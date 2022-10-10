@@ -852,6 +852,7 @@ class LoadEmulatorEfiSymbols(gdb.Breakpoint):
     Note: make sure SecGdbScriptBreak is not optimized away!
     Also turn off the dlopen() flow like on macOS.
     '''
+
     def stop(self):
         symbols = EfiSymbols()
         # Emulator adds SizeOfHeaders so we need file alignment to search

@@ -1,4 +1,4 @@
-## @file
+# @file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
 #
@@ -12,16 +12,19 @@ import os
 
 section_re = re.compile(r'^\[([\w., "]+)\]')
 
+
 class BaseINIFile(object):
     _objs = {}
+
     def __new__(cls, *args, **kwargs):
         """Maintain only a single instance of this object
         @return: instance of this class
 
         """
-        if len(args) == 0: return object.__new__(cls)
+        if len(args) == 0:
+            return object.__new__(cls)
         filename = args[0]
-        parent   = None
+        parent = None
         if len(args) > 1:
             parent = args[1]
 
@@ -35,19 +38,21 @@ class BaseINIFile(object):
         return cls._objs[key]
 
     def __init__(self, filename=None, parent=None):
-        self._lines    = []
+        self._lines = []
         self._sections = {}
         self._filename = filename
-        self._globals  = []
+        self._globals = []
         self._isModify = True
 
     def AddParent(self, parent):
-        if parent is None: return
+        if parent is None:
+            return
         if not hasattr(self, "_parents"):
             self._parents = []
 
         if parent in self._parents:
-            ErrorMsg("Duplicate parent is found for INI file %s" % self._filename)
+            ErrorMsg("Duplicate parent is found for INI file %s" %
+                     self._filename)
             return
         self._parents.append(parent)
 
@@ -58,7 +63,8 @@ class BaseINIFile(object):
         return self._isModify
 
     def Modify(self, modify=True, obj=None):
-        if modify == self._isModify: return
+        if modify == self._isModify:
+            return
         self._isModify = modify
         if modify:
             for parent in self._parents:
@@ -73,7 +79,7 @@ class BaseINIFile(object):
 
         try:
             handle = open(filename, 'r')
-            self._lines  = handle.readlines()
+            self._lines = handle.readlines()
             handle.close()
         except:
             raise EdkException("Fail to open file %s" % filename)
@@ -102,22 +108,25 @@ class BaseINIFile(object):
         return arr
 
     def Parse(self):
-        if not self._isModify: return True
-        if not self._ReadLines(self._filename): return False
+        if not self._isModify:
+            return True
+        if not self._ReadLines(self._filename):
+            return False
 
-        sObjs    = []
+        sObjs = []
         inGlobal = True
         # process line
         for index in range(len(self._lines)):
             templine = self._lines[index].strip()
             # skip comments
-            if len(templine) == 0: continue
+            if len(templine) == 0:
+                continue
             if re.match("^\[=*\]", templine) or re.match("^#", templine) or \
                re.match("\*+/", templine):
                 continue
 
             m = section_re.match(templine)
-            if m is not None: # found a section
+            if m is not None:  # found a section
                 inGlobal = False
                 # Finish the latest section first
                 if len(sObjs) != 0:
@@ -132,7 +141,8 @@ class BaseINIFile(object):
                 sname_arr = m.groups()[0].split(',')
                 sObjs = []
                 for name in sname_arr:
-                    sObj = self.GetSectionInstance(self, name, (len(sname_arr) > 1))
+                    sObj = self.GetSectionInstance(
+                        self, name, (len(sname_arr) > 1))
                     sObj._start = index
                     sObjs.append(sObj)
                     if name.lower() not in self._sections:
@@ -164,14 +174,16 @@ class BaseINIFile(object):
             assert parent in self._parents, "when destory ini object, can not found parent reference!"
             self._parents.remove(parent)
 
-        if len(self._parents) != 0: return
+        if len(self._parents) != 0:
+            return
 
         for sects in self._sections.values():
             for sect in sects:
                 sect.Destroy()
 
         # dereference from _objs array
-        assert self.GetFilename() in self._objs.keys(), "When destroy ini object, can not find obj reference!"
+        assert self.GetFilename() in self._objs.keys(
+        ), "When destroy ini object, can not find obj reference!"
         assert self in self._objs.values(), "When destroy ini object, can not find obj reference!"
         del self._objs[self.GetFilename()]
 
@@ -208,12 +220,13 @@ class BaseINIFile(object):
 
     def AddNewSection(self, sectName):
         if sectName.lower() in self._sections.keys():
-            ErrorMsg('Section %s can not be created for conflict with existing section')
+            ErrorMsg(
+                'Section %s can not be created for conflict with existing section')
             return None
 
         sectionObj = self.GetSectionInstance(self, sectName)
         sectionObj._start = len(self._lines)
-        sectionObj._end   = len(self._lines) + 1
+        sectionObj._end = len(self._lines) + 1
         self._lines.append('[%s]\n' % sectName)
         self._lines.append('\n\n')
         self._sections[sectName.lower()] = sectionObj
@@ -228,19 +241,19 @@ class BaseINIFile(object):
     def __str__(self):
         return ''.join(self._lines)
 
-    ## Get file header's comment from basic INI file.
+    # Get file header's comment from basic INI file.
     #  The file comments has two style:
     #  1) #/** @file
     #  2) ## @file
     #
     def GetFileHeader(self):
         desc = []
-        lineArr  = self._lines
+        lineArr = self._lines
         inHeader = False
         for num in range(len(self._lines)):
             line = lineArr[num].strip()
             if not inHeader and (line.startswith("#/**") or line.startswith("##")) and \
-                line.find("@file") != -1:
+                    line.find("@file") != -1:
                 inHeader = True
                 continue
             if inHeader and (line.startswith("#**/") or line.startswith('##')):
@@ -254,14 +267,15 @@ class BaseINIFile(object):
                     desc.append(line[prefixIndex + 1:])
         return '<br>\n'.join(desc)
 
+
 class BaseINISection(object):
     def __init__(self, parent, name, isCombined=False):
-        self._parent     = parent
-        self._name       = name
+        self._parent = parent
+        self._name = name
         self._isCombined = isCombined
-        self._start      = 0
-        self._end        = 0
-        self._objs       = []
+        self._start = 0
+        self._end = 0
+        self._objs = []
 
     def __del__(self):
         for obj in self._objs:
@@ -354,7 +368,7 @@ class BaseINISection(object):
 
     def GetComment(self):
         comments = []
-        start  = self._start - 1
+        start = self._start - 1
         bFound = False
 
         while (start > 0):
@@ -376,18 +390,21 @@ class BaseINISection(object):
             end = start + 1
             while (end < self._start):
                 line = self.GetLine(end).strip()
-                if len(line) == 0: break
-                if not line.startswith('#'): break
+                if len(line) == 0:
+                    break
+                if not line.startswith('#'):
+                    break
                 index = line.rfind('#')
                 if (index + 1) < len(line):
                     comments.append(line[index + 1:])
                 end += 1
         return comments
 
+
 class BaseINIGlobalObject(object):
     def __init__(self, parent):
         self._start = 0
-        self._end   = 0
+        self._end = 0
 
     def Parse(self):
         return True
@@ -398,10 +415,11 @@ class BaseINIGlobalObject(object):
     def __del__(self):
         pass
 
+
 class BaseINISectionObject(object):
     def __init__(self, parent):
-        self._start  = 0
-        self._end    = 0
+        self._start = 0
+        self._end = 0
         self._parent = parent
 
     def __del__(self):
@@ -444,7 +462,7 @@ class BaseINISectionObject(object):
 
     def GetComment(self):
         comments = []
-        start  = self.GetStartLinenumber() - 1
+        start = self.GetStartLinenumber() - 1
         bFound = False
 
         while (start > 0):
@@ -466,8 +484,10 @@ class BaseINISectionObject(object):
             end = start + 1
             while (end <= self.GetStartLinenumber() - 1):
                 line = self.GetParent().GetLine(end).strip()
-                if len(line) == 0: break
-                if not line.startswith('#'): break
+                if len(line) == 0:
+                    break
+                if not line.startswith('#'):
+                    break
                 index = line.rfind('#')
                 if (index + 1) < len(line):
                     comments.append(line[index + 1:])

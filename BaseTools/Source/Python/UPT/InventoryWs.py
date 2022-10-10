@@ -1,4 +1,4 @@
-## @file
+# @file
 # Inventory workspace's distribution package information.
 #
 # Copyright (c) 2014 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -23,12 +23,14 @@ import Logger.Log as Logger
 
 from Library import GlobalData
 
-## InventoryDistInstalled
+# InventoryDistInstalled
 #
 # This method retrieves the installed distribution information from the internal UPT database
 #
 # @param  DataBase: the UPT database
 #
+
+
 def InventoryDistInstalled(DataBase):
     DistInstalled = DataBase.InventoryDistInstalled()
 
@@ -47,7 +49,8 @@ def InventoryDistInstalled(DataBase):
     for (DpGuid, DpVersion, DpOriginalName, DpAliasFileName) in DistInstalled:
         MaxGuidlen = max(MaxGuidlen, len(DpGuid))
         MaxVerlen = max(MaxVerlen, len(DpVersion))
-        MaxDpAliasFileNameLen = max(MaxDpAliasFileNameLen, len(DpAliasFileName))
+        MaxDpAliasFileNameLen = max(
+            MaxDpAliasFileNameLen, len(DpAliasFileName))
         MaxDpOrigFileNamelen = max(MaxDpOrigFileNamelen, len(DpOriginalName))
 
     OutMsgFmt = "%-*s\t%-*s\t%-*s\t%-s"
@@ -62,15 +65,15 @@ def InventoryDistInstalled(DataBase):
 
     for (DpGuid, DpVersion, DpFileName, DpAliasFileName) in DistInstalled:
         OutMsg = OutMsgFmt % (MaxDpAliasFileNameLen,
-                            DpAliasFileName,
-                            MaxGuidlen,
-                            DpGuid,
-                            MaxVerlen,
-                            DpVersion,
-                            DpFileName)
+                              DpAliasFileName,
+                              MaxGuidlen,
+                              DpGuid,
+                              MaxVerlen,
+                              DpVersion,
+                              DpFileName)
         Logger.Info(OutMsg)
 
-## Tool entrance method
+# Tool entrance method
 #
 # This method mainly dispatch specific methods per the command line options.
 # If no error found, return zero value so the caller of this tool can know
@@ -78,7 +81,9 @@ def InventoryDistInstalled(DataBase):
 #
 # @param  Options: command Options
 #
-def Main(Options = None):
+
+
+def Main(Options=None):
     if Options:
         pass
 
@@ -89,21 +94,23 @@ def Main(Options = None):
     except FatalError as XExcept:
         ReturnCode = XExcept.args[0]
         if Logger.GetLevel() <= Logger.DEBUG_9:
-            Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) + format_exc())
+            Logger.Quiet(ST.MSG_PYTHON_ON %
+                         (python_version(), platform) + format_exc())
     except KeyboardInterrupt:
         ReturnCode = ABORT_ERROR
         if Logger.GetLevel() <= Logger.DEBUG_9:
-            Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) + format_exc())
+            Logger.Quiet(ST.MSG_PYTHON_ON %
+                         (python_version(), platform) + format_exc())
     except:
         ReturnCode = CODE_ERROR
         Logger.Error("\nInventoryWs",
-                    CODE_ERROR,
-                    ST.ERR_UNKNOWN_FATAL_INVENTORYWS_ERR,
-                    ExtraData=ST.MSG_SEARCH_FOR_HELP % ST.MSG_EDKII_MAIL_ADDR,
-                    RaiseError=False
-                    )
+                     CODE_ERROR,
+                     ST.ERR_UNKNOWN_FATAL_INVENTORYWS_ERR,
+                     ExtraData=ST.MSG_SEARCH_FOR_HELP % ST.MSG_EDKII_MAIL_ADDR,
+                     RaiseError=False
+                     )
         Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(),
-            platform) + format_exc())
+                                         platform) + format_exc())
 
     if ReturnCode == 0:
         Logger.Quiet(ST.MSG_FINISH)

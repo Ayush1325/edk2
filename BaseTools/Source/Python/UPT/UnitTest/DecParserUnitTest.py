@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file contain unit test for DecParser
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -24,6 +24,8 @@ from Object.Parser.DecObject import _DecComments
 #
 # Test CleanString
 #
+
+
 class CleanStringTestCase(unittest.TestCase):
     def testCleanString(self):
         Line, Comment = CleanString('')
@@ -43,13 +45,16 @@ class CleanStringTestCase(unittest.TestCase):
         self.assertEqual(Comment, '# and comment')
 
     def testCleanStringCpp(self):
-        Line, Comment = CleanString('line // and comment', AllowCppStyleComment = True)
+        Line, Comment = CleanString(
+            'line // and comment', AllowCppStyleComment=True)
         self.assertEqual(Line, 'line')
         self.assertEqual(Comment, '# and comment')
 
 #
 # Test _DecBase._MacroParser function
 #
+
+
 class MacroParserTestCase(unittest.TestCase):
     def setUp(self):
         self.dec = _DecBase(FileContent('dummy', []))
@@ -61,7 +66,8 @@ class MacroParserTestCase(unittest.TestCase):
 
     def testErrorMacro1(self):
         # Raise fatal error, macro name must be upper case letter
-        self.assertRaises(FatalError, self.dec._MacroParser, 'DEFINE not_upper_case = test2')
+        self.assertRaises(FatalError, self.dec._MacroParser,
+                          'DEFINE not_upper_case = test2')
 
     def testErrorMacro2(self):
         # No macro name given
@@ -70,6 +76,8 @@ class MacroParserTestCase(unittest.TestCase):
 #
 # Test _DecBase._TryBackSlash function
 #
+
+
 class TryBackSlashTestCase(unittest.TestCase):
     def setUp(self):
         Content = [
@@ -92,33 +100,42 @@ class TryBackSlashTestCase(unittest.TestCase):
         #
         # Right case, assert return values
         #
-        ConcatLine, CommentList = self.dec._TryBackSlash(self.dec._RawData.GetNextLine(), [])
+        ConcatLine, CommentList = self.dec._TryBackSlash(
+            self.dec._RawData.GetNextLine(), [])
         self.assertEqual(ConcatLine, 'test no backslash')
         self.assertEqual(CommentList, [])
 
-        ConcatLine, CommentList = self.dec._TryBackSlash(self.dec._RawData.GetNextLine(), [])
+        ConcatLine, CommentList = self.dec._TryBackSlash(
+            self.dec._RawData.GetNextLine(), [])
         self.assertEqual(CommentList, [])
-        self.assertEqual(ConcatLine, 'test with backslash continue second line')
+        self.assertEqual(
+            ConcatLine, 'test with backslash continue second line')
 
         #
         # Error cases, assert raise exception
         #
-        self.assertRaises(FatalError, self.dec._TryBackSlash, self.dec._RawData.GetNextLine(), [])
-        self.assertRaises(FatalError, self.dec._TryBackSlash, self.dec._RawData.GetNextLine(), [])
+        self.assertRaises(FatalError, self.dec._TryBackSlash,
+                          self.dec._RawData.GetNextLine(), [])
+        self.assertRaises(FatalError, self.dec._TryBackSlash,
+                          self.dec._RawData.GetNextLine(), [])
 
 #
 # Test _DecBase.Parse function
 #
+
+
 class DataItem(_DecComments):
     def __init__(self):
         _DecComments.__init__(self)
         self.String = ''
+
 
 class Data(_DecComments):
     def __init__(self):
         _DecComments.__init__(self)
         # List of DataItem
         self.ItemList = []
+
 
 class TestInner(_DecBase):
     def __init__(self, RawData):
@@ -137,6 +154,7 @@ class TestInner(_DecBase):
     def _TailCommentStrategy(self, Comment):
         return Comment.find('@comment') != -1
 
+
 class TestTop(_DecBase):
     def __init__(self, RawData):
         _DecBase.__init__(self, RawData)
@@ -153,13 +171,14 @@ class TestTop(_DecBase):
         self.ItemObject.append(TestParser.ItemObject)
         return TestParser.ItemObject
 
+
 class ParseTestCase(unittest.TestCase):
     def setUp(self):
         pass
 
     def testParse(self):
         Content = \
-        '''# Top comment
+            '''# Top comment
         [TOP]
           # sub1 head comment
           (test item has both head and tail comment) # sub1 tail comment
@@ -187,7 +206,8 @@ class ParseTestCase(unittest.TestCase):
         self.assertEqual(len(data.ItemList), 3)
 
         dataitem = data.ItemList[0]
-        self.assertEqual(dataitem.String, '(test item has both head and tail comment)')
+        self.assertEqual(
+            dataitem.String, '(test item has both head and tail comment)')
         # Comment content
         self.assertEqual(dataitem._HeadComment[0][0], '# sub1 head comment')
         self.assertEqual(dataitem._TailComment[0][0], '# sub1 tail comment')
@@ -196,10 +216,12 @@ class ParseTestCase(unittest.TestCase):
         self.assertEqual(dataitem._TailComment[0][1], 4)
 
         dataitem = data.ItemList[1]
-        self.assertEqual(dataitem.String, '(test item has head and special tail comment)')
+        self.assertEqual(
+            dataitem.String, '(test item has head and special tail comment)')
         # Comment content
         self.assertEqual(dataitem._HeadComment[0][0], '# sub2 head comment')
-        self.assertEqual(dataitem._TailComment[0][0], '# @comment test TailCommentStrategy branch')
+        self.assertEqual(
+            dataitem._TailComment[0][0], '# @comment test TailCommentStrategy branch')
         # Comment line number
         self.assertEqual(dataitem._HeadComment[0][1], 5)
         self.assertEqual(dataitem._TailComment[0][1], 7)
@@ -225,6 +247,8 @@ class ParseTestCase(unittest.TestCase):
 #
 # Test _DecDefine._ParseItem
 #
+
+
 class DecDefineTestCase(unittest.TestCase):
     def GetObj(self, Content):
         Obj = _DecDefine(FileContent('dummy', Content.splitlines()))
@@ -251,6 +275,8 @@ class DecDefineTestCase(unittest.TestCase):
 #
 # Test _DecLibraryclass._ParseItem
 #
+
+
 class DecLibraryTestCase(unittest.TestCase):
     def GetObj(self, Content):
         Obj = _DecLibraryclass(FileContent('dummy', Content.splitlines()))
@@ -266,7 +292,8 @@ class DecLibraryTestCase(unittest.TestCase):
         self.assertRaises(FatalError, obj._ParseItem)
 
     def testLibclassNaming(self):
-        obj = self.GetObj('lowercase_efiRuntimeLib|Include/Library/UefiRuntimeLib.h')
+        obj = self.GetObj(
+            'lowercase_efiRuntimeLib|Include/Library/UefiRuntimeLib.h')
         self.assertRaises(FatalError, obj._ParseItem)
 
     def testLibclassExt(self):
@@ -280,6 +307,8 @@ class DecLibraryTestCase(unittest.TestCase):
 #
 # Test _DecPcd._ParseItem
 #
+
+
 class DecPcdTestCase(unittest.TestCase):
     def GetObj(self, Content):
         Obj = _DecPcd(FileContent('dummy', Content.splitlines()))
@@ -288,7 +317,8 @@ class DecPcdTestCase(unittest.TestCase):
         return Obj
 
     def testOK(self):
-        item = self.GetObj('gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|FALSE|BOOLEAN|0x0000000d')._ParseItem()
+        item = self.GetObj(
+            'gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|FALSE|BOOLEAN|0x0000000d')._ParseItem()
         self.assertEqual(item.TokenSpaceGuidCName, 'gEfiMdePkgTokenSpaceGuid')
         self.assertEqual(item.TokenCName, 'PcdComponentNameDisable')
         self.assertEqual(item.DefaultValue, 'FALSE')
@@ -296,31 +326,39 @@ class DecPcdTestCase(unittest.TestCase):
         self.assertEqual(item.TokenValue, '0x0000000d')
 
     def testNoCvar(self):
-        obj = self.GetObj('123ai.PcdComponentNameDisable|FALSE|BOOLEAN|0x0000000d')
+        obj = self.GetObj(
+            '123ai.PcdComponentNameDisable|FALSE|BOOLEAN|0x0000000d')
         self.assertRaises(FatalError, obj._ParseItem)
 
     def testSplit(self):
-        obj = self.GetObj('gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable FALSE|BOOLEAN|0x0000000d')
+        obj = self.GetObj(
+            'gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable FALSE|BOOLEAN|0x0000000d')
         self.assertRaises(FatalError, obj._ParseItem)
 
-        obj = self.GetObj('gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|FALSE|BOOLEAN|0x0000000d | abc')
+        obj = self.GetObj(
+            'gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|FALSE|BOOLEAN|0x0000000d | abc')
         self.assertRaises(FatalError, obj._ParseItem)
 
     def testUnknownType(self):
-        obj = self.GetObj('gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|FALSE|unknown|0x0000000d')
+        obj = self.GetObj(
+            'gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|FALSE|unknown|0x0000000d')
         self.assertRaises(FatalError, obj._ParseItem)
 
     def testVoid(self):
-        obj = self.GetObj('gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|abc|VOID*|0x0000000d')
+        obj = self.GetObj(
+            'gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|abc|VOID*|0x0000000d')
         self.assertRaises(FatalError, obj._ParseItem)
 
     def testUINT(self):
-        obj = self.GetObj('gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|0xabc|UINT8|0x0000000d')
+        obj = self.GetObj(
+            'gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|0xabc|UINT8|0x0000000d')
         self.assertRaises(FatalError, obj._ParseItem)
 
 #
 # Test _DecInclude._ParseItem
 #
+
+
 class DecIncludeTestCase(unittest.TestCase):
     #
     # Test code to be added
@@ -330,6 +368,8 @@ class DecIncludeTestCase(unittest.TestCase):
 #
 # Test _DecGuid._ParseItem
 #
+
+
 class DecGuidTestCase(unittest.TestCase):
     def GetObj(self, Content):
         Obj = _DecGuid(FileContent('dummy', Content.splitlines()))
@@ -341,12 +381,15 @@ class DecGuidTestCase(unittest.TestCase):
         item = self.GetObj('gEfiIpSecProtocolGuid={ 0xdfb386f7, 0xe100, 0x43ad,'
                            ' {0x9c, 0x9a, 0xed, 0x90, 0xd0, 0x8a, 0x5e, 0x12 }}')._ParseItem()
         self.assertEqual(item.GuidCName, 'gEfiIpSecProtocolGuid')
-        self.assertEqual(item.GuidCValue, '{ 0xdfb386f7, 0xe100, 0x43ad, {0x9c, 0x9a, 0xed, 0x90, 0xd0, 0x8a, 0x5e, 0x12 }}')
+        self.assertEqual(
+            item.GuidCValue, '{ 0xdfb386f7, 0xe100, 0x43ad, {0x9c, 0x9a, 0xed, 0x90, 0xd0, 0x8a, 0x5e, 0x12 }}')
 
     def testGuidString(self):
-        item = self.GetObj('gEfiIpSecProtocolGuid=1E73767F-8F52-4603-AEB4-F29B510B6766')._ParseItem()
+        item = self.GetObj(
+            'gEfiIpSecProtocolGuid=1E73767F-8F52-4603-AEB4-F29B510B6766')._ParseItem()
         self.assertEqual(item.GuidCName, 'gEfiIpSecProtocolGuid')
-        self.assertEqual(item.GuidCValue, '1E73767F-8F52-4603-AEB4-F29B510B6766')
+        self.assertEqual(
+            item.GuidCValue, '1E73767F-8F52-4603-AEB4-F29B510B6766')
 
     def testNoValue1(self):
         obj = self.GetObj('gEfiIpSecProtocolGuid')
@@ -363,9 +406,12 @@ class DecGuidTestCase(unittest.TestCase):
 #
 # Test Dec.__init__
 #
+
+
 class DecDecInitTestCase(unittest.TestCase):
     def testNoDecFile(self):
         self.assertRaises(FatalError, Dec, 'No_Such_File')
+
 
 class TmpFile:
     def __init__(self, File):
@@ -388,11 +434,13 @@ class TmpFile:
 #
 # Test Dec._UserExtentionSectionParser
 #
+
+
 class DecUESectionTestCase(unittest.TestCase):
     def setUp(self):
         self.File = TmpFile('test.dec')
         self.File.Write(
-'''[userextensions.intel."myid"]
+            '''[userextensions.intel."myid"]
 [userextensions.intel."myid".IA32]
 [userextensions.intel."myid".IA32,]
 [userextensions.intel."myid]
@@ -409,7 +457,8 @@ class DecUESectionTestCase(unittest.TestCase):
         dec._RawData.CurrentLine = CleanString(dec._RawData.GetNextLine())[0]
         dec._UserExtentionSectionParser()
         self.assertEqual(len(dec._RawData.CurrentScope), 1)
-        self.assertEqual(dec._RawData.CurrentScope[0][0], 'userextensions'.upper())
+        self.assertEqual(
+            dec._RawData.CurrentScope[0][0], 'userextensions'.upper())
         self.assertEqual(dec._RawData.CurrentScope[0][1], 'intel')
         self.assertEqual(dec._RawData.CurrentScope[0][2], '"myid"')
         self.assertEqual(dec._RawData.CurrentScope[0][3], 'COMMON')
@@ -418,7 +467,8 @@ class DecUESectionTestCase(unittest.TestCase):
         dec._RawData.CurrentLine = CleanString(dec._RawData.GetNextLine())[0]
         dec._UserExtentionSectionParser()
         self.assertEqual(len(dec._RawData.CurrentScope), 1)
-        self.assertEqual(dec._RawData.CurrentScope[0][0], 'userextensions'.upper())
+        self.assertEqual(
+            dec._RawData.CurrentScope[0][0], 'userextensions'.upper())
         self.assertEqual(dec._RawData.CurrentScope[0][1], 'intel')
         self.assertEqual(dec._RawData.CurrentScope[0][2], '"myid"')
         self.assertEqual(dec._RawData.CurrentScope[0][3], 'IA32')
@@ -434,11 +484,13 @@ class DecUESectionTestCase(unittest.TestCase):
 #
 # Test Dec._SectionHeaderParser
 #
+
+
 class DecSectionTestCase(unittest.TestCase):
     def setUp(self):
         self.File = TmpFile('test.dec')
         self.File.Write(
-'''[no section start or end
+            '''[no section start or end
 [,] # empty sub-section
 [unknow_section_name]
 [Includes.IA32.other] # no third one
@@ -446,7 +498,7 @@ class DecSectionTestCase(unittest.TestCase):
 [Includes.IA32, Includes.IA32]
 [Includes, Includes.IA32] # common cannot be with other arch
 [Includes.IA32, PcdsFeatureFlag] # different section name
-'''     )
+''')
 
     def tearDown(self):
         self.File.Remove()
@@ -457,7 +509,7 @@ class DecSectionTestCase(unittest.TestCase):
         dec._RawData.CurrentLine = CleanString(dec._RawData.GetNextLine())[0]
         self.assertRaises(FatalError, dec._SectionHeaderParser)
 
-        #[,] # empty sub-section
+        # [,] # empty sub-section
         dec._RawData.CurrentLine = CleanString(dec._RawData.GetNextLine())[0]
         self.assertRaises(FatalError, dec._SectionHeaderParser)
 
@@ -491,11 +543,13 @@ class DecSectionTestCase(unittest.TestCase):
 #
 # Test Dec._ParseDecComment
 #
+
+
 class DecDecCommentTestCase(unittest.TestCase):
     def testDecHeadComment(self):
         File = TmpFile('test.dec')
         File.Write(
-       '''# abc
+            '''# abc
           ##''')
         dec = Dec('test.dec', False)
         dec.ParseDecComment()
@@ -509,7 +563,7 @@ class DecDecCommentTestCase(unittest.TestCase):
     def testNoDoubleComment(self):
         File = TmpFile('test.dec')
         File.Write(
-       '''# abc
+            '''# abc
           #
           [section_start]''')
         dec = Dec('test.dec', False)
@@ -521,8 +575,8 @@ class DecDecCommentTestCase(unittest.TestCase):
         self.assertEqual(dec._HeadComment[1][1], 2)
         File.Remove()
 
+
 if __name__ == '__main__':
     import Logger.Logger
     Logger.Logger.Initialize()
     unittest.main()
-

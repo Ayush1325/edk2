@@ -57,7 +57,8 @@ class LinuxGcc5ToolChain(IUefiBuildPlugin):
                 return 0
 
             # make GCC5_ARM_PREFIX to align with tools_def.txt
-            prefix = os.path.join(install_path, "bin", "arm-none-linux-gnueabihf-")
+            prefix = os.path.join(install_path, "bin",
+                                  "arm-none-linux-gnueabihf-")
             shell_environment.GetEnvironment().set_shell_var("GCC5_ARM_PREFIX", prefix)
 
         # now confirm it exists
@@ -80,7 +81,8 @@ class LinuxGcc5ToolChain(IUefiBuildPlugin):
                 return 0
 
             # make GCC5_AARCH64_PREFIX to align with tools_def.txt
-            prefix = os.path.join(install_path, "bin", "aarch64-none-linux-gnu-")
+            prefix = os.path.join(install_path, "bin",
+                                  "aarch64-none-linux-gnu-")
             shell_environment.GetEnvironment().set_shell_var("GCC5_AARCH64_PREFIX", prefix)
 
         # now confirm it exists

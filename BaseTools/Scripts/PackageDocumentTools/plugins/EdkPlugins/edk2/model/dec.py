@@ -1,4 +1,4 @@
-## @file
+# @file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
 #
@@ -6,8 +6,10 @@
 #
 
 from plugins.EdkPlugins.basemodel import ini
-import re, os
+import re
+import os
 from plugins.EdkPlugins.basemodel.message import *
+
 
 class DECFile(ini.BaseINIFile):
 
@@ -38,6 +40,7 @@ class DECFile(ini.BaseINIFile):
                 arr.append(obj)
 
         return arr
+
 
 class DECSection(ini.BaseINISection):
     def GetSectionINIObject(self, parent):
@@ -79,9 +82,11 @@ class DECSection(ini.BaseINISection):
 
         return True
 
+
 class DECSectionObject(ini.BaseINISectionObject):
     def GetArch(self):
         return self.GetParent().GetArch()
+
 
 class DECDefineSectionObject(DECSectionObject):
     def __init__(self, parent):
@@ -90,20 +95,21 @@ class DECDefineSectionObject(DECSectionObject):
         self._value = None
 
     def Parse(self):
-        assert (self._start == self._end), 'The object in define section must be in single line'
+        assert (self._start ==
+                self._end), 'The object in define section must be in single line'
 
         line = self.GetLineByOffset(self._start).strip()
 
         line = line.split('#')[0]
-        arr  = line.split('=')
+        arr = line.split('=')
         if len(arr) != 2:
             ErrorMsg('Invalid define section object',
-                   self.GetFilename(),
-                   self.GetParent().GetName()
-                   )
+                     self.GetFilename(),
+                     self.GetParent().GetName()
+                     )
             return False
 
-        self._key   = arr[0].strip()
+        self._key = arr[0].strip()
         self._value = arr[1].strip()
 
         return True
@@ -113,6 +119,7 @@ class DECDefineSectionObject(DECSectionObject):
 
     def GetValue(self):
         return self._value
+
 
 class DECGuidObject(DECSectionObject):
     _objs = {}
@@ -149,8 +156,10 @@ class DECGuidObject(DECSectionObject):
     def GetObjectDict():
         return DECGuidObject._objs
 
+
 class DECPpiObject(DECSectionObject):
     _objs = {}
+
     def __init__(self, parent):
         DECSectionObject.__init__(self, parent)
         self._name = None
@@ -183,6 +192,7 @@ class DECPpiObject(DECSectionObject):
     def GetObjectDict():
         return DECPpiObject._objs
 
+
 class DECProtocolObject(DECSectionObject):
     _objs = {}
 
@@ -214,10 +224,10 @@ class DECProtocolObject(DECSectionObject):
         if len(objdict[self._name]) == 0:
             del objdict[self._name]
 
-
     @staticmethod
     def GetObjectDict():
         return DECProtocolObject._objs
+
 
 class DECLibraryClassObject(DECSectionObject):
     _objs = {}
@@ -256,6 +266,7 @@ class DECLibraryClassObject(DECSectionObject):
     def GetObjectDict():
         return DECLibraryClassObject._objs
 
+
 class DECIncludeObject(DECSectionObject):
     def __init__(self, parent):
         DECSectionObject.__init__(self, parent)
@@ -263,19 +274,21 @@ class DECIncludeObject(DECSectionObject):
     def GetPath(self):
         return self.GetLineByOffset(self._start).split('#')[0].strip()
 
+
 class DECPcdObject(DECSectionObject):
     _objs = {}
 
     def __init__(self, parent):
         DECSectionObject.__init__(self, parent)
-        self.mPcdName           = None
-        self.mPcdDefaultValue   = None
-        self.mPcdDataType       = None
-        self.mPcdToken          = None
+        self.mPcdName = None
+        self.mPcdDefaultValue = None
+        self.mPcdDataType = None
+        self.mPcdToken = None
 
     def Parse(self):
         line = self.GetLineByOffset(self._start).strip().split('#')[0]
-        (self.mPcdName, self.mPcdDefaultValue, self.mPcdDataType, self.mPcdToken) = line.split('|')
+        (self.mPcdName, self.mPcdDefaultValue,
+         self.mPcdDataType, self.mPcdToken) = line.split('|')
         objdict = DECPcdObject._objs
         if self.mPcdName not in objdict.keys():
             objdict[self.mPcdName] = [self]

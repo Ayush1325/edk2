@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to define a class object to describe a distribution package
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -28,12 +28,14 @@ from Object.POM.CommonObject import CommonHeaderObject
 from Object.POM.CommonObject import MiscFileObject
 from Common.MultipleWorkspace import MultipleWorkspace as mws
 
-## DistributionPackageHeaderClass
+# DistributionPackageHeaderClass
 #
 # @param IdentificationObject: Identification Object
 # @param CommonHeaderObject: Common Header Object
 #
-class DistributionPackageHeaderObject(IdentificationObject, \
+
+
+class DistributionPackageHeaderObject(IdentificationObject,
                                       CommonHeaderObject):
     def __init__(self):
         IdentificationObject.__init__(self)
@@ -78,10 +80,12 @@ class DistributionPackageHeaderObject(IdentificationObject, \
     def GetXmlSpecification(self):
         return self.XmlSpecification
 
-## DistributionPackageClass
+# DistributionPackageClass
 #
 # @param object: DistributionPackageClass
 #
+
+
 class DistributionPackageClass(object):
     def __init__(self):
         self.Header = DistributionPackageHeaderObject()
@@ -98,7 +102,7 @@ class DistributionPackageClass(object):
         self.UserExtensions = []
         self.FileList = []
 
-    ## Get all included packages and modules for a distribution package
+    # Get all included packages and modules for a distribution package
     #
     # @param WorkspaceDir:  WorkspaceDir
     # @param PackageList:   A list of all packages
@@ -115,7 +119,8 @@ class DistributionPackageClass(object):
             for PackageFile in PackageList:
                 PackageFileFullPath = mws.join(Root, PackageFile)
                 WorkspaceDir = mws.getWs(Root, PackageFile)
-                DecObj = DecPomAlignment(PackageFileFullPath, WorkspaceDir, CheckMulDec=True)
+                DecObj = DecPomAlignment(
+                    PackageFileFullPath, WorkspaceDir, CheckMulDec=True)
                 PackageObj = DecObj
                 #
                 # Parser inf file one bye one
@@ -127,10 +132,10 @@ class DistributionPackageClass(object):
                     if ModuleList and WsRelPath in ModuleList:
                         Logger.Error("UPT",
                                      OPTION_VALUE_INVALID,
-                                     ST.ERR_NOT_STANDALONE_MODULE_ERROR%\
+                                     ST.ERR_NOT_STANDALONE_MODULE_ERROR %
                                      (WsRelPath, PackageFile))
-                    Filename = os.path.normpath\
-                    (os.path.join(PackageObj.GetRelaPath(), File))
+                    Filename = os.path.normpath(
+                        os.path.join(PackageObj.GetRelaPath(), File))
                     os.path.splitext(Filename)
                     #
                     # Call INF parser to generate Inf Object.
@@ -138,27 +143,27 @@ class DistributionPackageClass(object):
                     # Inf class in InfPomAlignment.
                     #
                     try:
-                        ModuleObj = InfPomAlignment(Filename, WorkspaceDir, PackageObj.GetPackagePath())
+                        ModuleObj = InfPomAlignment(
+                            Filename, WorkspaceDir, PackageObj.GetPackagePath())
 
                         #
                         # Add module to package
                         #
                         ModuleDict = PackageObj.GetModuleDict()
-                        ModuleDict[(ModuleObj.GetGuid(), \
-                                    ModuleObj.GetVersion(), \
-                                    ModuleObj.GetName(), \
+                        ModuleDict[(ModuleObj.GetGuid(),
+                                    ModuleObj.GetVersion(),
+                                    ModuleObj.GetName(),
                                     ModuleObj.GetCombinePath())] = ModuleObj
                         PackageObj.SetModuleDict(ModuleDict)
                     except FatalError as ErrCode:
                         if ErrCode.message == EDK1_INF_ERROR:
                             Logger.Warn("UPT",
-                                        ST.WRN_EDK1_INF_FOUND%Filename)
+                                        ST.WRN_EDK1_INF_FOUND % Filename)
                         else:
                             raise
 
-                self.PackageSurfaceArea\
-                [(PackageObj.GetGuid(), PackageObj.GetVersion(), \
-                  PackageObj.GetCombinePath())] = PackageObj
+                self.PackageSurfaceArea[(PackageObj.GetGuid(), PackageObj.GetVersion(),
+                                         PackageObj.GetCombinePath())] = PackageObj
 
         #
         # Get Modules
@@ -169,7 +174,8 @@ class DistributionPackageClass(object):
                 WorkspaceDir = mws.getWs(Root, ModuleFile)
 
                 try:
-                    ModuleObj = InfPomAlignment(ModuleFileFullPath, WorkspaceDir)
+                    ModuleObj = InfPomAlignment(
+                        ModuleFileFullPath, WorkspaceDir)
                     ModuleKey = (ModuleObj.GetGuid(),
                                  ModuleObj.GetVersion(),
                                  ModuleObj.GetName(),
@@ -179,7 +185,7 @@ class DistributionPackageClass(object):
                     if ErrCode.message == EDK1_INF_ERROR:
                         Logger.Error("UPT",
                                      EDK1_INF_ERROR,
-                                     ST.WRN_EDK1_INF_FOUND%ModuleFileFullPath,
+                                     ST.WRN_EDK1_INF_FOUND % ModuleFileFullPath,
                                      ExtraData=ST.ERR_NOT_SUPPORTED_SA_MODULE)
                     else:
                         raise
@@ -187,7 +193,7 @@ class DistributionPackageClass(object):
         # Recover WorkspaceDir
         WorkspaceDir = Root
 
-    ## Get all files included for a distribution package, except tool/misc of
+    # Get all files included for a distribution package, except tool/misc of
     # distribution level
     #
     # @retval DistFileList  A list of filepath for NonMetaDataFile, relative to workspace
@@ -204,15 +210,19 @@ class DistributionPackageClass(object):
             MetaDataFileList.append(Path)
             IncludePathList = Package.GetIncludePathList()
             for IncludePath in IncludePathList:
-                SearchPath = os.path.normpath(os.path.join(os.path.dirname(FullPath), IncludePath))
-                AddPath = os.path.normpath(os.path.join(PackagePath, IncludePath))
-                self.FileList += GetNonMetaDataFiles(SearchPath, ['CVS', '.svn'], False, AddPath)
+                SearchPath = os.path.normpath(os.path.join(
+                    os.path.dirname(FullPath), IncludePath))
+                AddPath = os.path.normpath(
+                    os.path.join(PackagePath, IncludePath))
+                self.FileList += GetNonMetaDataFiles(
+                    SearchPath, ['CVS', '.svn'], False, AddPath)
             #
             # Add the miscellaneous files on DEC file
             #
             for MiscFileObj in Package.GetMiscFileList():
                 for FileObj in MiscFileObj.GetFileList():
-                    MiscFileFullPath = os.path.normpath(os.path.join(PackagePath, FileObj.GetURI()))
+                    MiscFileFullPath = os.path.normpath(
+                        os.path.join(PackagePath, FileObj.GetURI()))
                     if MiscFileFullPath not in self.FileList:
                         self.FileList.append(MiscFileFullPath)
 
@@ -222,20 +232,23 @@ class DistributionPackageClass(object):
                 Module = ModuleDict[Guid, Version, Name, Path]
                 ModulePath = Module.GetModulePath()
                 FullPath = Module.GetFullPath()
-                PkgRelPath = os.path.normpath(os.path.join(PackagePath, ModulePath))
+                PkgRelPath = os.path.normpath(
+                    os.path.join(PackagePath, ModulePath))
                 MetaDataFileList.append(Path)
                 SkipList = ['CVS', '.svn']
                 NonMetaDataFileList = []
                 if Module.UniFileClassObject:
                     for UniFile in Module.UniFileClassObject.IncFileList:
                         OriPath = os.path.normpath(os.path.dirname(FullPath))
-                        UniFilePath = os.path.normpath(os.path.join(PkgRelPath, UniFile.Path[len(OriPath) + 1:]))
+                        UniFilePath = os.path.normpath(os.path.join(
+                            PkgRelPath, UniFile.Path[len(OriPath) + 1:]))
                         if UniFilePath not in SkipModulesUniList:
                             SkipModulesUniList.append(UniFilePath)
                     for IncludeFile in Module.UniFileClassObject.IncludePathList:
                         if IncludeFile not in SkipModulesUniList:
                             SkipModulesUniList.append(IncludeFile)
-                NonMetaDataFileList = GetNonMetaDataFiles(os.path.dirname(FullPath), SkipList, False, PkgRelPath)
+                NonMetaDataFileList = GetNonMetaDataFiles(
+                    os.path.dirname(FullPath), SkipList, False, PkgRelPath)
                 for NonMetaDataFile in NonMetaDataFileList:
                     if NonMetaDataFile not in self.FileList:
                         self.FileList.append(NonMetaDataFile)
@@ -249,10 +262,12 @@ class DistributionPackageClass(object):
             if Module.UniFileClassObject:
                 for UniFile in Module.UniFileClassObject.IncFileList:
                     OriPath = os.path.normpath(os.path.dirname(FullPath))
-                    UniFilePath = os.path.normpath(os.path.join(ModulePath, UniFile.Path[len(OriPath) + 1:]))
+                    UniFilePath = os.path.normpath(os.path.join(
+                        ModulePath, UniFile.Path[len(OriPath) + 1:]))
                     if UniFilePath not in SkipModulesUniList:
                         SkipModulesUniList.append(UniFilePath)
-            NonMetaDataFileList = GetNonMetaDataFiles(os.path.dirname(FullPath), SkipList, False, ModulePath)
+            NonMetaDataFileList = GetNonMetaDataFiles(
+                os.path.dirname(FullPath), SkipList, False, ModulePath)
             for NonMetaDataFile in NonMetaDataFileList:
                 if NonMetaDataFile not in self.FileList:
                     self.FileList.append(NonMetaDataFile)
@@ -261,7 +276,4 @@ class DistributionPackageClass(object):
             if SkipModuleUni in self.FileList:
                 self.FileList.remove(SkipModuleUni)
 
-        return  self.FileList, MetaDataFileList
-
-
-
+        return self.FileList, MetaDataFileList

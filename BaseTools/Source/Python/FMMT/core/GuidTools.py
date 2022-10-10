@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to define the FMMT dependent external tool management class.
 #
 # Copyright (c) 2021-, Intel Corporation. All rights reserved.<BR>
@@ -15,8 +15,10 @@ from FirmwareStorageFormat.Common import *
 from utils.FmmtLogger import FmmtLogger as logger
 import subprocess
 
+
 def ExecuteCommand(cmd: list) -> None:
-    subprocess.run(cmd,stdout=subprocess.DEVNULL)
+    subprocess.run(cmd, stdout=subprocess.DEVNULL)
+
 
 class GUIDTool:
     def __init__(self, guid: str, short_name: str, command: str) -> None:
@@ -39,7 +41,7 @@ class GUIDTool:
                 file.write(buffer)
                 file.close()
                 command = [tool, '-e', '-o', ToolOuputFile,
-                                  ToolInputFile]
+                           ToolInputFile]
                 ExecuteCommand(command)
                 buf = open(ToolOuputFile, "rb")
                 res_buffer = buf.read()
@@ -56,7 +58,6 @@ class GUIDTool:
                 "Error parsing section: EFI_SECTION_GUID_DEFINED cannot be parsed at this time.")
             logger.info("Its GUID is: %s" % self.guid)
             return ""
-
 
     def unpack(self, buffer: bytes) -> bytes:
         """
@@ -85,9 +86,11 @@ class GUIDTool:
                     shutil.rmtree(tmp)
                 return res_buffer
         else:
-            logger.error("Error parsing section: EFI_SECTION_GUID_DEFINED cannot be parsed at this time.")
+            logger.error(
+                "Error parsing section: EFI_SECTION_GUID_DEFINED cannot be parsed at this time.")
             logger.info("Its GUID is: %s" % self.guid)
             return ""
+
 
 class GUIDTools:
     '''
@@ -101,19 +104,22 @@ class GUIDTools:
         struct2stream(ModifyGuidFormat("3d532050-5cda-4fd0-879e-0f7f630d5afb")): GUIDTool("3d532050-5cda-4fd0-879e-0f7f630d5afb", "BROTLI", "BrotliCompress"),
     }
 
-    def __init__(self, tooldef_file: str=None) -> None:
+    def __init__(self, tooldef_file: str = None) -> None:
         self.dir = os.path.join(os.path.dirname(__file__), "..")
-        self.tooldef_file = tooldef_file if tooldef_file else os.path.join(self.dir, "FmmtConf.ini")
+        self.tooldef_file = tooldef_file if tooldef_file else os.path.join(
+            self.dir, "FmmtConf.ini")
         self.tooldef = dict()
 
     def SetConfigFile(self) -> None:
         if os.environ['FmmtConfPath']:
-            self.tooldef_file = os.path.join(os.environ['FmmtConfPath'], 'FmmtConf.ini')
+            self.tooldef_file = os.path.join(
+                os.environ['FmmtConfPath'], 'FmmtConf.ini')
         else:
             PathList = os.environ['PATH']
             for CurrentPath in PathList:
                 if os.path.exists(os.path.join(CurrentPath, 'FmmtConf.ini')):
-                    self.tooldef_file = os.path.join(CurrentPath, 'FmmtConf.ini')
+                    self.tooldef_file = os.path.join(
+                        CurrentPath, 'FmmtConf.ini')
                     break
 
     def VerifyTools(self, guidtool) -> None:
@@ -128,10 +134,13 @@ class GUIDTools:
         if os.path.isabs(cmd):
             if not os.path.exists(cmd):
                 if guidtool not in self.default_tools:
-                    logger.error("Tool Not found %s, which causes compress/uncompress process error." % cmd)
-                    logger.error("Please goto edk2 repo in current console, run 'edksetup.bat rebuild' command, and try again.\n")
+                    logger.error(
+                        "Tool Not found %s, which causes compress/uncompress process error." % cmd)
+                    logger.error(
+                        "Please goto edk2 repo in current console, run 'edksetup.bat rebuild' command, and try again.\n")
                 else:
-                    logger.error("Tool Not found %s, which causes compress/uncompress process error." % cmd)
+                    logger.error(
+                        "Tool Not found %s, which causes compress/uncompress process error." % cmd)
             else:
                 guidtool.ifexist = True
         else:
@@ -141,10 +150,13 @@ class GUIDTools:
                     break
             else:
                 if guidtool not in self.default_tools:
-                    logger.error("Tool Not found %s, which causes compress/uncompress process error." % cmd)
-                    logger.error("Please goto edk2 repo in current console, run 'edksetup.bat rebuild' command, and try again.\n")
+                    logger.error(
+                        "Tool Not found %s, which causes compress/uncompress process error." % cmd)
+                    logger.error(
+                        "Please goto edk2 repo in current console, run 'edksetup.bat rebuild' command, and try again.\n")
                 else:
-                    logger.error("Tool Not found %s, which causes compress/uncompress process error." % cmd)
+                    logger.error(
+                        "Tool Not found %s, which causes compress/uncompress process error." % cmd)
 
     def LoadingTools(self) -> None:
         self.SetConfigFile()
@@ -155,7 +167,8 @@ class GUIDTools:
                 try:
                     if not line.startswith("#"):
                         guid, short_name, command = line.split()
-                        new_format_guid = struct2stream(ModifyGuidFormat(guid.strip()))
+                        new_format_guid = struct2stream(
+                            ModifyGuidFormat(guid.strip()))
                         self.tooldef[new_format_guid] = GUIDTool(
                             guid.strip(), short_name.strip(), command.strip())
                 except:
@@ -175,5 +188,5 @@ class GUIDTools:
             logger.error("{} GuidTool is not defined!".format(guid))
             raise Exception("Process Failed: is not defined!")
 
-guidtools = GUIDTools()
 
+guidtools = GUIDTools()

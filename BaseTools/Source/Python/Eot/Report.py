@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to create report for Eot tool
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -13,20 +13,22 @@ import Common.LongFilePathOs as os
 from . import EotGlobalData
 from Common.LongFilePathSupport import OpenLongFilePath as open
 
-## Report() class
+# Report() class
 #
 #  This class defined Report
 #
 #  @param object: Inherited from object class
 #
+
+
 class Report(object):
-    ## The constructor
+    # The constructor
     #
     #  @param  self: The object pointer
     #  @param  ReportName: name of the report
     #  @param  FvObj: FV object after parsing FV images
     #
-    def __init__(self, ReportName = 'Report.html', FvObj = None, DispatchName=None):
+    def __init__(self, ReportName='Report.html', FvObj=None, DispatchName=None):
         self.ReportName = ReportName
         self.Op = open(ReportName, 'w+')
         self.DispatchList = None
@@ -39,7 +41,7 @@ class Report(object):
         if EotGlobalData.gMACRO['EFI_SOURCE'] == '':
             EotGlobalData.gMACRO['EFI_SOURCE'] = EotGlobalData.gMACRO['EDK_SOURCE']
 
-    ## WriteLn() method
+    # WriteLn() method
     #
     #  Write a line in the report
     #
@@ -49,7 +51,7 @@ class Report(object):
     def WriteLn(self, Line):
         self.Op.write('%s\n' % Line)
 
-    ## GenerateReport() method
+    # GenerateReport() method
     #
     #  A caller to generate report
     #
@@ -62,7 +64,7 @@ class Report(object):
         self.Op.close()
         self.GenerateUnDispatchedList()
 
-    ## GenerateUnDispatchedList() method
+    # GenerateUnDispatchedList() method
     #
     #  Create a list for not dispatched items
     #
@@ -72,9 +74,10 @@ class Report(object):
         FvObj = self.FvObj
         EotGlobalData.gOP_UN_DISPATCHED.write('%s\n' % FvObj.Name)
         for Item in FvObj.UnDispatchedFfsDict.keys():
-            EotGlobalData.gOP_UN_DISPATCHED.write('%s\n' % FvObj.UnDispatchedFfsDict[Item])
+            EotGlobalData.gOP_UN_DISPATCHED.write(
+                '%s\n' % FvObj.UnDispatchedFfsDict[Item])
 
-    ## GenerateFv() method
+    # GenerateFv() method
     #
     #  Generate FV information
     #
@@ -98,7 +101,7 @@ class Report(object):
     <td>%s</td>
     <td>%s</td>
     <td>%s</td>
-  </tr>"""  % (FvName, FvGuid, FvSize)
+  </tr>""" % (FvName, FvGuid, FvSize)
             self.WriteLn(Content)
 
         Content = """    <td colspan="3"><table width="100%%"  border="1">
@@ -125,7 +128,7 @@ class Report(object):
   </tr>"""
         self.WriteLn(Content)
 
-    ## GenerateDepex() method
+    # GenerateDepex() method
     #
     #  Generate Depex information
     #
@@ -138,7 +141,8 @@ class Report(object):
         DepexString = ''
         for Item in ItemList:
             if Item not in NonGuidList:
-                SqlCommand = """select DISTINCT GuidName from Report where GuidValue like '%s' and ItemMode = 'Produced' group by GuidName""" % (Item)
+                SqlCommand = """select DISTINCT GuidName from Report where GuidValue like '%s' and ItemMode = 'Produced' group by GuidName""" % (
+                    Item)
                 RecordSet = EotGlobalData.gDb.TblReport.Exec(SqlCommand)
                 if RecordSet != []:
                     Item = RecordSet[0][0]
@@ -149,7 +153,7 @@ class Report(object):
                 </tr>""" % (DepexString)
         self.WriteLn(Content)
 
-    ## GeneratePpi() method
+    # GeneratePpi() method
     #
     #  Generate PPI information
     #
@@ -161,7 +165,7 @@ class Report(object):
     def GeneratePpi(self, Name, Guid, Type):
         self.GeneratePpiProtocol('Ppi', Name, Guid, Type, self.PpiIndex)
 
-    ## GenerateProtocol() method
+    # GenerateProtocol() method
     #
     #  Generate PROTOCOL information
     #
@@ -171,9 +175,10 @@ class Report(object):
     #  @param Type: Type of a GUID
     #
     def GenerateProtocol(self, Name, Guid, Type):
-        self.GeneratePpiProtocol('Protocol', Name, Guid, Type, self.ProtocolIndex)
+        self.GeneratePpiProtocol(
+            'Protocol', Name, Guid, Type, self.ProtocolIndex)
 
-    ## GeneratePpiProtocol() method
+    # GeneratePpiProtocol() method
     #
     #  Generate PPI/PROTOCOL information
     #
@@ -201,7 +206,8 @@ class Report(object):
                                 select DISTINCT BelongsToFile from Inf
                                 where Value1 like '%s')""" % Record[0]
                 ModuleSet = EotGlobalData.gDb.TblReport.Exec(SqlCommand)
-                Inf = ModuleSet[0][0].replace(EotGlobalData.gMACRO['WORKSPACE'], '.')
+                Inf = ModuleSet[0][0].replace(
+                    EotGlobalData.gMACRO['WORKSPACE'], '.')
                 Function = Record[1]
                 Address = ''
                 for Item in EotGlobalData.gMap:
@@ -220,7 +226,7 @@ class Report(object):
                     </tr>""" % ('Callback', Inf, Function, Address)
                 self.WriteLn(Content)
 
-    ## GenerateFfs() method
+    # GenerateFfs() method
     #
     #  Generate FFS information
     #
@@ -274,13 +280,15 @@ class Report(object):
 
             if self.DispatchList:
                 if FfsObj.Type in [0x04, 0x06]:
-                    self.DispatchList.write("%s %s %s %s\n" % (FfsGuid, "P", FfsName, FfsPath))
+                    self.DispatchList.write("%s %s %s %s\n" % (
+                        FfsGuid, "P", FfsName, FfsPath))
                 if FfsObj.Type in [0x05, 0x07, 0x08, 0x0A]:
-                    self.DispatchList.write("%s %s %s %s\n" % (FfsGuid, "D", FfsName, FfsPath))
+                    self.DispatchList.write("%s %s %s %s\n" % (
+                        FfsGuid, "D", FfsName, FfsPath))
 
             self.WriteLn(Content)
 
-            EotGlobalData.gOP_DISPATCH_ORDER.write('%s\n' %FfsName)
+            EotGlobalData.gOP_DISPATCH_ORDER.write('%s\n' % FfsName)
 
             if FfsObj.Depex != '':
                 Content = """          <tr>
@@ -321,12 +329,13 @@ class Report(object):
                     CName = Record[4]
                     Guid = Record[3]
                     Type = Record[1]
-                    self.GeneratePpiProtocol(Type, Name, Guid, 'Consumed', CName)
+                    self.GeneratePpiProtocol(
+                        Type, Name, Guid, 'Consumed', CName)
 
                 Content = """            </table></td>
           </tr>"""
                 self.WriteLn(Content)
-            #End of Consumed Ppi/Protocol
+            # End of Consumed Ppi/Protocol
 
             # Find Produced Ppi/Protocol
             SqlCommand = """select ModuleName, ItemType, GuidName, GuidValue, GuidMacro from Report
@@ -354,7 +363,8 @@ class Report(object):
                     CName = Record[4]
                     Guid = Record[3]
                     Type = Record[1]
-                    self.GeneratePpiProtocol(Type, Name, Guid, 'Produced', CName)
+                    self.GeneratePpiProtocol(
+                        Type, Name, Guid, 'Produced', CName)
 
                 Content = """            </table></td>
           </tr>"""
@@ -366,7 +376,7 @@ class Report(object):
         </tr>"""
             self.WriteLn(Content)
 
-    ## GenerateTail() method
+    # GenerateTail() method
     #
     #  Generate end tags of HTML report
     #
@@ -378,7 +388,7 @@ class Report(object):
 </html>"""
         self.WriteLn(Tail)
 
-    ## GenerateHeader() method
+    # GenerateHeader() method
     #
     #  Generate start tags of HTML report
     #
@@ -445,6 +455,7 @@ function funOnMouseOut()
 <body>
 <table width="100%%"  border="1">"""
         self.WriteLn(Header)
+
 
 ##
 #

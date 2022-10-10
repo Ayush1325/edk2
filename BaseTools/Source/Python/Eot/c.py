@@ -1,4 +1,4 @@
-## @file
+# @file
 # preprocess source file
 #
 #  Copyright (c) 2007 - 2014, Intel Corporation. All rights reserved.<BR>
@@ -27,46 +27,55 @@ IncludePathListDict = {}
 ComplexTypeDict = {}
 SUDict = {}
 
-## GetFuncDeclPattern() method
+# GetFuncDeclPattern() method
 #
 #  Get the pattern of function declaration
 #
 #  @return p:    the pattern of function declaration
 #
+
+
 def GetFuncDeclPattern():
-    p = re.compile(r'(EFIAPI|EFI_BOOT_SERVICE|EFI_RUNTIME_SERVICE)?\s*[_\w]+\s*\(.*\).*', re.DOTALL)
+    p = re.compile(
+        r'(EFIAPI|EFI_BOOT_SERVICE|EFI_RUNTIME_SERVICE)?\s*[_\w]+\s*\(.*\).*', re.DOTALL)
     return p
 
-## GetArrayPattern() method
+# GetArrayPattern() method
 #
 #  Get the pattern of array
 #
 #  @return p:    the pattern of array
 #
+
+
 def GetArrayPattern():
     p = re.compile(r'[_\w]*\s*[\[.*\]]+')
     return p
 
-## GetTypedefFuncPointerPattern() method
+# GetTypedefFuncPointerPattern() method
 #
 #  Get the pattern of function pointer
 #
 #  @return p:    the pattern of function pointer
 #
+
+
 def GetTypedefFuncPointerPattern():
     p = re.compile('[_\w\s]*\([\w\s]*\*+\s*[_\w]+\s*\)\s*\(.*\)', re.DOTALL)
     return p
 
-## GetDB() method
+# GetDB() method
 #
 #  Get global database instance
 #
 #  @return EotGlobalData.gDb:    the global database instance
 #
+
+
 def GetDB():
     return EotGlobalData.gDb
 
-## PrintErrorMsg() method
+# PrintErrorMsg() method
 #
 #  print error message
 #
@@ -75,6 +84,8 @@ def GetDB():
 #  @param TableName: table name of error found
 #  @param ItemId: id of item
 #
+
+
 def PrintErrorMsg(ErrorType, Msg, TableName, ItemId):
     Msg = Msg.replace('\n', '').replace('\r', '')
     MsgPartList = Msg.split()
@@ -82,9 +93,10 @@ def PrintErrorMsg(ErrorType, Msg, TableName, ItemId):
     for Part in MsgPartList:
         Msg += Part
         Msg += ' '
-    GetDB().TblReport.Insert(ErrorType, OtherMsg = Msg, BelongsToTable = TableName, BelongsToItem = ItemId)
+    GetDB().TblReport.Insert(ErrorType, OtherMsg=Msg,
+                             BelongsToTable=TableName, BelongsToItem=ItemId)
 
-## GetIdType() method
+# GetIdType() method
 #
 #  Find type of input string
 #
@@ -92,6 +104,8 @@ def PrintErrorMsg(ErrorType, Msg, TableName, ItemId):
 #
 #  @return Type: The type of the string
 #
+
+
 def GetIdType(Str):
     Type = DataClass.MODEL_UNKNOWN
     Str = Str.replace('#', '# ')
@@ -112,22 +126,26 @@ def GetIdType(Str):
         Type = DataClass.MODEL_UNKNOWN
     return Type
 
-## GetIdentifierList() method
+# GetIdentifierList() method
 #
 #  Get id of all files
 #
 #  @return IdList: The list of all id of files
 #
+
+
 def GetIdentifierList():
     IdList = []
 
     for pp in FileProfile.PPDirectiveList:
         Type = GetIdType(pp.Content)
-        IdPP = DataClass.IdentifierClass(-1, '', '', '', pp.Content, Type, -1, -1, pp.StartPos[0], pp.StartPos[1], pp.EndPos[0], pp.EndPos[1])
+        IdPP = DataClass.IdentifierClass(-1, '', '', '', pp.Content, Type, -
+                                         1, -1, pp.StartPos[0], pp.StartPos[1], pp.EndPos[0], pp.EndPos[1])
         IdList.append(IdPP)
 
     for ae in FileProfile.AssignmentExpressionList:
-        IdAE = DataClass.IdentifierClass(-1, ae.Operator, '', ae.Name, ae.Value, DataClass.MODEL_IDENTIFIER_ASSIGNMENT_EXPRESSION, -1, -1, ae.StartPos[0], ae.StartPos[1], ae.EndPos[0], ae.EndPos[1])
+        IdAE = DataClass.IdentifierClass(-1, ae.Operator, '', ae.Name, ae.Value, DataClass.MODEL_IDENTIFIER_ASSIGNMENT_EXPRESSION, -
+                                         1, -1, ae.StartPos[0], ae.StartPos[1], ae.EndPos[0], ae.EndPos[1])
         IdList.append(IdAE)
 
     FuncDeclPattern = GetFuncDeclPattern()
@@ -147,9 +165,11 @@ def GetIdentifierList():
                 Index = 0
                 while Index < len(FuncNamePartList) - 1:
                     var.Modifier += ' ' + FuncNamePartList[Index]
-                    var.Declarator = var.Declarator.lstrip().lstrip(FuncNamePartList[Index])
+                    var.Declarator = var.Declarator.lstrip().lstrip(
+                        FuncNamePartList[Index])
                     Index += 1
-            IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', var.Declarator, '', DataClass.MODEL_IDENTIFIER_FUNCTION_DECLARATION, -1, -1, var.StartPos[0], var.StartPos[1], var.EndPos[0], var.EndPos[1])
+            IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', var.Declarator, '', DataClass.MODEL_IDENTIFIER_FUNCTION_DECLARATION, -
+                                              1, -1, var.StartPos[0], var.StartPos[1], var.EndPos[0], var.EndPos[1])
             IdList.append(IdVar)
             continue
 
@@ -162,7 +182,8 @@ def GetIdentifierList():
                     var.Modifier += ' ' + Name[LSBPos:]
                     Name = Name[0:LSBPos]
 
-                IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', Name, (len(DeclList) > 1 and [DeclList[1]]or [''])[0], DataClass.MODEL_IDENTIFIER_VARIABLE, -1, -1, var.StartPos[0], var.StartPos[1], var.EndPos[0], var.EndPos[1])
+                IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', Name, (len(DeclList) > 1 and [DeclList[1]] or [''])[
+                                                  0], DataClass.MODEL_IDENTIFIER_VARIABLE, -1, -1, var.StartPos[0], var.StartPos[1], var.EndPos[0], var.EndPos[1])
                 IdList.append(IdVar)
         else:
             DeclList = var.Declarator.split('=')
@@ -171,7 +192,8 @@ def GetIdentifierList():
                 LSBPos = var.Declarator.find('[')
                 var.Modifier += ' ' + Name[LSBPos:]
                 Name = Name[0:LSBPos]
-            IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', Name, (len(DeclList) > 1 and [DeclList[1]]or [''])[0], DataClass.MODEL_IDENTIFIER_VARIABLE, -1, -1, var.StartPos[0], var.StartPos[1], var.EndPos[0], var.EndPos[1])
+            IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', Name, (len(DeclList) > 1 and [DeclList[1]] or [''])[
+                                              0], DataClass.MODEL_IDENTIFIER_VARIABLE, -1, -1, var.StartPos[0], var.StartPos[1], var.EndPos[0], var.EndPos[1])
             IdList.append(IdVar)
 
     for enum in FileProfile.EnumerationDefinitionList:
@@ -179,7 +201,8 @@ def GetIdentifierList():
         RBPos = enum.Content.find('}')
         Name = enum.Content[4:LBPos].strip()
         Value = enum.Content[LBPos+1:RBPos]
-        IdEnum = DataClass.IdentifierClass(-1, '', '', Name, Value, DataClass.MODEL_IDENTIFIER_ENUMERATE, -1, -1, enum.StartPos[0], enum.StartPos[1], enum.EndPos[0], enum.EndPos[1])
+        IdEnum = DataClass.IdentifierClass(-1, '', '', Name, Value, DataClass.MODEL_IDENTIFIER_ENUMERATE, -
+                                           1, -1, enum.StartPos[0], enum.StartPos[1], enum.EndPos[0], enum.EndPos[1])
         IdList.append(IdEnum)
 
     for su in FileProfile.StructUnionDefinitionList:
@@ -196,7 +219,8 @@ def GetIdentifierList():
         else:
             Name = su.Content[SkipLen:LBPos].strip()
             Value = su.Content[LBPos+1:RBPos]
-        IdPE = DataClass.IdentifierClass(-1, '', '', Name, Value, Type, -1, -1, su.StartPos[0], su.StartPos[1], su.EndPos[0], su.EndPos[1])
+        IdPE = DataClass.IdentifierClass(-1, '', '', Name, Value, Type, -
+                                         1, -1, su.StartPos[0], su.StartPos[1], su.EndPos[0], su.EndPos[1])
         IdList.append(IdPE)
 
     TdFuncPointerPattern = GetTypedefFuncPointerPattern()
@@ -219,15 +243,17 @@ def GetIdentifierList():
             Name = TmpStr[0:RBPos]
             Value = 'FP' + TmpStr[RBPos + 1:]
 
-        IdTd = DataClass.IdentifierClass(-1, Modifier, '', Name, Value, DataClass.MODEL_IDENTIFIER_TYPEDEF, -1, -1, td.StartPos[0], td.StartPos[1], td.EndPos[0], td.EndPos[1])
+        IdTd = DataClass.IdentifierClass(-1, Modifier, '', Name, Value, DataClass.MODEL_IDENTIFIER_TYPEDEF, -
+                                         1, -1, td.StartPos[0], td.StartPos[1], td.EndPos[0], td.EndPos[1])
         IdList.append(IdTd)
 
     for funcCall in FileProfile.FunctionCallingList:
-        IdFC = DataClass.IdentifierClass(-1, '', '', funcCall.FuncName, funcCall.ParamList, DataClass.MODEL_IDENTIFIER_FUNCTION_CALLING, -1, -1, funcCall.StartPos[0], funcCall.StartPos[1], funcCall.EndPos[0], funcCall.EndPos[1])
+        IdFC = DataClass.IdentifierClass(-1, '', '', funcCall.FuncName, funcCall.ParamList, DataClass.MODEL_IDENTIFIER_FUNCTION_CALLING, -
+                                         1, -1, funcCall.StartPos[0], funcCall.StartPos[1], funcCall.EndPos[0], funcCall.EndPos[1])
         IdList.append(IdFC)
     return IdList
 
-## GetParamList() method
+# GetParamList() method
 #
 #  Get a list of parameters
 #
@@ -237,7 +263,9 @@ def GetIdentifierList():
 #
 #  @return ParamIdList: A list of parameters
 #
-def GetParamList(FuncDeclarator, FuncNameLine = 0, FuncNameOffset = 0):
+
+
+def GetParamList(FuncDeclarator, FuncNameLine=0, FuncNameOffset=0):
     ParamIdList = []
     DeclSplitList = FuncDeclarator.split('(')
     if len(DeclSplitList) < 2:
@@ -253,7 +281,7 @@ def GetParamList(FuncDeclarator, FuncNameLine = 0, FuncNameOffset = 0):
         Start += FuncName.find('\n', Start)
         Start += 1
     OffsetSkipped += len(FuncName[Start:])
-    OffsetSkipped += 1 #skip '('
+    OffsetSkipped += 1  # skip '('
     ParamBeginLine = FuncNameLine + LineSkipped
     ParamBeginOffset = OffsetSkipped
     for p in ParamStr.split(','):
@@ -289,19 +317,22 @@ def GetParamList(FuncDeclarator, FuncNameLine = 0, FuncNameOffset = 0):
 
         ParamEndLine = ParamBeginLine + LineSkipped
         ParamEndOffset = OffsetSkipped
-        IdParam = DataClass.IdentifierClass(-1, ParamModifier, '', ParamName, '', DataClass.MODEL_IDENTIFIER_PARAMETER, -1, -1, ParamBeginLine, ParamBeginOffset, ParamEndLine, ParamEndOffset)
+        IdParam = DataClass.IdentifierClass(-1, ParamModifier, '', ParamName, '', DataClass.MODEL_IDENTIFIER_PARAMETER, -
+                                            1, -1, ParamBeginLine, ParamBeginOffset, ParamEndLine, ParamEndOffset)
         ParamIdList.append(IdParam)
         ParamBeginLine = ParamEndLine
-        ParamBeginOffset = OffsetSkipped + 1 #skip ','
+        ParamBeginOffset = OffsetSkipped + 1  # skip ','
 
     return ParamIdList
 
-## GetFunctionList()
+# GetFunctionList()
 #
 #  Get a list of functions
 #
 #  @return FuncObjList: A list of function objects
 #
+
+
 def GetFunctionList():
     FuncObjList = []
     for FuncDef in FileProfile.FunctionDefinitionList:
@@ -325,17 +356,20 @@ def GetFunctionList():
                 FuncDef.Modifier += ' ' + FuncNamePartList[Index]
                 Index += 1
 
-        FuncObj = DataClass.FunctionClass(-1, FuncDef.Declarator, FuncDef.Modifier, FuncName.strip(), '', FuncDef.StartPos[0], FuncDef.StartPos[1], FuncDef.EndPos[0], FuncDef.EndPos[1], FuncDef.LeftBracePos[0], FuncDef.LeftBracePos[1], -1, ParamIdList, [])
+        FuncObj = DataClass.FunctionClass(-1, FuncDef.Declarator, FuncDef.Modifier, FuncName.strip(
+        ), '', FuncDef.StartPos[0], FuncDef.StartPos[1], FuncDef.EndPos[0], FuncDef.EndPos[1], FuncDef.LeftBracePos[0], FuncDef.LeftBracePos[1], -1, ParamIdList, [])
         FuncObjList.append(FuncObj)
 
     return FuncObjList
 
-## CreateCCodeDB() method
+# CreateCCodeDB() method
 #
 #  Create database for all c code
 #
 #  @param FileNameList: A list of all c code file names
 #
+
+
 def CreateCCodeDB(FileNameList):
     FileObjList = []
     ParseErrorFileList = []
@@ -346,7 +380,8 @@ def CreateCCodeDB(FileNameList):
                 continue
             ParsedFiles[FullName.lower()] = 1
             EdkLogger.info("Parsing " + FullName)
-            model = FullName.endswith('c') and DataClass.MODEL_FILE_C or DataClass.MODEL_FILE_H
+            model = FullName.endswith(
+                'c') and DataClass.MODEL_FILE_C or DataClass.MODEL_FILE_H
             collector = CodeFragmentCollector.CodeFragmentCollector(FullName)
             try:
                 collector.ParseFile()
@@ -356,18 +391,21 @@ def CreateCCodeDB(FileNameList):
             DirName = os.path.dirname(FullName)
             Ext = os.path.splitext(BaseName)[1].lstrip('.')
             ModifiedTime = os.path.getmtime(FullName)
-            FileObj = DataClass.FileClass(-1, BaseName, Ext, DirName, FullName, model, ModifiedTime, GetFunctionList(), GetIdentifierList(), [])
+            FileObj = DataClass.FileClass(-1, BaseName, Ext, DirName, FullName,
+                                          model, ModifiedTime, GetFunctionList(), GetIdentifierList(), [])
             FileObjList.append(FileObj)
             collector.CleanFileProfileBuffer()
 
     if len(ParseErrorFileList) > 0:
-        EdkLogger.info("Found unrecoverable error during parsing:\n\t%s\n" % "\n\t".join(ParseErrorFileList))
+        EdkLogger.info("Found unrecoverable error during parsing:\n\t%s\n" %
+                       "\n\t".join(ParseErrorFileList))
 
     Db = EotGlobalData.gDb
     for file in FileObjList:
         Db.InsertOneFile(file)
 
     Db.UpdateIdentifierBelongsToFunction()
+
 
 ##
 #

@@ -1,4 +1,4 @@
-## @file
+# @file
 # Unit tests for Python based BaseTools
 #
 #  Copyright (c) 2008 - 2015, Intel Corporation. All rights reserved.<BR>
@@ -22,7 +22,7 @@ def TheTestSuite():
     suites.append(CheckUnicodeSourceFiles.TheTestSuite())
     return unittest.TestSuite(suites)
 
+
 if __name__ == '__main__':
     allTests = TheTestSuite()
     unittest.TextTestRunner().run(allTests)
-

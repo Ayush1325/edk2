@@ -1,4 +1,4 @@
-## @file
+# @file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
 #
@@ -9,22 +9,27 @@ def GetEdkLogger():
     import logging
     return logging.getLogger('edk')
 
+
 class EdkException(Exception):
     def __init__(self, message, fName=None, fNo=None):
         self._message = message
         ErrorMsg(message, fName, fNo)
 
     def GetMessage(self):
-        return '[EDK Failure]: %s' %self._message
+        return '[EDK Failure]: %s' % self._message
+
 
 def ErrorMsg(mess, fName=None, fNo=None):
     GetEdkLogger().error(NormalMessage('#ERR#', mess, fName, fNo))
 
+
 def LogMsg(mess, fName=None, fNo=None):
     GetEdkLogger().info(NormalMessage('@LOG@', mess, fName, fNo))
 
+
 def WarnMsg(mess, fName=None, fNo=None):
     GetEdkLogger().warning(NormalMessage('!WAR!', mess, fName, fNo))
+
 
 def NormalMessage(type, mess, fName=None, fNo=None):
     strMsg = type
@@ -41,6 +46,3 @@ def NormalMessage(type, mess, fName=None, fNo=None):
     strMsg += mess
 
     return strMsg
-
-
-

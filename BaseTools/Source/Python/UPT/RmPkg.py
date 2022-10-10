@@ -1,4 +1,4 @@
-## @file
+# @file
 # Install distribution package.
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -32,7 +32,7 @@ from Logger.ToolError import CODE_ERROR
 from Logger.ToolError import FatalError
 
 
-## CheckDpDepex
+# CheckDpDepex
 #
 # Check if the Depex is satisfied
 # @param Dep: Dep
@@ -57,13 +57,14 @@ def CheckDpDepex(Dep, Guid, Version, WorkspaceDir):
             # also generate a log file for reference
             #
             Logger.Info(ST.MSG_INVALID_MODULE_INTRODUCED)
-            LogFilePath = os.path.normpath(os.path.join(WorkspaceDir, GlobalData.gINVALID_MODULE_FILE))
+            LogFilePath = os.path.normpath(os.path.join(
+                WorkspaceDir, GlobalData.gINVALID_MODULE_FILE))
             Logger.Info(ST.MSG_CHECK_LOG_FILE % LogFilePath)
             try:
                 LogFile = open(LogFilePath, 'w')
                 try:
                     for ModulePath in DependModuleList:
-                        LogFile.write("%s\n"%ModulePath)
+                        LogFile.write("%s\n" % ModulePath)
                         Logger.Info(ModulePath)
                 except IOError:
                     Logger.Warn("\nRmPkg", ST.ERR_FILE_WRITE_FAILURE,
@@ -74,13 +75,15 @@ def CheckDpDepex(Dep, Guid, Version, WorkspaceDir):
             finally:
                 LogFile.close()
 
-## Remove Path
+# Remove Path
 #
 # removing readonly file on windows will get "Access is denied"
 # error, so before removing, change the mode to be writeable
 #
 # @param Path: The Path to be removed
 #
+
+
 def RemovePath(Path):
     Logger.Info(ST.MSG_REMOVE_FILE % Path)
     if not os.access(Path, os.W_OK):
@@ -90,16 +93,18 @@ def RemovePath(Path):
         os.removedirs(os.path.split(Path)[0])
     except OSError:
         pass
-## GetCurrentFileList
+# GetCurrentFileList
 #
 # @param DataBase: DataBase of UPT
 # @param Guid: Guid of Dp
 # @param Version: Version of Dp
 # @param WorkspaceDir: Workspace Dir
 #
+
+
 def GetCurrentFileList(DataBase, Guid, Version, WorkspaceDir):
     NewFileList = []
-    for Dir in  DataBase.GetDpInstallDirList(Guid, Version):
+    for Dir in DataBase.GetDpInstallDirList(Guid, Version):
         RootDir = os.path.normpath(os.path.join(WorkspaceDir, Dir))
         for Root, Dirs, Files in os.walk(RootDir):
             Logger.Debug(0, Dirs)
@@ -110,7 +115,7 @@ def GetCurrentFileList(DataBase, Guid, Version, WorkspaceDir):
     return NewFileList
 
 
-## Tool entrance method
+# Tool entrance method
 #
 # This method mainly dispatch specific methods per the command line options.
 # If no error found, return zero value so the caller of this tool can know
@@ -118,7 +123,7 @@ def GetCurrentFileList(DataBase, Guid, Version, WorkspaceDir):
 #
 # @param  Options: command option
 #
-def Main(Options = None):
+def Main(Options=None):
 
     try:
         DataBase = GlobalData.gDB
@@ -135,7 +140,8 @@ def Main(Options = None):
         #
         # Get the Dp information
         #
-        StoredDistFile, Guid, Version = GetInstalledDpInfo(Options.DistributionFile, Dep, DataBase, WorkspaceDir)
+        StoredDistFile, Guid, Version = GetInstalledDpInfo(
+            Options.DistributionFile, Dep, DataBase, WorkspaceDir)
 
         #
         # Check Dp depex
@@ -145,7 +151,8 @@ def Main(Options = None):
         #
         # remove distribution
         #
-        RemoveDist(Guid, Version, StoredDistFile, DataBase, WorkspaceDir, Options.Yes)
+        RemoveDist(Guid, Version, StoredDistFile,
+                   DataBase, WorkspaceDir, Options.Yes)
 
         Logger.Quiet(ST.MSG_FINISH)
 
@@ -154,27 +161,27 @@ def Main(Options = None):
     except FatalError as XExcept:
         ReturnCode = XExcept.args[0]
         if Logger.GetLevel() <= Logger.DEBUG_9:
-            Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) + \
+            Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) +
                          format_exc())
     except KeyboardInterrupt:
         ReturnCode = ABORT_ERROR
         if Logger.GetLevel() <= Logger.DEBUG_9:
-            Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) + \
+            Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) +
                          format_exc())
     except:
         Logger.Error(
-                    "\nRmPkg",
-                    CODE_ERROR,
-                    ST.ERR_UNKNOWN_FATAL_REMOVING_ERR,
-                    ExtraData=ST.MSG_SEARCH_FOR_HELP % ST.MSG_EDKII_MAIL_ADDR,
-                    RaiseError=False
-                    )
-        Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) + \
+            "\nRmPkg",
+            CODE_ERROR,
+            ST.ERR_UNKNOWN_FATAL_REMOVING_ERR,
+            ExtraData=ST.MSG_SEARCH_FOR_HELP % ST.MSG_EDKII_MAIL_ADDR,
+            RaiseError=False
+        )
+        Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) +
                      format_exc())
         ReturnCode = CODE_ERROR
     return ReturnCode
 
-## GetInstalledDpInfo method
+# GetInstalledDpInfo method
 #
 # Get the installed distribution information
 #
@@ -186,10 +193,14 @@ def Main(Options = None):
 # @retval Guid: the Guid of the distribution
 # @retval Version: the Version of distribution
 #
+
+
 def GetInstalledDpInfo(DistributionFile, Dep, DataBase, WorkspaceDir):
-    (Guid, Version, NewDpFileName) = DataBase.GetDpByName(os.path.split(DistributionFile)[1])
+    (Guid, Version, NewDpFileName) = DataBase.GetDpByName(
+        os.path.split(DistributionFile)[1])
     if not Guid:
-        Logger.Error("RmPkg", UNKNOWN_ERROR, ST.ERR_PACKAGE_NOT_INSTALLED % DistributionFile)
+        Logger.Error("RmPkg", UNKNOWN_ERROR,
+                     ST.ERR_PACKAGE_NOT_INSTALLED % DistributionFile)
 
     #
     # Check Dp existing
@@ -200,14 +211,15 @@ def GetInstalledDpInfo(DistributionFile, Dep, DataBase, WorkspaceDir):
     # Check for Distribution files existence in /conf/upt, if not exist,
     # Warn user and go on.
     #
-    StoredDistFile = os.path.normpath(os.path.join(WorkspaceDir, GlobalData.gUPT_DIR, NewDpFileName))
+    StoredDistFile = os.path.normpath(os.path.join(
+        WorkspaceDir, GlobalData.gUPT_DIR, NewDpFileName))
     if not os.path.isfile(StoredDistFile):
-        Logger.Warn("RmPkg", ST.WRN_DIST_NOT_FOUND%StoredDistFile)
+        Logger.Warn("RmPkg", ST.WRN_DIST_NOT_FOUND % StoredDistFile)
         StoredDistFile = None
 
     return StoredDistFile, Guid, Version
 
-## RemoveDist method
+# RemoveDist method
 #
 # remove a distribution
 #
@@ -218,6 +230,8 @@ def GetInstalledDpInfo(DistributionFile, Dep, DataBase, WorkspaceDir):
 # @param  WorkspaceDir: work space directory
 # @param  ForceRemove: whether user want to remove file even it is modified
 #
+
+
 def RemoveDist(Guid, Version, StoredDistFile, DataBase, WorkspaceDir, ForceRemove):
     #
     # Get Current File List

@@ -1,4 +1,4 @@
-## @file
+# @file
 # generate capsule
 #
 #  Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -24,13 +24,16 @@ from Common.DataType import TAB_LINE_BREAK
 WIN_CERT_REVISION = 0x0200
 WIN_CERT_TYPE_EFI_GUID = 0x0EF1
 EFI_CERT_TYPE_PKCS7_GUID = uuid.UUID('{4aafd29d-68df-49ee-8aa9-347d375665a7}')
-EFI_CERT_TYPE_RSA2048_SHA256_GUID = uuid.UUID('{a7717414-c616-4977-9420-844712a735bf}')
+EFI_CERT_TYPE_RSA2048_SHA256_GUID = uuid.UUID(
+    '{a7717414-c616-4977-9420-844712a735bf}')
 
-## create inf file describes what goes into capsule and call GenFv to generate capsule
+# create inf file describes what goes into capsule and call GenFv to generate capsule
 #
 #
+
+
 class Capsule (CapsuleClassObject):
-    ## The constructor
+    # The constructor
     #
     #   @param  self        The object pointer
     #
@@ -42,7 +45,7 @@ class Capsule (CapsuleClassObject):
         self.BlockNum = None
         self.CapsuleName = None
 
-    ## Generate FMP capsule
+    # Generate FMP capsule
     #
     #   @retval string      Generated Capsule file path
     #
@@ -60,10 +63,12 @@ class Capsule (CapsuleClassObject):
         #
         # Use FMP capsule GUID: 6DCBD5ED-E82D-4C44-BDA1-7194199AD92A
         #
-        Header.write(PackGUID('6DCBD5ED-E82D-4C44-BDA1-7194199AD92A'.split('-')))
+        Header.write(
+            PackGUID('6DCBD5ED-E82D-4C44-BDA1-7194199AD92A'.split('-')))
         HdrSize = 0
         if 'CAPSULE_HEADER_SIZE' in self.TokensDict:
-            Header.write(pack('=I', int(self.TokensDict['CAPSULE_HEADER_SIZE'], 16)))
+            Header.write(
+                pack('=I', int(self.TokensDict['CAPSULE_HEADER_SIZE'], 16)))
             HdrSize = int(self.TokensDict['CAPSULE_HEADER_SIZE'], 16)
         else:
             Header.write(pack('=I', 0x20))
@@ -89,11 +94,14 @@ class Capsule (CapsuleClassObject):
         #
         FwMgrHdr = BytesIO()
         if 'CAPSULE_HEADER_INIT_VERSION' in self.TokensDict:
-            FwMgrHdr.write(pack('=I', int(self.TokensDict['CAPSULE_HEADER_INIT_VERSION'], 16)))
+            FwMgrHdr.write(
+                pack('=I', int(self.TokensDict['CAPSULE_HEADER_INIT_VERSION'], 16)))
         else:
             FwMgrHdr.write(pack('=I', 0x00000001))
-        FwMgrHdr.write(pack('=HH', len(self.CapsuleDataList), len(self.FmpPayloadList)))
-        FwMgrHdrSize = 4+2+2+8*(len(self.CapsuleDataList)+len(self.FmpPayloadList))
+        FwMgrHdr.write(pack('=HH', len(self.CapsuleDataList),
+                       len(self.FmpPayloadList)))
+        FwMgrHdrSize = 4+2+2+8 * \
+            (len(self.CapsuleDataList)+len(self.FmpPayloadList))
 
         #
         # typedef struct _WIN_CERTIFICATE {
@@ -143,27 +151,37 @@ class Capsule (CapsuleClassObject):
                 for Obj in fmp.VendorCodeFile:
                     fmp.VendorCodeFile = Obj.GenCapsuleSubItem()
             if fmp.Certificate_Guid:
-                ExternalTool, ExternalOption = FindExtendTool([], GenFdsGlobalVariable.ArchList, fmp.Certificate_Guid)
+                ExternalTool, ExternalOption = FindExtendTool(
+                    [], GenFdsGlobalVariable.ArchList, fmp.Certificate_Guid)
                 CmdOption = ''
                 CapInputFile = fmp.ImageFile
                 if not os.path.isabs(fmp.ImageFile):
-                    CapInputFile = os.path.join(GenFdsGlobalVariable.WorkSpaceDir, fmp.ImageFile)
-                CapOutputTmp = os.path.join(GenFdsGlobalVariable.FvDir, self.UiCapsuleName) + '.tmp'
+                    CapInputFile = os.path.join(
+                        GenFdsGlobalVariable.WorkSpaceDir, fmp.ImageFile)
+                CapOutputTmp = os.path.join(
+                    GenFdsGlobalVariable.FvDir, self.UiCapsuleName) + '.tmp'
                 if ExternalTool is None:
-                    EdkLogger.error("GenFds", GENFDS_ERROR, "No tool found with GUID %s" % fmp.Certificate_Guid)
+                    EdkLogger.error(
+                        "GenFds", GENFDS_ERROR, "No tool found with GUID %s" % fmp.Certificate_Guid)
                 else:
                     CmdOption += ExternalTool
                 if ExternalOption:
                     CmdOption = CmdOption + ' ' + ExternalOption
-                CmdOption += ' -e ' + ' --monotonic-count ' + str(fmp.MonotonicCount) + ' -o ' + CapOutputTmp + ' ' + CapInputFile
+                CmdOption += ' -e ' + ' --monotonic-count ' + \
+                    str(fmp.MonotonicCount) + ' -o ' + \
+                    CapOutputTmp + ' ' + CapInputFile
                 CmdList = CmdOption.split()
-                GenFdsGlobalVariable.CallExternalTool(CmdList, "Failed to generate FMP auth capsule")
+                GenFdsGlobalVariable.CallExternalTool(
+                    CmdList, "Failed to generate FMP auth capsule")
                 if uuid.UUID(fmp.Certificate_Guid) == EFI_CERT_TYPE_PKCS7_GUID:
-                    dwLength = 4 + 2 + 2 + 16 + os.path.getsize(CapOutputTmp) - os.path.getsize(CapInputFile)
+                    dwLength = 4 + 2 + 2 + 16 + \
+                        os.path.getsize(CapOutputTmp) - \
+                        os.path.getsize(CapInputFile)
                 else:
                     dwLength = 4 + 2 + 2 + 16 + 16 + 256 + 256
                 fmp.ImageFile = CapOutputTmp
-                AuthData = [fmp.MonotonicCount, dwLength, WIN_CERT_REVISION, WIN_CERT_TYPE_EFI_GUID, fmp.Certificate_Guid]
+                AuthData = [fmp.MonotonicCount, dwLength, WIN_CERT_REVISION,
+                            WIN_CERT_TYPE_EFI_GUID, fmp.Certificate_Guid]
                 fmp.Buffer = fmp.GenCapsuleSubItem(AuthData)
             else:
                 fmp.Buffer = fmp.GenCapsuleSubItem()
@@ -181,11 +199,12 @@ class Capsule (CapsuleClassObject):
         #
         # Generate FMP capsule file
         #
-        CapOutputFile = os.path.join(GenFdsGlobalVariable.FvDir, self.UiCapsuleName) + '.Cap'
+        CapOutputFile = os.path.join(
+            GenFdsGlobalVariable.FvDir, self.UiCapsuleName) + '.Cap'
         SaveFileOnChange(CapOutputFile, Header.getvalue(), True)
         return CapOutputFile
 
-    ## Generate capsule
+    # Generate capsule
     #
     #   @param  self        The object pointer
     #   @retval string      Generated Capsule file path
@@ -194,9 +213,10 @@ class Capsule (CapsuleClassObject):
         if self.UiCapsuleName.upper() + 'cap' in GenFdsGlobalVariable.ImageBinDict:
             return GenFdsGlobalVariable.ImageBinDict[self.UiCapsuleName.upper() + 'cap']
 
-        GenFdsGlobalVariable.InfLogger( "\nGenerate %s Capsule" %self.UiCapsuleName)
+        GenFdsGlobalVariable.InfLogger(
+            "\nGenerate %s Capsule" % self.UiCapsuleName)
         if ('CAPSULE_GUID' in self.TokensDict and
-            uuid.UUID(self.TokensDict['CAPSULE_GUID']) == uuid.UUID('6DCBD5ED-E82D-4C44-BDA1-7194199AD92A')):
+                uuid.UUID(self.TokensDict['CAPSULE_GUID']) == uuid.UUID('6DCBD5ED-E82D-4C44-BDA1-7194199AD92A')):
             return self.GenFmpCapsule()
 
         CapInfFile = self.GenCapInf()
@@ -207,44 +227,47 @@ class Capsule (CapsuleClassObject):
             FileName = CapsuleDataObj.GenCapsuleSubItem()
             CapsuleDataObj.CapsuleName = None
             CapFileList.append(FileName)
-            CapInfFile.append("EFI_FILE_NAME = " + \
-                                   FileName      + \
-                                   TAB_LINE_BREAK)
+            CapInfFile.append("EFI_FILE_NAME = " +
+                              FileName +
+                              TAB_LINE_BREAK)
         SaveFileOnChange(self.CapInfFileName, ''.join(CapInfFile), False)
         #
         # Call GenFv tool to generate capsule
         #
-        CapOutputFile = os.path.join(GenFdsGlobalVariable.FvDir, self.UiCapsuleName)
+        CapOutputFile = os.path.join(
+            GenFdsGlobalVariable.FvDir, self.UiCapsuleName)
         CapOutputFile = CapOutputFile + '.Cap'
         GenFdsGlobalVariable.GenerateFirmwareVolume(
-                                CapOutputFile,
-                                [self.CapInfFileName],
-                                Capsule=True,
-                                FfsList=CapFileList
-                                )
+            CapOutputFile,
+            [self.CapInfFileName],
+            Capsule=True,
+            FfsList=CapFileList
+        )
 
-        GenFdsGlobalVariable.VerboseLogger( "\nGenerate %s Capsule Successfully" %self.UiCapsuleName)
+        GenFdsGlobalVariable.VerboseLogger(
+            "\nGenerate %s Capsule Successfully" % self.UiCapsuleName)
         GenFdsGlobalVariable.SharpCounter = 0
-        GenFdsGlobalVariable.ImageBinDict[self.UiCapsuleName.upper() + 'cap'] = CapOutputFile
+        GenFdsGlobalVariable.ImageBinDict[self.UiCapsuleName.upper(
+        ) + 'cap'] = CapOutputFile
         return CapOutputFile
 
-    ## Generate inf file for capsule
+    # Generate inf file for capsule
     #
     #   @param  self        The object pointer
     #   @retval file        inf file object
     #
     def GenCapInf(self):
         self.CapInfFileName = os.path.join(GenFdsGlobalVariable.FvDir,
-                                   self.UiCapsuleName +  "_Cap" + '.inf')
+                                           self.UiCapsuleName + "_Cap" + '.inf')
         CapInfFile = []
 
         CapInfFile.append("[options]" + TAB_LINE_BREAK)
 
         for Item in self.TokensDict:
-            CapInfFile.append("EFI_"                    + \
-                                  Item                      + \
-                                  ' = '                     + \
-                                  self.TokensDict[Item]     + \
-                                  TAB_LINE_BREAK)
+            CapInfFile.append("EFI_" +
+                              Item +
+                              ' = ' +
+                              self.TokensDict[Item] +
+                              TAB_LINE_BREAK)
 
         return CapInfFile

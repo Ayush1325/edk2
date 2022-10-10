@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to be the c coding style checking of ECC tool
 #
 # Copyright (c) 2009 - 2019, Intel Corporation. All rights reserved.<BR>
@@ -28,29 +28,37 @@ ComplexTypeDict = {}
 SUDict = {}
 IgnoredKeywordList = ['EFI_ERROR']
 
+
 def GetIgnoredDirListPattern():
     skipList = list(EccGlobalData.gConfig.SkipDirList) + ['.svn']
     DirString = '|'.join(skipList)
     p = re.compile(r'.*[\\/](?:%s)[\\/]?.*' % DirString)
     return p
 
+
 def GetFuncDeclPattern():
-    p = re.compile(r'(?:EFIAPI|EFI_BOOT_SERVICE|EFI_RUNTIME_SERVICE)?\s*[_\w]+\s*\(.*\)$', re.DOTALL)
+    p = re.compile(
+        r'(?:EFIAPI|EFI_BOOT_SERVICE|EFI_RUNTIME_SERVICE)?\s*[_\w]+\s*\(.*\)$', re.DOTALL)
     return p
+
 
 def GetArrayPattern():
     p = re.compile(r'[_\w]*\s*[\[.*\]]+')
     return p
 
+
 def GetTypedefFuncPointerPattern():
     p = re.compile('[_\w\s]*\([\w\s]*\*+\s*[_\w]+\s*\)\s*\(.*\)', re.DOTALL)
     return p
 
+
 def GetDB():
     return EccGlobalData.gDb
 
+
 def GetConfig():
     return EccGlobalData.gConfig
+
 
 def PrintErrorMsg(ErrorType, Msg, TableName, ItemId):
     Msg = Msg.replace('\n', '').replace('\r', '')
@@ -59,7 +67,9 @@ def PrintErrorMsg(ErrorType, Msg, TableName, ItemId):
     for Part in MsgPartList:
         Msg += Part
         Msg += ' '
-    GetDB().TblReport.Insert(ErrorType, OtherMsg=Msg, BelongsToTable=TableName, BelongsToItem=ItemId)
+    GetDB().TblReport.Insert(ErrorType, OtherMsg=Msg,
+                             BelongsToTable=TableName, BelongsToItem=ItemId)
+
 
 def GetIdType(Str):
     Type = DataClass.MODEL_UNKNOWN
@@ -83,25 +93,30 @@ def GetIdType(Str):
         Type = DataClass.MODEL_UNKNOWN
     return Type
 
-def SuOccurInTypedef (Su, TdList):
+
+def SuOccurInTypedef(Su, TdList):
     for Td in TdList:
         if Su.StartPos[0] == Td.StartPos[0] and Su.EndPos[0] == Td.EndPos[0]:
             return True
     return False
 
+
 def GetIdentifierList():
     IdList = []
     for comment in FileProfile.CommentList:
-        IdComment = DataClass.IdentifierClass(-1, '', '', '', comment.Content, DataClass.MODEL_IDENTIFIER_COMMENT, -1, -1, comment.StartPos[0], comment.StartPos[1], comment.EndPos[0], comment.EndPos[1])
+        IdComment = DataClass.IdentifierClass(-1, '', '', '', comment.Content, DataClass.MODEL_IDENTIFIER_COMMENT, -
+                                              1, -1, comment.StartPos[0], comment.StartPos[1], comment.EndPos[0], comment.EndPos[1])
         IdList.append(IdComment)
 
     for pp in FileProfile.PPDirectiveList:
         Type = GetIdType(pp.Content)
-        IdPP = DataClass.IdentifierClass(-1, '', '', '', pp.Content, Type, -1, -1, pp.StartPos[0], pp.StartPos[1], pp.EndPos[0], pp.EndPos[1])
+        IdPP = DataClass.IdentifierClass(-1, '', '', '', pp.Content, Type, -
+                                         1, -1, pp.StartPos[0], pp.StartPos[1], pp.EndPos[0], pp.EndPos[1])
         IdList.append(IdPP)
 
     for pe in FileProfile.PredicateExpressionList:
-        IdPE = DataClass.IdentifierClass(-1, '', '', '', pe.Content, DataClass.MODEL_IDENTIFIER_PREDICATE_EXPRESSION, -1, -1, pe.StartPos[0], pe.StartPos[1], pe.EndPos[0], pe.EndPos[1])
+        IdPE = DataClass.IdentifierClass(-1, '', '', '', pe.Content, DataClass.MODEL_IDENTIFIER_PREDICATE_EXPRESSION, -
+                                         1, -1, pe.StartPos[0], pe.StartPos[1], pe.EndPos[0], pe.EndPos[1])
         IdList.append(IdPE)
 
     FuncDeclPattern = GetFuncDeclPattern()
@@ -177,7 +192,8 @@ def GetIdentifierList():
                             Index += 1
                             VarNameStartColumn += 1
                         PreChar = FirstChar
-            IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', var.Declarator, FuncName, DataClass.MODEL_IDENTIFIER_FUNCTION_DECLARATION, -1, -1, var.StartPos[0], var.StartPos[1], VarNameStartLine, VarNameStartColumn)
+            IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', var.Declarator, FuncName, DataClass.MODEL_IDENTIFIER_FUNCTION_DECLARATION, -
+                                              1, -1, var.StartPos[0], var.StartPos[1], VarNameStartLine, VarNameStartColumn)
             IdList.append(IdVar)
             continue
 
@@ -190,7 +206,8 @@ def GetIdentifierList():
                     var.Modifier += ' ' + Name[LSBPos:]
                     Name = Name[0:LSBPos]
 
-                IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', Name, (len(DeclList) > 1 and [DeclList[1]]or [''])[0], DataClass.MODEL_IDENTIFIER_VARIABLE, -1, -1, var.StartPos[0], var.StartPos[1], VarNameStartLine, VarNameStartColumn)
+                IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', Name, (len(DeclList) > 1 and [DeclList[1]] or [''])[
+                                                  0], DataClass.MODEL_IDENTIFIER_VARIABLE, -1, -1, var.StartPos[0], var.StartPos[1], VarNameStartLine, VarNameStartColumn)
                 IdList.append(IdVar)
         else:
             DeclList = var.Declarator.split('=')
@@ -199,7 +216,8 @@ def GetIdentifierList():
                 LSBPos = var.Declarator.find('[')
                 var.Modifier += ' ' + Name[LSBPos:]
                 Name = Name[0:LSBPos]
-            IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', Name, (len(DeclList) > 1 and [DeclList[1]]or [''])[0], DataClass.MODEL_IDENTIFIER_VARIABLE, -1, -1, var.StartPos[0], var.StartPos[1], VarNameStartLine, VarNameStartColumn)
+            IdVar = DataClass.IdentifierClass(-1, var.Modifier, '', Name, (len(DeclList) > 1 and [DeclList[1]] or [''])[
+                                              0], DataClass.MODEL_IDENTIFIER_VARIABLE, -1, -1, var.StartPos[0], var.StartPos[1], VarNameStartLine, VarNameStartColumn)
             IdList.append(IdVar)
 
     for enum in FileProfile.EnumerationDefinitionList:
@@ -207,7 +225,8 @@ def GetIdentifierList():
         RBPos = enum.Content.find('}')
         Name = enum.Content[4:LBPos].strip()
         Value = enum.Content[LBPos + 1:RBPos]
-        IdEnum = DataClass.IdentifierClass(-1, '', '', Name, Value, DataClass.MODEL_IDENTIFIER_ENUMERATE, -1, -1, enum.StartPos[0], enum.StartPos[1], enum.EndPos[0], enum.EndPos[1])
+        IdEnum = DataClass.IdentifierClass(-1, '', '', Name, Value, DataClass.MODEL_IDENTIFIER_ENUMERATE, -
+                                           1, -1, enum.StartPos[0], enum.StartPos[1], enum.EndPos[0], enum.EndPos[1])
         IdList.append(IdEnum)
 
     for su in FileProfile.StructUnionDefinitionList:
@@ -226,7 +245,8 @@ def GetIdentifierList():
         else:
             Name = su.Content[SkipLen:LBPos].strip()
             Value = su.Content[LBPos:RBPos + 1]
-        IdPE = DataClass.IdentifierClass(-1, '', '', Name, Value, Type, -1, -1, su.StartPos[0], su.StartPos[1], su.EndPos[0], su.EndPos[1])
+        IdPE = DataClass.IdentifierClass(-1, '', '', Name, Value, Type, -
+                                         1, -1, su.StartPos[0], su.StartPos[1], su.EndPos[0], su.EndPos[1])
         IdList.append(IdPE)
 
     TdFuncPointerPattern = GetTypedefFuncPointerPattern()
@@ -242,7 +262,7 @@ def GetIdentifierList():
             if StarPos != -1:
                 Modifier += ' ' + TmpStr[0:StarPos]
             while TmpStr[StarPos] == '*':
-#                Modifier += ' ' + '*'
+                #                Modifier += ' ' + '*'
                 StarPos += 1
             TmpStr = TmpStr[StarPos:].strip()
             RBPos = TmpStr.find(')')
@@ -256,16 +276,19 @@ def GetIdentifierList():
         if Name.find('[') != -1:
             LBPos = Name.find('[')
             RBPos = Name.rfind(']')
-            Value += Name[LBPos : RBPos + 1]
-            Name = Name[0 : LBPos]
+            Value += Name[LBPos: RBPos + 1]
+            Name = Name[0: LBPos]
 
-        IdTd = DataClass.IdentifierClass(-1, Modifier, '', Name, Value, DataClass.MODEL_IDENTIFIER_TYPEDEF, -1, -1, td.StartPos[0], td.StartPos[1], td.EndPos[0], td.EndPos[1])
+        IdTd = DataClass.IdentifierClass(-1, Modifier, '', Name, Value, DataClass.MODEL_IDENTIFIER_TYPEDEF, -
+                                         1, -1, td.StartPos[0], td.StartPos[1], td.EndPos[0], td.EndPos[1])
         IdList.append(IdTd)
 
     for funcCall in FileProfile.FunctionCallingList:
-        IdFC = DataClass.IdentifierClass(-1, '', '', funcCall.FuncName, funcCall.ParamList, DataClass.MODEL_IDENTIFIER_FUNCTION_CALLING, -1, -1, funcCall.StartPos[0], funcCall.StartPos[1], funcCall.EndPos[0], funcCall.EndPos[1])
+        IdFC = DataClass.IdentifierClass(-1, '', '', funcCall.FuncName, funcCall.ParamList, DataClass.MODEL_IDENTIFIER_FUNCTION_CALLING, -
+                                         1, -1, funcCall.StartPos[0], funcCall.StartPos[1], funcCall.EndPos[0], funcCall.EndPos[1])
         IdList.append(IdFC)
     return IdList
+
 
 def StripNonAlnumChars(Str):
     StrippedStr = ''
@@ -274,12 +297,13 @@ def StripNonAlnumChars(Str):
             StrippedStr += Char
     return StrippedStr
 
+
 def GetParamList(FuncDeclarator, FuncNameLine=0, FuncNameOffset=0):
     FuncDeclarator = StripComments(FuncDeclarator)
     ParamIdList = []
     #DeclSplitList = FuncDeclarator.split('(')
     LBPos = FuncDeclarator.find('(')
-    #if len(DeclSplitList) < 2:
+    # if len(DeclSplitList) < 2:
     if LBPos == -1:
         return ParamIdList
     #FuncName = DeclSplitList[0]
@@ -309,7 +333,7 @@ def GetParamList(FuncDeclarator, FuncNameLine=0, FuncNameOffset=0):
             FuncName = FuncName[:-1]
         TailChar = FuncName[-1]
 
-    OffsetSkipped += 1 #skip '('
+    OffsetSkipped += 1  # skip '('
 
     for p in ParamStr.split(','):
         ListP = p.split()
@@ -396,12 +420,14 @@ def GetParamList(FuncDeclarator, FuncNameLine=0, FuncNameOffset=0):
         ParamEndOffset = FuncNameOffset + OffsetSkipped
         if ParamName != '...':
             ParamName = StripNonAlnumChars(ParamName)
-        IdParam = DataClass.IdentifierClass(-1, ParamModifier, '', ParamName, '', DataClass.MODEL_IDENTIFIER_PARAMETER, -1, -1, ParamBeginLine, ParamBeginOffset, ParamEndLine, ParamEndOffset)
+        IdParam = DataClass.IdentifierClass(-1, ParamModifier, '', ParamName, '', DataClass.MODEL_IDENTIFIER_PARAMETER, -
+                                            1, -1, ParamBeginLine, ParamBeginOffset, ParamEndLine, ParamEndOffset)
         ParamIdList.append(IdParam)
 
-        OffsetSkipped += 1 #skip ','
+        OffsetSkipped += 1  # skip ','
 
     return ParamIdList
+
 
 def GetFunctionList():
     FuncObjList = []
@@ -476,10 +502,12 @@ def GetFunctionList():
                         FuncNameStartColumn += 1
                     PreChar = FirstChar
 
-        FuncObj = DataClass.FunctionClass(-1, FuncDef.Declarator, FuncDef.Modifier, FuncName.strip(), '', FuncDef.StartPos[0], FuncDef.StartPos[1], FuncDef.EndPos[0], FuncDef.EndPos[1], FuncDef.LeftBracePos[0], FuncDef.LeftBracePos[1], -1, ParamIdList, [], FuncNameStartLine, FuncNameStartColumn)
+        FuncObj = DataClass.FunctionClass(-1, FuncDef.Declarator, FuncDef.Modifier, FuncName.strip(
+        ), '', FuncDef.StartPos[0], FuncDef.StartPos[1], FuncDef.EndPos[0], FuncDef.EndPos[1], FuncDef.LeftBracePos[0], FuncDef.LeftBracePos[1], -1, ParamIdList, [], FuncNameStartLine, FuncNameStartColumn)
         FuncObjList.append(FuncObj)
 
     return FuncObjList
+
 
 def GetFileModificationTimeFromDB(FullFileName):
     TimeValue = 0.0
@@ -492,6 +520,7 @@ def GetFileModificationTimeFromDB(FullFileName):
     for Result in ResultSet:
         TimeValue = Result[0]
     return TimeValue
+
 
 def CollectSourceCodeDataIntoDB(RootDir):
     FileObjList = []
@@ -522,8 +551,10 @@ def CollectSourceCodeDataIntoDB(RootDir):
             model = DataClass.MODEL_FILE_OTHERS
             if os.path.splitext(f)[1] in ('.h', '.c'):
                 EdkLogger.info("Parsing " + FullName)
-                model = f.endswith('c') and DataClass.MODEL_FILE_C or DataClass.MODEL_FILE_H
-                collector = CodeFragmentCollector.CodeFragmentCollector(FullName)
+                model = f.endswith(
+                    'c') and DataClass.MODEL_FILE_C or DataClass.MODEL_FILE_H
+                collector = CodeFragmentCollector.CodeFragmentCollector(
+                    FullName)
                 collector.TokenReleaceList = TokenReleaceList
                 try:
                     collector.ParseFile()
@@ -536,13 +567,15 @@ def CollectSourceCodeDataIntoDB(RootDir):
             DirName = os.path.dirname(FullName)
             Ext = os.path.splitext(f)[1].lstrip('.')
             ModifiedTime = os.path.getmtime(FullName)
-            FileObj = DataClass.FileClass(-1, BaseName, Ext, DirName, FullName, model, ModifiedTime, GetFunctionList(), GetIdentifierList(), [])
+            FileObj = DataClass.FileClass(-1, BaseName, Ext, DirName, FullName,
+                                          model, ModifiedTime, GetFunctionList(), GetIdentifierList(), [])
             FileObjList.append(FileObj)
             if collector:
                 collector.CleanFileProfileBuffer()
 
     if len(ParseErrorFileList) > 0:
-        EdkLogger.info("Found unrecoverable error during parsing:\n\t%s\n" % "\n\t".join(ParseErrorFileList))
+        EdkLogger.info("Found unrecoverable error during parsing:\n\t%s\n" %
+                       "\n\t".join(ParseErrorFileList))
 
     Db = GetDB()
     for file in FileObjList:
@@ -550,6 +583,7 @@ def CollectSourceCodeDataIntoDB(RootDir):
             Db.InsertOneFile(file)
 
     Db.UpdateIdentifierBelongsToFunction()
+
 
 def GetTableID(FullFileName, ErrorMsgList=None):
     if ErrorMsgList is None:
@@ -565,13 +599,16 @@ def GetTableID(FullFileName, ErrorMsgList=None):
     FileID = -1
     for Result in ResultSet:
         if FileID != -1:
-            ErrorMsgList.append('Duplicate file ID found in DB for file %s' % FullFileName)
+            ErrorMsgList.append(
+                'Duplicate file ID found in DB for file %s' % FullFileName)
             return - 2
         FileID = Result[0]
     if FileID == -1:
-        ErrorMsgList.append('NO file ID found in DB for file %s' % FullFileName)
+        ErrorMsgList.append(
+            'NO file ID found in DB for file %s' % FullFileName)
         return - 1
     return FileID
+
 
 def GetIncludeFileList(FullFileName):
     if os.path.splitext(FullFileName)[1].upper() not in ('.H'):
@@ -594,6 +631,7 @@ def GetIncludeFileList(FullFileName):
     IncludeFileListDict[FullFileName] = ResultSet
     return ResultSet
 
+
 def GetFullPathOfIncludeFile(Str, IncludePathList):
     for IncludePath in IncludePathList:
         FullPath = os.path.join(IncludePath, Str)
@@ -602,6 +640,7 @@ def GetFullPathOfIncludeFile(Str, IncludePathList):
             return FullPath
     return None
 
+
 def GetAllIncludeFiles(FullFileName):
     if AllIncludeFileListDict.get(FullFileName) is not None:
         return AllIncludeFileListDict.get(FullFileName)
@@ -609,7 +648,8 @@ def GetAllIncludeFiles(FullFileName):
     FileDirName = os.path.dirname(FullFileName)
     IncludePathList = IncludePathListDict.get(FileDirName)
     if IncludePathList is None:
-        IncludePathList = MetaDataParser.GetIncludeListOfFile(EccGlobalData.gWorkspace, FullFileName, GetDB())
+        IncludePathList = MetaDataParser.GetIncludeListOfFile(
+            EccGlobalData.gWorkspace, FullFileName, GetDB())
         if FileDirName not in IncludePathList:
             IncludePathList.insert(0, FileDirName)
         IncludePathListDict[FileDirName] = IncludePathList
@@ -637,6 +677,7 @@ def GetAllIncludeFiles(FullFileName):
 
     AllIncludeFileListDict[FullFileName] = IncludeFileQueue
     return IncludeFileQueue
+
 
 def GetPredicateListFromPredicateExpStr(PES):
 
@@ -674,6 +715,7 @@ def GetPredicateListFromPredicateExpStr(PES):
             PredicateList.append(Exp.rstrip(';').rstrip(')').strip())
     return PredicateList
 
+
 def GetCNameList(Lvalue, StarList=[]):
     Lvalue += ' '
     i = 0
@@ -700,7 +742,6 @@ def GetCNameList(Lvalue, StarList=[]):
         if VarEnd == -1:
             break
 
-
         DotIndex = Lvalue[VarEnd:].find('.')
         ArrowIndex = Lvalue[VarEnd:].find('->')
         if DotIndex == -1 and ArrowIndex == -1:
@@ -710,13 +751,15 @@ def GetCNameList(Lvalue, StarList=[]):
         elif ArrowIndex == -1 and DotIndex != -1:
             SearchBegin = VarEnd + DotIndex
         else:
-            SearchBegin = VarEnd + ((DotIndex < ArrowIndex) and DotIndex or ArrowIndex)
+            SearchBegin = VarEnd + \
+                ((DotIndex < ArrowIndex) and DotIndex or ArrowIndex)
 
         i = SearchBegin
         VarStart = -1
         VarEnd = -1
 
     return VarList
+
 
 def SplitPredicateByOp(Str, Op, IsFuncCalling=False):
 
@@ -780,6 +823,7 @@ def SplitPredicateByOp(Str, Op, IsFuncCalling=False):
 
         TmpStr = Str[0:Index - 1]
 
+
 def SplitPredicateStr(Str):
 
     Str = Str.lstrip('(')
@@ -815,11 +859,13 @@ def SplitPredicateStr(Str):
 
     return [[Str, None], None]
 
+
 def GetFuncContainsPE(ExpLine, ResultSet):
     for Result in ResultSet:
         if Result[0] < ExpLine and Result[1] > ExpLine:
             return Result
     return None
+
 
 def PatternInModifier(Modifier, SubStr):
     PartList = Modifier.split()
@@ -827,6 +873,7 @@ def PatternInModifier(Modifier, SubStr):
         if Part == SubStr:
             return True
     return False
+
 
 def GetDataTypeFromModifier(ModifierStr):
     MList = ModifierStr.split()
@@ -844,6 +891,7 @@ def GetDataTypeFromModifier(ModifierStr):
         ReturnType = 'VOID'
     return ReturnType
 
+
 def DiffModifier(Str1, Str2):
     PartList1 = Str1.split()
     PartList2 = Str2.split()
@@ -851,6 +899,7 @@ def DiffModifier(Str1, Str2):
         return False
     else:
         return True
+
 
 def GetTypedefDict(FullFileName):
 
@@ -897,6 +946,7 @@ def GetTypedefDict(FullFileName):
     ComplexTypeDict[FullFileName] = Dict
     return Dict
 
+
 def GetSUDict(FullFileName):
 
     Dict = SUDict.get(FullFileName)
@@ -936,6 +986,7 @@ def GetSUDict(FullFileName):
 
     SUDict[FullFileName] = Dict
     return Dict
+
 
 def StripComments(Str):
     Str += '   '
@@ -983,6 +1034,7 @@ def StripComments(Str):
 
     return Str
 
+
 def GetFinalTypeValue(Type, FieldName, TypedefDict, SUDict):
     Value = TypedefDict.get(Type)
     if Value is None:
@@ -1019,21 +1071,23 @@ def GetFinalTypeValue(Type, FieldName, TypedefDict, SUDict):
                 Type = GetDataTypeFromModifier(Field[0:Index])
                 return Type.strip()
             else:
-            # For the condition that the field in struct is an array with [] suffixes...
+                # For the condition that the field in struct is an array with [] suffixes...
                 if not Field[Index + len(FieldName)].isalnum():
                     Type = GetDataTypeFromModifier(Field[0:Index])
                     return Type.strip()
 
     return None
 
+
 def GetRealType(Type, TypedefDict, TargetType=None):
     if TargetType is not None and Type == TargetType:
-            return Type
+        return Type
     while TypedefDict.get(Type):
         Type = TypedefDict.get(Type)
         if TargetType is not None and Type == TargetType:
             return Type
     return Type
+
 
 def GetTypeInfo(RefList, Modifier, FullFileName, TargetType=None):
     TypedefDict = GetTypedefDict(FullFileName)
@@ -1062,6 +1116,7 @@ def GetTypeInfo(RefList, Modifier, FullFileName, TargetType=None):
     Type = GetRealType(Type, TypedefDict, TargetType)
 
     return Type
+
 
 def GetVarInfo(PredVarList, FuncRecord, FullFileName, IsFuncCall=False, TargetType=None, StarList=None):
 
@@ -1147,10 +1202,11 @@ def GetVarInfo(PredVarList, FuncRecord, FullFileName, IsFuncCall=False, TargetTy
     VarFound = False
     for Result in ResultSet:
         if len(PredVarList) > 1:
-            Type = GetTypeInfo(PredVarList[1:], Result[0], FullFileName, TargetType)
+            Type = GetTypeInfo(
+                PredVarList[1:], Result[0], FullFileName, TargetType)
             return Type
         else:
-#            Type = GetDataTypeFromModifier(Result[0]).split()[-1]
+            #            Type = GetDataTypeFromModifier(Result[0]).split()[-1]
             TypeList = GetDataTypeFromModifier(Result[0]).split()
             Type = TypeList[-1]
             if len(TypeList) > 1 and StarList is not None:
@@ -1169,7 +1225,8 @@ def GetVarInfo(PredVarList, FuncRecord, FullFileName, IsFuncCall=False, TargetTy
     for Param in ParamList:
         if Param.Name.strip() == PredVar:
             if len(PredVarList) > 1:
-                Type = GetTypeInfo(PredVarList[1:], Param.Modifier, FullFileName, TargetType)
+                Type = GetTypeInfo(
+                    PredVarList[1:], Param.Modifier, FullFileName, TargetType)
                 return Type
             else:
                 TypeList = GetDataTypeFromModifier(Param.Modifier).split()
@@ -1196,7 +1253,8 @@ def GetVarInfo(PredVarList, FuncRecord, FullFileName, IsFuncCall=False, TargetTy
 
     for Result in ResultSet:
         if len(PredVarList) > 1:
-            Type = GetTypeInfo(PredVarList[1:], Result[0], FullFileName, TargetType)
+            Type = GetTypeInfo(
+                PredVarList[1:], Result[0], FullFileName, TargetType)
             return Type
         else:
             TypeList = GetDataTypeFromModifier(Result[0]).split()
@@ -1227,7 +1285,8 @@ def GetVarInfo(PredVarList, FuncRecord, FullFileName, IsFuncCall=False, TargetTy
 
         for Result in ResultSet:
             if len(PredVarList) > 1:
-                Type = GetTypeInfo(PredVarList[1:], Result[0], FullFileName, TargetType)
+                Type = GetTypeInfo(
+                    PredVarList[1:], Result[0], FullFileName, TargetType)
                 return Type
             else:
                 TypeList = GetDataTypeFromModifier(Result[0]).split()
@@ -1243,6 +1302,7 @@ def GetVarInfo(PredVarList, FuncRecord, FullFileName, IsFuncCall=False, TargetTy
                 Type = GetRealType(Type, TypedefDict, TargetType)
                 return Type
 
+
 def GetTypeFromArray(Type, Var):
     Count = Var.count('[')
 
@@ -1252,6 +1312,7 @@ def GetTypeFromArray(Type, Var):
         Count = Count - 1
 
     return Type
+
 
 def CheckFuncLayoutReturnType(FullFileName):
     ErrorMsgList = []
@@ -1278,10 +1339,12 @@ def CheckFuncLayoutReturnType(FullFileName):
             Result0 = Result0[6:].strip()
         Index = Result0.find(TypeStart)
         if Index != 0 or Result[3] != 0:
-            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_RETURN_TYPE, '[%s] Return Type should appear at the start of line' % FuncName, FileTable, Result[1])
+            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_RETURN_TYPE,
+                          '[%s] Return Type should appear at the start of line' % FuncName, FileTable, Result[1])
 
         if Result[2] == Result[4]:
-            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_RETURN_TYPE, '[%s] Return Type should appear on its own line' % FuncName, FileTable, Result[1])
+            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_RETURN_TYPE,
+                          '[%s] Return Type should appear on its own line' % FuncName, FileTable, Result[1])
 
     SqlStatement = """ select Modifier, ID, StartLine, StartColumn, FunNameStartLine, Name
                        from Function
@@ -1299,7 +1362,9 @@ def CheckFuncLayoutReturnType(FullFileName):
             Result0 = Result0[6:].strip()
         Index = Result0.find(TypeStart)
         if Index != 0 or Result[3] != 0:
-            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_RETURN_TYPE, '[%s] Return Type should appear at the start of line' % FuncName, 'Function', Result[1])
+            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_RETURN_TYPE,
+                          '[%s] Return Type should appear at the start of line' % FuncName, 'Function', Result[1])
+
 
 def CheckFuncLayoutModifier(FullFileName):
     ErrorMsgList = []
@@ -1323,7 +1388,8 @@ def CheckFuncLayoutModifier(FullFileName):
             Result0 = Result0[6:].strip()
         Index = Result0.find(TypeStart)
         if Index != 0:
-            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_OPTIONAL_FUNCTIONAL_MODIFIER, '', FileTable, Result[1])
+            PrintErrorMsg(
+                ERROR_C_FUNCTION_LAYOUT_CHECK_OPTIONAL_FUNCTIONAL_MODIFIER, '', FileTable, Result[1])
 
     SqlStatement = """ select Modifier, ID
                        from Function
@@ -1338,7 +1404,9 @@ def CheckFuncLayoutModifier(FullFileName):
             Result0 = Result0[6:].strip()
         Index = Result0.find(TypeStart)
         if Index != 0:
-            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_OPTIONAL_FUNCTIONAL_MODIFIER, '', 'Function', Result[1])
+            PrintErrorMsg(
+                ERROR_C_FUNCTION_LAYOUT_CHECK_OPTIONAL_FUNCTIONAL_MODIFIER, '', 'Function', Result[1])
+
 
 def CheckFuncLayoutName(FullFileName):
     ErrorMsgList = []
@@ -1361,22 +1429,27 @@ def CheckFuncLayoutName(FullFileName):
         if EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, FuncName):
             continue
         if Result[2] != 0:
-            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, 'Function name [%s] should appear at the start of a line' % FuncName, FileTable, Result[1])
+            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME,
+                          'Function name [%s] should appear at the start of a line' % FuncName, FileTable, Result[1])
         ParamList = GetParamList(Result[0])
         if len(ParamList) == 0:
             continue
         StartLine = 0
         for Param in ParamList:
             if Param.StartLine <= StartLine:
-                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, 'Parameter %s should be in its own line.' % Param.Name, FileTable, Result[1])
+                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME,
+                              'Parameter %s should be in its own line.' % Param.Name, FileTable, Result[1])
             if Param.StartLine - StartLine > 1:
-                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, 'Empty line appears before Parameter %s.' % Param.Name, FileTable, Result[1])
+                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME,
+                              'Empty line appears before Parameter %s.' % Param.Name, FileTable, Result[1])
             if not Pattern.match(Param.Name) and not Param.Name in ParamIgnoreList and not EccGlobalData.gException.IsException(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, Param.Name):
-                PrintErrorMsg(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, 'Parameter [%s] NOT follow naming convention.' % Param.Name, FileTable, Result[1])
+                PrintErrorMsg(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME,
+                              'Parameter [%s] NOT follow naming convention.' % Param.Name, FileTable, Result[1])
             StartLine = Param.StartLine
 
         if not Result[0].endswith('\n  )') and not Result[0].endswith('\r  )'):
-            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, '\')\' should be on a new line and indented two spaces', FileTable, Result[1])
+            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME,
+                          '\')\' should be on a new line and indented two spaces', FileTable, Result[1])
 
     SqlStatement = """ select Modifier, ID, FunNameStartColumn, Name
                        from Function
@@ -1388,21 +1461,27 @@ def CheckFuncLayoutName(FullFileName):
         if EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, FuncName):
             continue
         if Result[2] != 0:
-            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, 'Function name [%s] should appear at the start of a line' % FuncName, 'Function', Result[1])
+            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME,
+                          'Function name [%s] should appear at the start of a line' % FuncName, 'Function', Result[1])
         ParamList = GetParamList(Result[0])
         if len(ParamList) == 0:
             continue
         StartLine = 0
         for Param in ParamList:
             if Param.StartLine <= StartLine:
-                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, 'Parameter %s should be in its own line.' % Param.Name, 'Function', Result[1])
+                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME,
+                              'Parameter %s should be in its own line.' % Param.Name, 'Function', Result[1])
             if Param.StartLine - StartLine > 1:
-                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, 'Empty line appears before Parameter %s.' % Param.Name, 'Function', Result[1])
+                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME,
+                              'Empty line appears before Parameter %s.' % Param.Name, 'Function', Result[1])
             if not Pattern.match(Param.Name) and not Param.Name in ParamIgnoreList and not EccGlobalData.gException.IsException(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, Param.Name):
-                PrintErrorMsg(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, 'Parameter [%s] NOT follow naming convention.' % Param.Name, FileTable, Result[1])
+                PrintErrorMsg(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME,
+                              'Parameter [%s] NOT follow naming convention.' % Param.Name, FileTable, Result[1])
             StartLine = Param.StartLine
         if not Result[0].endswith('\n  )') and not Result[0].endswith('\r  )'):
-            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME, '\')\' should be on a new line and indented two spaces', 'Function', Result[1])
+            PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_NAME,
+                          '\')\' should be on a new line and indented two spaces', 'Function', Result[1])
+
 
 def CheckFuncLayoutPrototype(FullFileName):
     ErrorMsgList = []
@@ -1445,17 +1524,20 @@ def CheckFuncLayoutPrototype(FullFileName):
             DeclModifier = FuncDecl[0]
             if DeclName == FuncName:
                 if DiffModifier(FuncModifier, DeclModifier) and not EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE, FuncName):
-                    PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE, 'Function [%s] modifier different with prototype.' % FuncName, 'Function', FuncDef[3])
+                    PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE,
+                                  'Function [%s] modifier different with prototype.' % FuncName, 'Function', FuncDef[3])
                 ParamListOfDef = GetParamList(FuncDefHeader)
                 ParamListOfDecl = GetParamList(FuncDecl[1])
                 if len(ParamListOfDef) != len(ParamListOfDecl) and not EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_2, FuncName):
-                    PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_2, 'Parameter number different in function [%s].' % FuncName, 'Function', FuncDef[3])
+                    PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_2,
+                                  'Parameter number different in function [%s].' % FuncName, 'Function', FuncDef[3])
                     break
 
                 Index = 0
                 while Index < len(ParamListOfDef):
                     if DiffModifier(ParamListOfDef[Index].Modifier, ParamListOfDecl[Index].Modifier) and not EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_3, FuncName):
-                        PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_3, 'Parameter %s has different modifier with prototype in function [%s].' % (ParamListOfDef[Index].Name, FuncName), 'Function', FuncDef[3])
+                        PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_3, 'Parameter %s has different modifier with prototype in function [%s].' % (
+                            ParamListOfDef[Index].Name, FuncName), 'Function', FuncDef[3])
                     Index += 1
                 break
         else:
@@ -1488,19 +1570,23 @@ def CheckFuncLayoutPrototype(FullFileName):
             DeclModifier = FuncDecl[0]
             if DeclName == FuncName:
                 if DiffModifier(FuncModifier, DeclModifier) and not EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE, FuncName):
-                    PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE, 'Function [%s] modifier different with prototype.' % FuncName, 'Function', FuncDef[3])
+                    PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE,
+                                  'Function [%s] modifier different with prototype.' % FuncName, 'Function', FuncDef[3])
                 ParamListOfDef = GetParamList(FuncDefHeader)
                 ParamListOfDecl = GetParamList(FuncDecl[1])
                 if len(ParamListOfDef) != len(ParamListOfDecl) and not EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_2, FuncName):
-                    PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_2, 'Parameter number different in function [%s].' % FuncName, 'Function', FuncDef[3])
+                    PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_2,
+                                  'Parameter number different in function [%s].' % FuncName, 'Function', FuncDef[3])
                     break
 
                 Index = 0
                 while Index < len(ParamListOfDef):
                     if DiffModifier(ParamListOfDef[Index].Modifier, ParamListOfDecl[Index].Modifier) and not EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_3, FuncName):
-                        PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_3, 'Parameter %s has different modifier with prototype in function [%s].' % (ParamListOfDef[Index].Name, FuncName), 'Function', FuncDef[3])
+                        PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_PROTO_TYPE_3, 'Parameter %s has different modifier with prototype in function [%s].' % (
+                            ParamListOfDef[Index].Name, FuncName), 'Function', FuncDef[3])
                     Index += 1
                 break
+
 
 def CheckFuncLayoutBody(FullFileName):
     ErrorMsgList = []
@@ -1522,13 +1608,16 @@ def CheckFuncLayoutBody(FullFileName):
         if Result[0] != 0:
             if not EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_BODY, Result[3]):
                 PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_BODY,
-                              'The open brace should be at the very beginning of a line for the function [%s].' % Result[3],
+                              'The open brace should be at the very beginning of a line for the function [%s].' % Result[
+                                  3],
                               'Function', Result[2])
         if Result[1] != 0:
             if not EccGlobalData.gException.IsException(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_BODY, Result[3]):
                 PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_FUNCTION_BODY,
-                              'The close brace should be at the very beginning of a line for the function [%s].' % Result[3],
+                              'The close brace should be at the very beginning of a line for the function [%s].' % Result[
+                                  3],
                               'Function', Result[2])
+
 
 def CheckFuncLayoutLocalVariable(FullFileName):
     ErrorMsgList = []
@@ -1561,7 +1650,9 @@ def CheckFuncLayoutLocalVariable(FullFileName):
 
         for Result in ResultSet:
             if len(Result[1]) > 0 and 'CONST' not in Result[3] and 'STATIC' not in Result[3]:
-                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_NO_INIT_OF_VARIABLE, 'Variable Name: %s' % Result[0], FileTable, Result[2])
+                PrintErrorMsg(ERROR_C_FUNCTION_LAYOUT_CHECK_NO_INIT_OF_VARIABLE,
+                              'Variable Name: %s' % Result[0], FileTable, Result[2])
+
 
 def CheckMemberVariableFormat(Name, Value, FileTable, TdId, ModelId):
     ErrMsgList = []
@@ -1573,25 +1664,28 @@ def CheckMemberVariableFormat(Name, Value, FileTable, TdId, ModelId):
     if LBPos == -1 or RBPos == -1:
         return ErrMsgList
 
-    Fields = Value[LBPos + 1 : RBPos]
+    Fields = Value[LBPos + 1: RBPos]
     Fields = StripComments(Fields).strip()
-    NestPos = Fields.find ('struct')
+    NestPos = Fields.find('struct')
     if NestPos != -1 and (NestPos + len('struct') < len(Fields)) and ModelId != DataClass.MODEL_IDENTIFIER_UNION:
         if not Fields[NestPos + len('struct') + 1].isalnum():
             if not EccGlobalData.gException.IsException(ERROR_DECLARATION_DATA_TYPE_CHECK_NESTED_STRUCTURE, Name):
-                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NESTED_STRUCTURE, 'Nested struct in [%s].' % (Name), FileTable, TdId)
+                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NESTED_STRUCTURE,
+                              'Nested struct in [%s].' % (Name), FileTable, TdId)
             return ErrMsgList
-    NestPos = Fields.find ('union')
+    NestPos = Fields.find('union')
     if NestPos != -1 and (NestPos + len('union') < len(Fields)):
         if not Fields[NestPos + len('union') + 1].isalnum():
             if not EccGlobalData.gException.IsException(ERROR_DECLARATION_DATA_TYPE_CHECK_NESTED_STRUCTURE, Name):
-                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NESTED_STRUCTURE, 'Nested union in [%s].' % (Name), FileTable, TdId)
+                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NESTED_STRUCTURE,
+                              'Nested union in [%s].' % (Name), FileTable, TdId)
             return ErrMsgList
-    NestPos = Fields.find ('enum')
+    NestPos = Fields.find('enum')
     if NestPos != -1 and (NestPos + len('enum') < len(Fields)):
         if not Fields[NestPos + len('enum') + 1].isalnum():
             if not EccGlobalData.gException.IsException(ERROR_DECLARATION_DATA_TYPE_CHECK_NESTED_STRUCTURE, Name):
-                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NESTED_STRUCTURE, 'Nested enum in [%s].' % (Name), FileTable, TdId)
+                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NESTED_STRUCTURE,
+                              'Nested enum in [%s].' % (Name), FileTable, TdId)
             return ErrMsgList
 
     if ModelId == DataClass.MODEL_IDENTIFIER_ENUMERATE:
@@ -1655,6 +1749,7 @@ def CheckMemberVariableFormat(Name, Value, FileTable, TdId, ModelId):
 
     return ErrMsgList
 
+
 def CheckDeclTypedefFormat(FullFileName, ModelId):
     ErrorMsgList = []
 
@@ -1705,11 +1800,13 @@ def CheckDeclTypedefFormat(FullFileName, ModelId):
         if ValueModelId != ModelId:
             continue
         # Check member variable format.
-        ErrMsgList = CheckMemberVariableFormat(Name, Value, FileTable, Td[5], ModelId)
+        ErrMsgList = CheckMemberVariableFormat(
+            Name, Value, FileTable, Td[5], ModelId)
         for ErrMsg in ErrMsgList:
             if EccGlobalData.gException.IsException(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, Name + '.' + ErrMsg):
                 continue
-            PrintErrorMsg(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, 'Member variable [%s] NOT follow naming convention.' % (Name + '.' + ErrMsg), FileTable, Td[5])
+            PrintErrorMsg(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, 'Member variable [%s] NOT follow naming convention.' % (
+                Name + '.' + ErrMsg), FileTable, Td[5])
 
     # First check in current file to see whether struct/union/enum is typedef-ed.
     UntypedefedList = []
@@ -1728,11 +1825,13 @@ def CheckDeclTypedefFormat(FullFileName, ModelId):
 
         if ValueModelId != ModelId:
             continue
-        ErrMsgList = CheckMemberVariableFormat(Name, Value, FileTable, Result[3], ModelId)
+        ErrMsgList = CheckMemberVariableFormat(
+            Name, Value, FileTable, Result[3], ModelId)
         for ErrMsg in ErrMsgList:
             if EccGlobalData.gException.IsException(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, Result[0] + '.' + ErrMsg):
                 continue
-            PrintErrorMsg(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, 'Member variable [%s] NOT follow naming convention.' % (Result[0] + '.' + ErrMsg), FileTable, Result[3])
+            PrintErrorMsg(ERROR_NAMING_CONVENTION_CHECK_VARIABLE_NAME, 'Member variable [%s] NOT follow naming convention.' % (
+                Result[0] + '.' + ErrMsg), FileTable, Result[3])
         # Check whether it is typedefed.
         Found = False
         for Td in TdList:
@@ -1742,11 +1841,13 @@ def CheckDeclTypedefFormat(FullFileName, ModelId):
             if Result[1] >= Td[3] and Td[4] >= Result[2]:
                 Found = True
                 if not Td[1].isupper():
-                    PrintErrorMsg(ErrorType, 'Typedef should be UPPER case', FileTable, Td[5])
+                    PrintErrorMsg(
+                        ErrorType, 'Typedef should be UPPER case', FileTable, Td[5])
             if Result[0] in Td[2].split():
                 Found = True
                 if not Td[1].isupper():
-                    PrintErrorMsg(ErrorType, 'Typedef should be UPPER case', FileTable, Td[5])
+                    PrintErrorMsg(
+                        ErrorType, 'Typedef should be UPPER case', FileTable, Td[5])
             if Found:
                 break
 
@@ -1783,26 +1884,33 @@ def CheckDeclTypedefFormat(FullFileName, ModelId):
             if Result[1] >= Td[3] and Td[4] >= Result[2]:
                 Found = True
                 if not Td[1].isupper():
-                    PrintErrorMsg(ErrorType, 'Typedef should be UPPER case', FileTable, Td[5])
+                    PrintErrorMsg(
+                        ErrorType, 'Typedef should be UPPER case', FileTable, Td[5])
             if Result[0] in Td[2].split():
                 Found = True
                 if not Td[1].isupper():
-                    PrintErrorMsg(ErrorType, 'Typedef should be UPPER case', FileTable, Td[5])
+                    PrintErrorMsg(
+                        ErrorType, 'Typedef should be UPPER case', FileTable, Td[5])
             if Found:
                 break
 
         if not Found:
-            PrintErrorMsg(ErrorType, 'No Typedef for %s' % Result[0], FileTable, Result[3])
+            PrintErrorMsg(ErrorType, 'No Typedef for %s' %
+                          Result[0], FileTable, Result[3])
             continue
+
 
 def CheckDeclStructTypedef(FullFileName):
     CheckDeclTypedefFormat(FullFileName, DataClass.MODEL_IDENTIFIER_STRUCTURE)
 
+
 def CheckDeclEnumTypedef(FullFileName):
     CheckDeclTypedefFormat(FullFileName, DataClass.MODEL_IDENTIFIER_ENUMERATE)
 
+
 def CheckDeclUnionTypedef(FullFileName):
     CheckDeclTypedefFormat(FullFileName, DataClass.MODEL_IDENTIFIER_UNION)
+
 
 def CheckDeclArgModifier(FullFileName):
     ErrorMsgList = []
@@ -1823,7 +1931,8 @@ def CheckDeclArgModifier(FullFileName):
     for Result in ResultSet:
         for Modifier in ModifierTuple:
             if PatternInModifier(Result[0], Modifier) and len(Result[0]) < MAX_MODIFIER_LENGTH:
-                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_IN_OUT_MODIFIER, 'Variable Modifier %s' % Result[0], FileTable, Result[2])
+                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_IN_OUT_MODIFIER,
+                              'Variable Modifier %s' % Result[0], FileTable, Result[2])
                 break
 
     SqlStatement = """ select Modifier, Name, ID
@@ -1834,7 +1943,8 @@ def CheckDeclArgModifier(FullFileName):
     for Result in ResultSet:
         for Modifier in ModifierTuple:
             if PatternInModifier(Result[0], Modifier):
-                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_IN_OUT_MODIFIER, 'Return Type Modifier %s' % Result[0], FileTable, Result[2])
+                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_IN_OUT_MODIFIER,
+                              'Return Type Modifier %s' % Result[0], FileTable, Result[2])
                 break
 
     SqlStatement = """ select Modifier, Header, ID
@@ -1845,8 +1955,10 @@ def CheckDeclArgModifier(FullFileName):
     for Result in ResultSet:
         for Modifier in ModifierTuple:
             if PatternInModifier(Result[0], Modifier):
-                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_IN_OUT_MODIFIER, 'Return Type Modifier %s' % Result[0], FileTable, Result[2])
+                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_IN_OUT_MODIFIER,
+                              'Return Type Modifier %s' % Result[0], FileTable, Result[2])
                 break
+
 
 def CheckDeclNoUseCType(FullFileName):
     ErrorMsgList = []
@@ -1870,7 +1982,8 @@ def CheckDeclNoUseCType(FullFileName):
                                                         Result[0] + ' ' + Result[1]):
                     continue
                 PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NO_USE_C_TYPE,
-                              'Invalid variable type (%s) in definition [%s]' % (Type, Result[0] + ' ' + Result[1]),
+                              'Invalid variable type (%s) in definition [%s]' % (
+                                  Type, Result[0] + ' ' + Result[1]),
                               FileTable,
                               Result[2])
                 break
@@ -1887,11 +2000,13 @@ def CheckDeclNoUseCType(FullFileName):
             continue
         for Type in CTypeTuple:
             if PatternInModifier(Result[0], Type):
-                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NO_USE_C_TYPE, '%s Return type %s' % (FuncName, Result[0]), FileTable, Result[2])
+                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NO_USE_C_TYPE, '%s Return type %s' % (
+                    FuncName, Result[0]), FileTable, Result[2])
 
             for Param in ParamList:
                 if PatternInModifier(Param.Modifier, Type):
-                    PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NO_USE_C_TYPE, 'Parameter %s' % Param.Name, FileTable, Result[2])
+                    PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NO_USE_C_TYPE,
+                                  'Parameter %s' % Param.Name, FileTable, Result[2])
 
     SqlStatement = """ select Modifier, Header, ID, Name
                        from Function
@@ -1905,11 +2020,13 @@ def CheckDeclNoUseCType(FullFileName):
             continue
         for Type in CTypeTuple:
             if PatternInModifier(Result[0], Type):
-                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NO_USE_C_TYPE, '[%s] Return type %s' % (FuncName, Result[0]), FileTable, Result[2])
+                PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NO_USE_C_TYPE, '[%s] Return type %s' % (
+                    FuncName, Result[0]), FileTable, Result[2])
 
             for Param in ParamList:
                 if PatternInModifier(Param.Modifier, Type):
-                    PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NO_USE_C_TYPE, 'Parameter %s' % Param.Name, FileTable, Result[2])
+                    PrintErrorMsg(ERROR_DECLARATION_DATA_TYPE_CHECK_NO_USE_C_TYPE,
+                                  'Parameter %s' % Param.Name, FileTable, Result[2])
 
 
 def CheckPointerNullComparison(FullFileName):
@@ -1976,20 +2093,24 @@ def CheckPointerNullComparison(FullFileName):
                     Type = FuncReturnTypeDict.get(PredVarStr)
                     if Type is not None:
                         if Type.find('*') != -1 and Type != 'BOOLEAN*':
-                            PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_COMPARISON_NULL_TYPE, 'Predicate Expression: %s' % Exp, FileTable, Str[2])
+                            PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_COMPARISON_NULL_TYPE,
+                                          'Predicate Expression: %s' % Exp, FileTable, Str[2])
                         continue
 
                     if PredVarStr in FuncReturnTypeDict:
                         continue
 
-                Type = GetVarInfo(PredVarList, FuncRecord, FullFileName, IsFuncCall, None, StarList)
+                Type = GetVarInfo(PredVarList, FuncRecord,
+                                  FullFileName, IsFuncCall, None, StarList)
                 if SearchInCache:
                     FuncReturnTypeDict[PredVarStr] = Type
                 if Type is None:
                     continue
                 Type = GetTypeFromArray(Type, PredVarStr)
                 if Type.find('*') != -1 and Type != 'BOOLEAN*':
-                    PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_COMPARISON_NULL_TYPE, 'Predicate Expression: %s' % Exp, FileTable, Str[2])
+                    PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_COMPARISON_NULL_TYPE,
+                                  'Predicate Expression: %s' % Exp, FileTable, Str[2])
+
 
 def CheckNonBooleanValueComparison(FullFileName):
     ErrorMsgList = []
@@ -2056,18 +2177,21 @@ def CheckNonBooleanValueComparison(FullFileName):
                     Type = FuncReturnTypeDict.get(PredVarStr)
                     if Type is not None:
                         if Type.find('BOOLEAN') == -1:
-                            PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_NO_BOOLEAN_OPERATOR, 'Predicate Expression: %s' % Exp, FileTable, Str[2])
+                            PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_NO_BOOLEAN_OPERATOR,
+                                          'Predicate Expression: %s' % Exp, FileTable, Str[2])
                         continue
 
                     if PredVarStr in FuncReturnTypeDict:
                         continue
-                Type = GetVarInfo(PredVarList, FuncRecord, FullFileName, IsFuncCall, 'BOOLEAN', StarList)
+                Type = GetVarInfo(PredVarList, FuncRecord,
+                                  FullFileName, IsFuncCall, 'BOOLEAN', StarList)
                 if SearchInCache:
                     FuncReturnTypeDict[PredVarStr] = Type
                 if Type is None:
                     continue
                 if Type.find('BOOLEAN') == -1:
-                    PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_NO_BOOLEAN_OPERATOR, 'Predicate Expression: %s' % Exp, FileTable, Str[2])
+                    PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_NO_BOOLEAN_OPERATOR,
+                                  'Predicate Expression: %s' % Exp, FileTable, Str[2])
 
 
 def CheckBooleanValueComparison(FullFileName):
@@ -2135,19 +2259,22 @@ def CheckBooleanValueComparison(FullFileName):
                     Type = FuncReturnTypeDict.get(PredVarStr)
                     if Type is not None:
                         if Type.find('BOOLEAN') != -1:
-                            PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_BOOLEAN_VALUE, 'Predicate Expression: %s' % Exp, FileTable, Str[2])
+                            PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_BOOLEAN_VALUE,
+                                          'Predicate Expression: %s' % Exp, FileTable, Str[2])
                         continue
 
                     if PredVarStr in FuncReturnTypeDict:
                         continue
 
-                Type = GetVarInfo(PredVarList, FuncRecord, FullFileName, IsFuncCall, 'BOOLEAN', StarList)
+                Type = GetVarInfo(PredVarList, FuncRecord,
+                                  FullFileName, IsFuncCall, 'BOOLEAN', StarList)
                 if SearchInCache:
                     FuncReturnTypeDict[PredVarStr] = Type
                 if Type is None:
                     continue
                 if Type.find('BOOLEAN') != -1:
-                    PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_BOOLEAN_VALUE, 'Predicate Expression: %s' % Exp, FileTable, Str[2])
+                    PrintErrorMsg(ERROR_PREDICATE_EXPRESSION_CHECK_BOOLEAN_VALUE,
+                                  'Predicate Expression: %s' % Exp, FileTable, Str[2])
 
 
 def CheckHeaderFileData(FullFileName, AllTypedefFun=[]):
@@ -2170,7 +2297,8 @@ def CheckHeaderFileData(FullFileName, AllTypedefFun=[]):
                 if '(%s)' % Result[1] in Item:
                     break
             else:
-                PrintErrorMsg(ERROR_INCLUDE_FILE_CHECK_DATA, 'Variable definition appears in header file', FileTable, Result[0])
+                PrintErrorMsg(ERROR_INCLUDE_FILE_CHECK_DATA,
+                              'Variable definition appears in header file', FileTable, Result[0])
 
     SqlStatement = """ select ID
                        from Function
@@ -2178,9 +2306,11 @@ def CheckHeaderFileData(FullFileName, AllTypedefFun=[]):
                    """ % FileID
     ResultSet = Db.TblFile.Exec(SqlStatement)
     for Result in ResultSet:
-        PrintErrorMsg(ERROR_INCLUDE_FILE_CHECK_DATA, 'Function definition appears in header file', 'Function', Result[0])
+        PrintErrorMsg(ERROR_INCLUDE_FILE_CHECK_DATA,
+                      'Function definition appears in header file', 'Function', Result[0])
 
     return ErrorMsgList
+
 
 def CheckHeaderFileIfndef(FullFileName):
     ErrorMsgList = []
@@ -2197,7 +2327,8 @@ def CheckHeaderFileIfndef(FullFileName):
                    """ % (FileTable, DataClass.MODEL_IDENTIFIER_MACRO_IFNDEF)
     ResultSet = Db.TblFile.Exec(SqlStatement)
     if len(ResultSet) == 0:
-        PrintErrorMsg(ERROR_INCLUDE_FILE_CHECK_IFNDEF_STATEMENT_1, '', 'File', FileID)
+        PrintErrorMsg(ERROR_INCLUDE_FILE_CHECK_IFNDEF_STATEMENT_1,
+                      '', 'File', FileID)
         return ErrorMsgList
     for Result in ResultSet:
         SqlStatement = """ select Value, EndLine
@@ -2207,7 +2338,8 @@ def CheckHeaderFileIfndef(FullFileName):
         ResultSet = Db.TblFile.Exec(SqlStatement)
         for Result in ResultSet:
             if not Result[0].startswith('/*') and not Result[0].startswith('//'):
-                PrintErrorMsg(ERROR_INCLUDE_FILE_CHECK_IFNDEF_STATEMENT_2, '', 'File', FileID)
+                PrintErrorMsg(
+                    ERROR_INCLUDE_FILE_CHECK_IFNDEF_STATEMENT_2, '', 'File', FileID)
         break
 
     SqlStatement = """ select Value
@@ -2217,8 +2349,10 @@ def CheckHeaderFileIfndef(FullFileName):
     ResultSet = Db.TblFile.Exec(SqlStatement)
     for Result in ResultSet:
         if not Result[0].startswith('/*') and not Result[0].startswith('//'):
-            PrintErrorMsg(ERROR_INCLUDE_FILE_CHECK_IFNDEF_STATEMENT_3, '', 'File', FileID)
+            PrintErrorMsg(
+                ERROR_INCLUDE_FILE_CHECK_IFNDEF_STATEMENT_3, '', 'File', FileID)
     return ErrorMsgList
+
 
 def CheckDoxygenCommand(FullFileName):
     ErrorMsgList = []
@@ -2241,9 +2375,11 @@ def CheckDoxygenCommand(FullFileName):
         CommentPartList = CommentStr.split()
         for Part in CommentPartList:
             if Part.upper() == 'BUGBUG':
-                PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMAND, 'Bug should be marked with doxygen tag @bug', FileTable, Result[1])
+                PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMAND,
+                              'Bug should be marked with doxygen tag @bug', FileTable, Result[1])
             if Part.upper() == 'TODO':
-                PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMAND, 'ToDo should be marked with doxygen tag @todo', FileTable, Result[1])
+                PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMAND,
+                              'ToDo should be marked with doxygen tag @todo', FileTable, Result[1])
             if Part.startswith('@'):
                 if EccGlobalData.gException.IsException(ERROR_DOXYGEN_CHECK_COMMAND, Part):
                     continue
@@ -2253,14 +2389,17 @@ def CheckDoxygenCommand(FullFileName):
                     continue
                 if Part.lstrip('@').isalpha():
                     if Part.lstrip('@') not in DoxygenCommandList:
-                        PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMAND, 'Unknown doxygen command %s' % Part, FileTable, Result[1])
+                        PrintErrorMsg(
+                            ERROR_DOXYGEN_CHECK_COMMAND, 'Unknown doxygen command %s' % Part, FileTable, Result[1])
                 else:
                     Index = Part.find('[')
                     if Index == -1:
-                        PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMAND, 'Unknown doxygen command %s' % Part, FileTable, Result[1])
+                        PrintErrorMsg(
+                            ERROR_DOXYGEN_CHECK_COMMAND, 'Unknown doxygen command %s' % Part, FileTable, Result[1])
                     RealCmd = Part[1:Index]
                     if RealCmd not in DoxygenCommandList:
-                        PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMAND, 'Unknown doxygen command %s' % Part, FileTable, Result[1])
+                        PrintErrorMsg(
+                            ERROR_DOXYGEN_CHECK_COMMAND, 'Unknown doxygen command %s' % Part, FileTable, Result[1])
 
 
 def CheckDoxygenTripleForwardSlash(FullFileName):
@@ -2284,7 +2423,6 @@ def CheckDoxygenTripleForwardSlash(FullFileName):
     for Result in ResultSet:
         FuncDefSet.append(Result)
 
-
     FileTable = 'Identifier' + str(FileID)
     SqlStatement = """ select Value, ID, StartLine, StartColumn, EndLine, EndColumn
                        from %s
@@ -2298,7 +2436,6 @@ def CheckDoxygenTripleForwardSlash(FullFileName):
             CommentSet.append(Result)
     except:
         print('Unrecognized chars in comment of file %s', FullFileName)
-
 
     for Result in CommentSet:
         CommentStr = Result[0]
@@ -2324,7 +2461,8 @@ def CheckDoxygenTripleForwardSlash(FullFileName):
                 Found = True
                 break
         if Found:
-            PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMENT_FORMAT, '', FileTable, Result[1])
+            PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMENT_FORMAT,
+                          '', FileTable, Result[1])
 
 
 def CheckFileHeaderDoxygenComments(FullFileName):
@@ -2342,7 +2480,8 @@ def CheckFileHeaderDoxygenComments(FullFileName):
                    """ % (FileTable, DataClass.MODEL_IDENTIFIER_COMMENT)
     ResultSet = Db.TblFile.Exec(SqlStatement)
     if len(ResultSet) == 0:
-        PrintErrorMsg(ERROR_HEADER_CHECK_FILE, 'No File License header appear at the very beginning of file.', 'File', FileID)
+        PrintErrorMsg(ERROR_HEADER_CHECK_FILE,
+                      'No File License header appear at the very beginning of file.', 'File', FileID)
         return ErrorMsgList
 
     NoHeaderCommentStartFlag = True
@@ -2364,7 +2503,7 @@ def CheckFileHeaderDoxygenComments(FullFileName):
         for CommentLine in CommentStrListTemp:
             if CommentLine.strip().startswith('/** @file'):
                 FileStartFlag = True
-            if FileStartFlag ==  True:
+            if FileStartFlag == True:
                 CommentStrList.append(CommentLine)
 
         ID = Result[1]
@@ -2388,7 +2527,8 @@ def CheckFileHeaderDoxygenComments(FullFileName):
             # Check whether C File header Comment content start with two spaces.
             if EccGlobalData.gConfig.HeaderCheckCFileCommentStartSpacesNum == '1' or EccGlobalData.gConfig.HeaderCheckAll == '1' or EccGlobalData.gConfig.CheckAll == '1':
                 if CommentLine.startswith('/** @file') == False and CommentLine.startswith('**/') == False and CommentLine.strip() and CommentLine.startswith('  ') == False:
-                    PrintErrorMsg(ERROR_HEADER_CHECK_FILE, 'File header comment content should start with two spaces at each line', FileTable, ID)
+                    PrintErrorMsg(
+                        ERROR_HEADER_CHECK_FILE, 'File header comment content should start with two spaces at each line', FileTable, ID)
 
             CommentLine = CommentLine.strip()
             if CommentLine.startswith('Copyright') or ('Copyright' in CommentLine and CommentLine.lower().startswith('(c)')):
@@ -2396,10 +2536,12 @@ def CheckFileHeaderDoxygenComments(FullFileName):
                 if CommentLine.find('All rights reserved') == -1:
                     for Copyright in EccGlobalData.gConfig.Copyright:
                         if CommentLine.find(Copyright) > -1:
-                            PrintErrorMsg(ERROR_HEADER_CHECK_FILE, '""All rights reserved"" announcement should be following the ""Copyright"" at the same line', FileTable, ID)
+                            PrintErrorMsg(
+                                ERROR_HEADER_CHECK_FILE, '""All rights reserved"" announcement should be following the ""Copyright"" at the same line', FileTable, ID)
                             break
                 if CommentLine.endswith('<BR>') == -1:
-                    PrintErrorMsg(ERROR_HEADER_CHECK_FILE, 'The ""<BR>"" at the end of the Copyright line is required', FileTable, ID)
+                    PrintErrorMsg(
+                        ERROR_HEADER_CHECK_FILE, 'The ""<BR>"" at the end of the Copyright line is required', FileTable, ID)
                 if NextLineIndex < len(CommentStrList) and CommentStrList[NextLineIndex].strip().startswith('Copyright') == False and CommentStrList[NextLineIndex].strip():
                     NoLicenseFlag = False
             if CommentLine.startswith('@par Revision Reference:'):
@@ -2415,20 +2557,26 @@ def CheckFileHeaderDoxygenComments(FullFileName):
                     if EccGlobalData.gConfig.HeaderCheckCFileCommentReferenceFormat == '1' or EccGlobalData.gConfig.HeaderCheckAll == '1' or EccGlobalData.gConfig.CheckAll == '1':
                         if RefListFlag == True:
                             if RefLine.strip() and RefLine.strip().startswith('**/') == False and RefLine.startswith('  -') == False:
-                                PrintErrorMsg(ERROR_HEADER_CHECK_FILE, 'Each reference on a separate line should begin with a bullet character ""-"" ', FileTable, ID)
+                                PrintErrorMsg(
+                                    ERROR_HEADER_CHECK_FILE, 'Each reference on a separate line should begin with a bullet character ""-"" ', FileTable, ID)
 
     if NoHeaderCommentStartFlag:
-        PrintErrorMsg(ERROR_DOXYGEN_CHECK_FILE_HEADER, 'File header comment should begin with ""/** @file""', FileTable, ID)
+        PrintErrorMsg(ERROR_DOXYGEN_CHECK_FILE_HEADER,
+                      'File header comment should begin with ""/** @file""', FileTable, ID)
         return
     if NoHeaderCommentEndFlag:
-        PrintErrorMsg(ERROR_HEADER_CHECK_FILE, 'File header comment should end with ""**/""', FileTable, ID)
+        PrintErrorMsg(ERROR_HEADER_CHECK_FILE,
+                      'File header comment should end with ""**/""', FileTable, ID)
         return
     if NoCopyrightFlag:
-        PrintErrorMsg(ERROR_HEADER_CHECK_FILE, 'File header comment missing the ""Copyright""', FileTable, ID)
-    #Check whether C File header Comment have the License immediately after the ""Copyright"" line.
+        PrintErrorMsg(ERROR_HEADER_CHECK_FILE,
+                      'File header comment missing the ""Copyright""', FileTable, ID)
+    # Check whether C File header Comment have the License immediately after the ""Copyright"" line.
     if EccGlobalData.gConfig.HeaderCheckCFileCommentLicenseFormat == '1' or EccGlobalData.gConfig.HeaderCheckAll == '1' or EccGlobalData.gConfig.CheckAll == '1':
         if NoLicenseFlag:
-            PrintErrorMsg(ERROR_HEADER_CHECK_FILE, 'File header comment should have the License immediately after the ""Copyright"" line', FileTable, ID)
+            PrintErrorMsg(ERROR_HEADER_CHECK_FILE,
+                          'File header comment should have the License immediately after the ""Copyright"" line', FileTable, ID)
+
 
 def CheckFuncHeaderDoxygenComments(FullFileName):
     ErrorMsgList = []
@@ -2460,14 +2608,18 @@ def CheckFuncHeaderDoxygenComments(FullFileName):
     ResultSet = Db.TblFile.Exec(SqlStatement)
     for Result in ResultSet:
         FuncName = Result[4]
-        FunctionHeaderComment = CheckCommentImmediatelyPrecedeFunctionHeader(Result[1], Result[2], CommentSet)
+        FunctionHeaderComment = CheckCommentImmediatelyPrecedeFunctionHeader(
+            Result[1], Result[2], CommentSet)
         if FunctionHeaderComment:
-            CheckFunctionHeaderConsistentWithDoxygenComment(Result[0], Result[1], Result[2], FunctionHeaderComment[0], FunctionHeaderComment[1], ErrorMsgList, FunctionHeaderComment[3], FileTable)
+            CheckFunctionHeaderConsistentWithDoxygenComment(
+                Result[0], Result[1], Result[2], FunctionHeaderComment[0], FunctionHeaderComment[1], ErrorMsgList, FunctionHeaderComment[3], FileTable)
         else:
             if EccGlobalData.gException.IsException(ERROR_HEADER_CHECK_FUNCTION, FuncName):
                 continue
-            ErrorMsgList.append('Line %d :Function %s has NO comment immediately preceding it.' % (Result[2], Result[1]))
-            PrintErrorMsg(ERROR_HEADER_CHECK_FUNCTION, 'Function [%s] has NO comment immediately preceding it.' % (FuncName), FileTable, Result[3])
+            ErrorMsgList.append(
+                'Line %d :Function %s has NO comment immediately preceding it.' % (Result[2], Result[1]))
+            PrintErrorMsg(ERROR_HEADER_CHECK_FUNCTION, 'Function [%s] has NO comment immediately preceding it.' % (
+                FuncName), FileTable, Result[3])
 
     # Func Def check
     SqlStatement = """ select Value, StartLine, EndLine, ID
@@ -2490,15 +2642,20 @@ def CheckFuncHeaderDoxygenComments(FullFileName):
     ResultSet = Db.TblFile.Exec(SqlStatement)
     for Result in ResultSet:
         FuncName = Result[4]
-        FunctionHeaderComment = CheckCommentImmediatelyPrecedeFunctionHeader(Result[1], Result[2], CommentSet)
+        FunctionHeaderComment = CheckCommentImmediatelyPrecedeFunctionHeader(
+            Result[1], Result[2], CommentSet)
         if FunctionHeaderComment:
-            CheckFunctionHeaderConsistentWithDoxygenComment(Result[0], Result[1], Result[2], FunctionHeaderComment[0], FunctionHeaderComment[1], ErrorMsgList, FunctionHeaderComment[3], FileTable)
+            CheckFunctionHeaderConsistentWithDoxygenComment(
+                Result[0], Result[1], Result[2], FunctionHeaderComment[0], FunctionHeaderComment[1], ErrorMsgList, FunctionHeaderComment[3], FileTable)
         else:
             if EccGlobalData.gException.IsException(ERROR_HEADER_CHECK_FUNCTION, FuncName):
                 continue
-            ErrorMsgList.append('Line %d :Function [%s] has NO comment immediately preceding it.' % (Result[2], Result[1]))
-            PrintErrorMsg(ERROR_HEADER_CHECK_FUNCTION, 'Function [%s] has NO comment immediately preceding it.' % (FuncName), 'Function', Result[3])
+            ErrorMsgList.append(
+                'Line %d :Function [%s] has NO comment immediately preceding it.' % (Result[2], Result[1]))
+            PrintErrorMsg(ERROR_HEADER_CHECK_FUNCTION, 'Function [%s] has NO comment immediately preceding it.' % (
+                FuncName), 'Function', Result[3])
     return ErrorMsgList
+
 
 def CheckCommentImmediatelyPrecedeFunctionHeader(FuncName, FuncStartLine, CommentSet):
 
@@ -2506,6 +2663,7 @@ def CheckCommentImmediatelyPrecedeFunctionHeader(FuncName, FuncStartLine, Commen
         if Comment[2] == FuncStartLine - 1:
             return Comment
     return None
+
 
 def GetDoxygenStrFromComment(Str):
     DoxygenStrList = []
@@ -2543,28 +2701,38 @@ def GetDoxygenStrFromComment(Str):
 
     return DoxygenStrList
 
-def CheckGeneralDoxygenCommentLayout(Str, StartLine, ErrorMsgList, CommentId= -1, TableName=''):
-    #/** --*/ @retval after @param
+
+def CheckGeneralDoxygenCommentLayout(Str, StartLine, ErrorMsgList, CommentId=-1, TableName=''):
+    # /** --*/ @retval after @param
     if not Str.startswith('/**'):
-        ErrorMsgList.append('Line %d : Comment does NOT have prefix /** ' % StartLine)
-        PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'Comment does NOT have prefix /** ', TableName, CommentId)
+        ErrorMsgList.append(
+            'Line %d : Comment does NOT have prefix /** ' % StartLine)
+        PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER,
+                      'Comment does NOT have prefix /** ', TableName, CommentId)
     if not Str.endswith('**/'):
-        ErrorMsgList.append('Line %d : Comment does NOT have tail **/ ' % StartLine)
-        PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'Comment does NOT have tail **/ ', TableName, CommentId)
+        ErrorMsgList.append(
+            'Line %d : Comment does NOT have tail **/ ' % StartLine)
+        PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER,
+                      'Comment does NOT have tail **/ ', TableName, CommentId)
     FirstRetvalIndex = Str.find('@retval')
     LastParamIndex = Str.rfind('@param')
     if (FirstRetvalIndex > 0) and (LastParamIndex > 0) and (FirstRetvalIndex < LastParamIndex):
-        ErrorMsgList.append('Line %d : @retval appear before @param ' % StartLine)
-        PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'in Comment, @retval appear before @param  ', TableName, CommentId)
+        ErrorMsgList.append(
+            'Line %d : @retval appear before @param ' % StartLine)
+        PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER,
+                      'in Comment, @retval appear before @param  ', TableName, CommentId)
 
-def CheckFunctionHeaderConsistentWithDoxygenComment(FuncModifier, FuncHeader, FuncStartLine, CommentStr, CommentStartLine, ErrorMsgList, CommentId= -1, TableName=''):
+
+def CheckFunctionHeaderConsistentWithDoxygenComment(FuncModifier, FuncHeader, FuncStartLine, CommentStr, CommentStartLine, ErrorMsgList, CommentId=-1, TableName=''):
 
     ParamList = GetParamList(FuncHeader)
-    CheckGeneralDoxygenCommentLayout(CommentStr, CommentStartLine, ErrorMsgList, CommentId, TableName)
+    CheckGeneralDoxygenCommentLayout(
+        CommentStr, CommentStartLine, ErrorMsgList, CommentId, TableName)
     DescriptionStr = CommentStr
     DoxygenStrList = GetDoxygenStrFromComment(DescriptionStr)
     if DescriptionStr.find('.') == -1:
-        PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMENT_DESCRIPTION, 'Comment description should end with period \'.\'', TableName, CommentId)
+        PrintErrorMsg(ERROR_DOXYGEN_CHECK_COMMENT_DESCRIPTION,
+                      'Comment description should end with period \'.\'', TableName, CommentId)
     DoxygenTagNumber = len(DoxygenStrList)
     ParamNumber = len(ParamList)
     for Param in ParamList:
@@ -2577,12 +2745,16 @@ def CheckFunctionHeaderConsistentWithDoxygenComment(FuncModifier, FuncHeader, Fu
             ParamName = ParamList[Index].Name.strip()
             Tag = DoxygenStrList[Index].strip(' ')
             if (not Tag[-1] == ('\n')) and (not Tag[-1] == ('\r')):
-                ErrorMsgList.append('Line %d : in Comment, <%s> does NOT end with new line ' % (CommentStartLine, Tag.replace('\n', '').replace('\r', '')))
-                PrintErrorMsg(ERROR_HEADER_CHECK_FUNCTION, 'in Comment, <%s> does NOT end with new line ' % (Tag.replace('\n', '').replace('\r', '')), TableName, CommentId)
+                ErrorMsgList.append('Line %d : in Comment, <%s> does NOT end with new line ' % (
+                    CommentStartLine, Tag.replace('\n', '').replace('\r', '')))
+                PrintErrorMsg(ERROR_HEADER_CHECK_FUNCTION, 'in Comment, <%s> does NOT end with new line ' % (
+                    Tag.replace('\n', '').replace('\r', '')), TableName, CommentId)
             TagPartList = Tag.split()
             if len(TagPartList) < 2:
-                ErrorMsgList.append('Line %d : in Comment, <%s> does NOT contain doxygen contents ' % (CommentStartLine, Tag.replace('\n', '').replace('\r', '')))
-                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'in Comment, <%s> does NOT contain doxygen contents ' % (Tag.replace('\n', '').replace('\r', '')), TableName, CommentId)
+                ErrorMsgList.append('Line %d : in Comment, <%s> does NOT contain doxygen contents ' % (
+                    CommentStartLine, Tag.replace('\n', '').replace('\r', '')))
+                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'in Comment, <%s> does NOT contain doxygen contents ' % (
+                    Tag.replace('\n', '').replace('\r', '')), TableName, CommentId)
                 Index += 1
                 continue
             LBPos = Tag.find('[')
@@ -2603,46 +2775,62 @@ def CheckFunctionHeaderConsistentWithDoxygenComment(FuncModifier, FuncHeader, Fu
                 if InOutStr != '':
                     if Tag.find('[' + InOutStr + ']') == -1:
                         if InOutStr != 'in, out':
-                            ErrorMsgList.append('Line %d : in Comment, <%s> does NOT have %s ' % (CommentStartLine, (TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), '[' + InOutStr + ']'))
-                            PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'in Comment, <%s> does NOT have %s ' % ((TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), '[' + InOutStr + ']'), TableName, CommentId)
+                            ErrorMsgList.append('Line %d : in Comment, <%s> does NOT have %s ' % (
+                                CommentStartLine, (TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), '[' + InOutStr + ']'))
+                            PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'in Comment, <%s> does NOT have %s ' % (
+                                (TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), '[' + InOutStr + ']'), TableName, CommentId)
                         else:
                             if Tag.find('[in,out]') == -1:
-                                ErrorMsgList.append('Line %d : in Comment, <%s> does NOT have %s ' % (CommentStartLine, (TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), '[' + InOutStr + ']'))
-                                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'in Comment, <%s> does NOT have %s ' % ((TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), '[' + InOutStr + ']'), TableName, CommentId)
-
+                                ErrorMsgList.append('Line %d : in Comment, <%s> does NOT have %s ' % (
+                                    CommentStartLine, (TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), '[' + InOutStr + ']'))
+                                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'in Comment, <%s> does NOT have %s ' % (
+                                    (TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), '[' + InOutStr + ']'), TableName, CommentId)
 
             if Tag.find(ParamName) == -1 and ParamName != 'VOID' and ParamName != 'void':
-                ErrorMsgList.append('Line %d : in Comment, <%s> is NOT consistent with parameter name %s ' % (CommentStartLine, (TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), ParamName))
-                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'in Comment, <%s> is NOT consistent with parameter name %s ' % ((TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), ParamName), TableName, CommentId)
+                ErrorMsgList.append('Line %d : in Comment, <%s> is NOT consistent with parameter name %s ' % (
+                    CommentStartLine, (TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), ParamName))
+                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'in Comment, <%s> is NOT consistent with parameter name %s ' % (
+                    (TagPartList[0] + ' ' + TagPartList[1]).replace('\n', '').replace('\r', ''), ParamName), TableName, CommentId)
             Index += 1
 
         if Index < ParamNumber:
-            ErrorMsgList.append('Line %d : Number of doxygen tags in comment less than number of function parameters' % CommentStartLine)
-            PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'Number of doxygen tags in comment less than number of function parameters ', TableName, CommentId)
+            ErrorMsgList.append(
+                'Line %d : Number of doxygen tags in comment less than number of function parameters' % CommentStartLine)
+            PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER,
+                          'Number of doxygen tags in comment less than number of function parameters ', TableName, CommentId)
         # VOID return type, NOT VOID*. VOID* should be matched with a doxygen tag.
         if (FuncModifier.find('VOID') != -1 or FuncModifier.find('void') != -1) and FuncModifier.find('*') == -1:
 
             # assume we allow a return description tag for void func. return. that's why 'DoxygenTagNumber - 1' is used instead of 'DoxygenTagNumber'
             if Index < DoxygenTagNumber - 1 or (Index < DoxygenTagNumber and DoxygenStrList[Index].startswith('@retval')):
-                ErrorMsgList.append('Line %d : VOID return type need NO doxygen tags in comment' % CommentStartLine)
-                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'VOID return type need no doxygen tags in comment ', TableName, CommentId)
+                ErrorMsgList.append(
+                    'Line %d : VOID return type need NO doxygen tags in comment' % CommentStartLine)
+                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER,
+                              'VOID return type need no doxygen tags in comment ', TableName, CommentId)
         else:
             if Index < DoxygenTagNumber and not DoxygenStrList[Index].startswith('@retval') and not DoxygenStrList[Index].startswith('@return'):
-                ErrorMsgList.append('Line %d : Number of @param doxygen tags in comment does NOT match number of function parameters' % CommentStartLine)
-                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'Number of @param doxygen tags in comment does NOT match number of function parameters ', TableName, CommentId)
+                ErrorMsgList.append(
+                    'Line %d : Number of @param doxygen tags in comment does NOT match number of function parameters' % CommentStartLine)
+                PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER,
+                              'Number of @param doxygen tags in comment does NOT match number of function parameters ', TableName, CommentId)
     else:
         if ParamNumber == 0 and DoxygenTagNumber != 0 and ((FuncModifier.find('VOID') != -1 or FuncModifier.find('void') != -1) and FuncModifier.find('*') == -1):
-            ErrorMsgList.append('Line %d : VOID return type need NO doxygen tags in comment' % CommentStartLine)
-            PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'VOID return type need NO doxygen tags in comment ', TableName, CommentId)
+            ErrorMsgList.append(
+                'Line %d : VOID return type need NO doxygen tags in comment' % CommentStartLine)
+            PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER,
+                          'VOID return type need NO doxygen tags in comment ', TableName, CommentId)
         if ParamNumber != 0 and DoxygenTagNumber == 0:
-            ErrorMsgList.append('Line %d : No doxygen tags in comment' % CommentStartLine)
-            PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER, 'No doxygen tags in comment ', TableName, CommentId)
+            ErrorMsgList.append(
+                'Line %d : No doxygen tags in comment' % CommentStartLine)
+            PrintErrorMsg(ERROR_DOXYGEN_CHECK_FUNCTION_HEADER,
+                          'No doxygen tags in comment ', TableName, CommentId)
+
 
 if __name__ == '__main__':
 
-#    EdkLogger.Initialize()
-#    EdkLogger.SetLevel(EdkLogger.QUIET)
-#    CollectSourceCodeDataIntoDB(sys.argv[1])
+    #    EdkLogger.Initialize()
+    #    EdkLogger.SetLevel(EdkLogger.QUIET)
+    #    CollectSourceCodeDataIntoDB(sys.argv[1])
     try:
         test_file = sys.argv[1]
     except IndexError as v:

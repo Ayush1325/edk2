@@ -1,4 +1,4 @@
-## @file
+# @file
 # package and install PyEfiCompressor extension
 #
 #  Copyright (c) 2008, Intel Corporation. All rights reserved.<BR>
@@ -23,15 +23,15 @@ setup(
         Extension(
             'EfiCompressor',
             sources=[
-                os.path.join(BaseToolsDir, 'Source', 'C', 'Common', 'Decompress.c'),
+                os.path.join(BaseToolsDir, 'Source', 'C',
+                             'Common', 'Decompress.c'),
                 'EfiCompressor.c'
-                ],
+            ],
             include_dirs=[
                 os.path.join(BaseToolsDir, 'Source', 'C', 'Include'),
                 os.path.join(BaseToolsDir, 'Source', 'C', 'Include', 'Ia32'),
                 os.path.join(BaseToolsDir, 'Source', 'C', 'Common')
-                ],
-            )
-        ],
-  )
-
+            ],
+        )
+    ],
+)

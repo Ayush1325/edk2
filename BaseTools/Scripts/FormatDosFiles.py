@@ -18,14 +18,17 @@ import re
 import sys
 import copy
 
-__prog__        = 'FormatDosFiles'
-__version__     = '%s Version %s' % (__prog__, '0.10 ')
-__copyright__   = 'Copyright (c) 2018-2019, Intel Corporation. All rights reserved.'
+__prog__ = 'FormatDosFiles'
+__version__ = '%s Version %s' % (__prog__, '0.10 ')
+__copyright__ = 'Copyright (c) 2018-2019, Intel Corporation. All rights reserved.'
 __description__ = 'Convert source files to meet the EDKII C Coding Standards Specification.\n'
-DEFAULT_EXT_LIST = ['.h', '.c', '.nasm', '.nasmb', '.asm', '.S', '.inf', '.dec', '.dsc', '.fdf', '.uni', '.asl', '.aslc', '.vfr', '.idf', '.txt', '.bat', '.py']
+DEFAULT_EXT_LIST = ['.h', '.c', '.nasm', '.nasmb', '.asm', '.S', '.inf', '.dec',
+                    '.dsc', '.fdf', '.uni', '.asl', '.aslc', '.vfr', '.idf', '.txt', '.bat', '.py']
 
-#For working in python2 and python3 environment, re pattern should use binary string, which is bytes type in python3.
-#Because in python3,read from file in binary mode will return bytes type,and in python3 bytes type can not be mixed with str type.
+# For working in python2 and python3 environment, re pattern should use binary string, which is bytes type in python3.
+# Because in python3,read from file in binary mode will return bytes type,and in python3 bytes type can not be mixed with str type.
+
+
 def FormatFile(FilePath, Args):
     with open(FilePath, 'rb') as Fd:
         Content = Fd.read()
@@ -42,6 +45,7 @@ def FormatFile(FilePath, Args):
             Fd.write(Content)
             if not Args.Quiet:
                 print(FilePath)
+
 
 def FormatFilesInDir(DirPath, ExtList, Args):
 
@@ -68,12 +72,14 @@ def FormatFilesInDir(DirPath, ExtList, Args):
             if Continue:
                 continue
         for FileName in [f for f in FileNames if any(f.endswith(ext) for ext in ExtList)]:
-                FileList.append(os.path.join(DirPath, FileName))
+            FileList.append(os.path.join(DirPath, FileName))
     for File in FileList:
         FormatFile(File, Args)
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog=__prog__, description=__description__ + __copyright__, conflict_handler = 'resolve')
+    parser = argparse.ArgumentParser(
+        prog=__prog__, description=__description__ + __copyright__, conflict_handler='resolve')
 
     parser.add_argument('Path', nargs='+',
                         help='the path for files to be converted.It could be directory or file path.')
@@ -88,7 +94,8 @@ if __name__ == "__main__":
                         help='reduce output messages')
     parser.add_argument('--debug', dest='Debug', type=int, metavar='[0-9]', choices=range(0, 10), default=0,
                         help='set debug level')
-    parser.add_argument('--exclude', dest='Exclude', nargs='+', help="directory name or file name which will be excluded")
+    parser.add_argument('--exclude', dest='Exclude', nargs='+',
+                        help="directory name or file name which will be excluded")
     args = parser.parse_args()
     DefaultExt = copy.copy(DEFAULT_EXT_LIST)
 

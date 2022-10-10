@@ -1,11 +1,11 @@
-## @file
+# @file
 # Parser a Inf file and Get specify section data.
 #
 # Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 
-## Import Modules
+# Import Modules
 #
 
 import Common.EdkLogger as EdkLogger
@@ -31,7 +31,8 @@ class InfSectionParser():
             with open(self._FilePath, "r") as File:
                 FileLinesList = File.readlines()
         except BaseException:
-            EdkLogger.error("build", AUTOGEN_ERROR, 'File %s is opened failed.' % self._FilePath)
+            EdkLogger.error("build", AUTOGEN_ERROR,
+                            'File %s is opened failed.' % self._FilePath)
 
         for Index in range(0, len(FileLinesList)):
             line = str(FileLinesList[Index]).strip()
@@ -48,8 +49,8 @@ class InfSectionParser():
                 UserExtFind = True
                 FindEnd = False
 
-            if (NextLine != '' and NextLine[0] == TAB_SECTION_START and \
-                NextLine[-1] == TAB_SECTION_END) or FileLastLine:
+            if (NextLine != '' and NextLine[0] == TAB_SECTION_START and
+                    NextLine[-1] == TAB_SECTION_END) or FileLastLine:
                 UserExtFind = False
                 FindEnd = True
                 self._FileSectionDataList.append({SectionLine: SectionData[:]})
@@ -66,13 +67,16 @@ class InfSectionParser():
         for SectionDataDict in self._FileSectionDataList:
             for key in SectionDataDict:
                 if key.lower().startswith("[userextensions") and key.lower().find('.tianocore.') > -1:
-                    SectionLine = key.lstrip(TAB_SECTION_START).rstrip(TAB_SECTION_END)
+                    SectionLine = key.lstrip(
+                        TAB_SECTION_START).rstrip(TAB_SECTION_END)
                     SubSectionList = [SectionLine]
                     if str(SectionLine).find(TAB_COMMA_SPLIT) > -1:
-                        SubSectionList = str(SectionLine).split(TAB_COMMA_SPLIT)
+                        SubSectionList = str(
+                            SectionLine).split(TAB_COMMA_SPLIT)
                     for SubSection in SubSectionList:
                         if SubSection.lower().find('.tianocore.') > -1:
-                            UserExtensionTianoCore.append({SubSection: SectionDataDict[key]})
+                            UserExtensionTianoCore.append(
+                                {SubSection: SectionDataDict[key]})
         return UserExtensionTianoCore
 
     # Get depex expression
@@ -85,10 +89,12 @@ class InfSectionParser():
         for SectionDataDict in self._FileSectionDataList:
             for key in SectionDataDict:
                 if key.lower() == "[depex]" or key.lower().startswith("[depex."):
-                    SectionLine = key.lstrip(TAB_SECTION_START).rstrip(TAB_SECTION_END)
+                    SectionLine = key.lstrip(
+                        TAB_SECTION_START).rstrip(TAB_SECTION_END)
                     SubSectionList = [SectionLine]
                     if str(SectionLine).find(TAB_COMMA_SPLIT) > -1:
-                        SubSectionList = str(SectionLine).split(TAB_COMMA_SPLIT)
+                        SubSectionList = str(
+                            SectionLine).split(TAB_COMMA_SPLIT)
                     for SubSection in SubSectionList:
                         SectionList = SubSection.split(TAB_SPLIT)
                         SubKey = ()
@@ -99,21 +105,8 @@ class InfSectionParser():
                         elif len(SectionList) == 3:
                             SubKey = (SectionList[1], SectionList[2])
                         else:
-                            EdkLogger.error("build", AUTOGEN_ERROR, 'Section %s is invalid.' % key)
-                        DepexExpressionList.append({SubKey: SectionDataDict[key]})
+                            EdkLogger.error(
+                                "build", AUTOGEN_ERROR, 'Section %s is invalid.' % key)
+                        DepexExpressionList.append(
+                            {SubKey: SectionDataDict[key]})
         return DepexExpressionList
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

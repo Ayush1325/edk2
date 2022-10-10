@@ -15,6 +15,7 @@ from io import BytesIO
 from struct import pack
 from Common.DataType import *
 
+
 class VAR_CHECK_PCD_VARIABLE_TAB_CONTAINER(object):
     def __init__(self):
         self.var_check_info = []
@@ -56,7 +57,7 @@ class VAR_CHECK_PCD_VARIABLE_TAB_CONTAINER(object):
                     else:
                         realLength += item.StorageWidth
                         realLength += item.StorageWidth
-                if (index == len(self.var_check_info)) :
+                if (index == len(self.var_check_info)):
                     if (itemIndex < len(var_check_tab.validtab)) and realLength % 4:
                         realLength += (4 - (realLength % 4))
                 else:
@@ -136,14 +137,16 @@ class VAR_CHECK_PCD_VARIABLE_TAB_CONTAINER(object):
                         Buffer += b
                         realLength += item.StorageWidth
                     else:
-                        b = pack(PACK_CODE_BY_SIZE[item.StorageWidth], v_data[0])
+                        b = pack(
+                            PACK_CODE_BY_SIZE[item.StorageWidth], v_data[0])
                         Buffer += b
                         realLength += item.StorageWidth
-                        b = pack(PACK_CODE_BY_SIZE[item.StorageWidth], v_data[1])
+                        b = pack(
+                            PACK_CODE_BY_SIZE[item.StorageWidth], v_data[1])
                         Buffer += b
                         realLength += item.StorageWidth
 
-                if (index == len(self.var_check_info)) :
+                if (index == len(self.var_check_info)):
                     if (itemIndex < len(var_check_tab.validtab)) and realLength % 4:
                         for i in range(4 - (realLength % 4)):
                             b = pack("=B", var_check_tab.pad)
@@ -173,6 +176,7 @@ class VAR_CHECK_PCD_VARIABLE_TAB_CONTAINER(object):
 
 class VAR_CHECK_PCD_VARIABLE_TAB(object):
     pad = 0xDA
+
     def __init__(self, TokenSpaceGuid, PcdCName):
         self.Revision = 0x0001
         self.HeaderLength = 0
@@ -180,7 +184,8 @@ class VAR_CHECK_PCD_VARIABLE_TAB(object):
         self.Type = 0
         self.Reserved = 0
         self.Attributes = 0x00000000
-        self.Guid = eval("[" + TokenSpaceGuid.replace("{", "").replace("}", "") + "]")
+        self.Guid = eval(
+            "[" + TokenSpaceGuid.replace("{", "").replace("}", "") + "]")
         self.Name = PcdCName
         self.validtab = []
 
@@ -233,9 +238,11 @@ class VAR_CHECK_PCD_VALID_OBJ(object):
     def __eq__(self, validObj):
         return validObj and self.VarOffset == validObj.VarOffset
 
+
 class VAR_CHECK_PCD_VALID_LIST(VAR_CHECK_PCD_VALID_OBJ):
     def __init__(self, VarOffset, validlist, PcdDataType):
-        super(VAR_CHECK_PCD_VALID_LIST, self).__init__(VarOffset, validlist, PcdDataType)
+        super(VAR_CHECK_PCD_VALID_LIST, self).__init__(
+            VarOffset, validlist, PcdDataType)
         self.Type = 1
         valid_num_list = []
         for item in self.rawdata:
@@ -249,13 +256,13 @@ class VAR_CHECK_PCD_VALID_LIST(VAR_CHECK_PCD_VALID_OBJ):
             else:
                 self.data.add(int(valid_num))
 
-
         self.Length = 5 + len(self.data) * self.StorageWidth
 
 
 class VAR_CHECK_PCD_VALID_RANGE(VAR_CHECK_PCD_VALID_OBJ):
     def __init__(self, VarOffset, validrange, PcdDataType):
-        super(VAR_CHECK_PCD_VALID_RANGE, self).__init__(VarOffset, validrange, PcdDataType)
+        super(VAR_CHECK_PCD_VALID_RANGE, self).__init__(
+            VarOffset, validrange, PcdDataType)
         self.Type = 2
         RangeExpr = ""
         i = 0

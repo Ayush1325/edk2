@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to define class objects of INF file [UserExtension] section.
 # It will consumed by InfParser.
 #
@@ -17,33 +17,38 @@ from Library import GlobalData
 
 from Library.Misc import Sdict
 
+
 class InfUserExtensionItem():
     def __init__(self,
-                 Content = '',
-                 UserId = '',
-                 IdString = ''):
-        self.Content  = Content
-        self.UserId   = UserId
+                 Content='',
+                 UserId='',
+                 IdString=''):
+        self.Content = Content
+        self.UserId = UserId
         self.IdString = IdString
         self.SupArchList = []
 
     def SetContent(self, Content):
         self.Content = Content
+
     def GetContent(self):
         return self.Content
 
     def SetUserId(self, UserId):
         self.UserId = UserId
+
     def GetUserId(self):
         return self.UserId
 
     def SetIdString(self, IdString):
         self.IdString = IdString
+
     def GetIdString(self):
         return self.IdString
 
     def SetSupArchList(self, SupArchList):
         self.SupArchList = SupArchList
+
     def GetSupArchList(self):
         return self.SupArchList
 
@@ -51,6 +56,8 @@ class InfUserExtensionItem():
 #
 #
 #
+
+
 class InfUserExtensionObject():
     def __init__(self):
         self.UserExtension = Sdict()
@@ -111,8 +118,9 @@ class InfUserExtensionObject():
                 #
                 Logger.Error('InfParser',
                              ToolError.FORMAT_INVALID,
-                             ST.ERR_INF_PARSER_UE_SECTION_DUPLICATE_ERROR%\
-                             (IdContentItem[0] + '.' + IdContentItem[1] + '.' + IdContentItem[2]),
+                             ST.ERR_INF_PARSER_UE_SECTION_DUPLICATE_ERROR %
+                             (IdContentItem[0] + '.' +
+                              IdContentItem[1] + '.' + IdContentItem[2]),
                              File=GlobalData.gINF_MODULE_NAME,
                              Line=LineNo,
                              ExtraData=None)

@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to define the Section Header C Struct.
 #
 # Copyright (c) 2021-, Intel Corporation. All rights reserved.<BR>
@@ -10,6 +10,7 @@ from FirmwareStorageFormat.Common import *
 
 EFI_COMMON_SECTION_HEADER_LEN = 4
 EFI_COMMON_SECTION_HEADER2_LEN = 8
+
 
 class EFI_COMMON_SECTION_HEADER(Structure):
     _pack_ = 1
@@ -24,6 +25,7 @@ class EFI_COMMON_SECTION_HEADER(Structure):
 
     def Common_Header_Size(self) -> int:
         return 4
+
 
 class EFI_COMMON_SECTION_HEADER2(Structure):
     _pack_ = 1
@@ -40,6 +42,7 @@ class EFI_COMMON_SECTION_HEADER2(Structure):
     def Common_Header_Size(self) -> int:
         return 8
 
+
 class EFI_COMPRESSION_SECTION(Structure):
     _pack_ = 1
     _fields_ = [
@@ -50,6 +53,7 @@ class EFI_COMPRESSION_SECTION(Structure):
     def ExtHeaderSize(self) -> int:
         return 5
 
+
 class EFI_FREEFORM_SUBTYPE_GUID_SECTION(Structure):
     _pack_ = 1
     _fields_ = [
@@ -58,6 +62,7 @@ class EFI_FREEFORM_SUBTYPE_GUID_SECTION(Structure):
 
     def ExtHeaderSize(self) -> int:
         return 16
+
 
 class EFI_GUID_DEFINED_SECTION(Structure):
     _pack_ = 1
@@ -69,6 +74,7 @@ class EFI_GUID_DEFINED_SECTION(Structure):
 
     def ExtHeaderSize(self) -> int:
         return 20
+
 
 def Get_USER_INTERFACE_Header(nums: int):
     class EFI_SECTION_USER_INTERFACE(Structure):
@@ -88,6 +94,7 @@ def Get_USER_INTERFACE_Header(nums: int):
             return UiString
 
     return EFI_SECTION_USER_INTERFACE
+
 
 def Get_VERSION_Header(nums: int):
     class EFI_SECTION_VERSION(Structure):

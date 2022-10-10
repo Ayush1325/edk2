@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file contained the parser for [Guids], [Ppis], [Protocols] sections in INF file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -25,8 +25,9 @@ from Library.ParserValidate import IsValidUserId
 from Library.ParserValidate import IsValidArch
 from Parser.InfParserMisc import InfParserSectionRoot
 
+
 class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
-    ## InfGuidParser
+    # InfGuidParser
     #
     #
     def InfGuidParser(self, SectionString, InfSectionObject, FileName):
@@ -58,10 +59,10 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                 #
                 if LineContent.find(DT.TAB_COMMENT_SPLIT) > -1:
                     CommentsList.append((
-                            LineContent[LineContent.find(DT.TAB_COMMENT_SPLIT):],
-                            LineNo))
+                        LineContent[LineContent.find(DT.TAB_COMMENT_SPLIT):],
+                        LineNo))
                     LineContent = \
-                            LineContent[:LineContent.find(DT.TAB_COMMENT_SPLIT)]
+                        LineContent[:LineContent.find(DT.TAB_COMMENT_SPLIT)]
 
             if LineContent != '':
                 #
@@ -77,7 +78,8 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                     ValueList = []
                     continue
 
-                TokenList = GetSplitValueList(LineContent, DT.TAB_VALUE_SPLIT, 1)
+                TokenList = GetSplitValueList(
+                    LineContent, DT.TAB_VALUE_SPLIT, 1)
                 ValueList[0:len(TokenList)] = TokenList
 
                 #
@@ -85,10 +87,9 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                 #
                 ValueList = [InfExpandMacro(Value, (FileName, LineContent, LineNo),
                                             self.FileLocalMacros, SectionMacros, True)
-                            for Value in ValueList]
+                             for Value in ValueList]
 
                 CurrentLineVar = (LineContent, LineNo, FileName)
-
 
             if len(ValueList) >= 1:
                 GuidList.append((ValueList, CommentsList, CurrentLineVar))
@@ -109,11 +110,12 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
         if not InfSectionObject.SetGuid(GuidList, Arch=ArchList):
             Logger.Error('InfParser',
                          FORMAT_INVALID,
-                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % ("[Guid]"),
+                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (
+                             "[Guid]"),
                          File=FileName,
                          Line=LineIndex)
 
-    ## InfPpiParser
+    # InfPpiParser
     #
     #
     def InfPpiParser(self, SectionString, InfSectionObject, FileName):
@@ -145,10 +147,10 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                 #
                 if LineContent.find(DT.TAB_COMMENT_SPLIT) > -1:
                     CommentsList.append((
-                            LineContent[LineContent.find(DT.TAB_COMMENT_SPLIT):],
-                            LineNo))
+                        LineContent[LineContent.find(DT.TAB_COMMENT_SPLIT):],
+                        LineNo))
                     LineContent = \
-                            LineContent[:LineContent.find(DT.TAB_COMMENT_SPLIT)]
+                        LineContent[:LineContent.find(DT.TAB_COMMENT_SPLIT)]
 
             if LineContent != '':
                 #
@@ -164,14 +166,15 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                     CommentsList = []
                     continue
 
-                TokenList = GetSplitValueList(LineContent, DT.TAB_VALUE_SPLIT, 1)
+                TokenList = GetSplitValueList(
+                    LineContent, DT.TAB_VALUE_SPLIT, 1)
                 ValueList[0:len(TokenList)] = TokenList
 
                 #
                 # Replace with Local section Macro and [Defines] section Macro.
                 #
                 ValueList = [InfExpandMacro(Value, (FileName, LineContent, LineNo), self.FileLocalMacros, SectionMacros)
-                            for Value in ValueList]
+                             for Value in ValueList]
 
                 CurrentLineVar = (LineContent, LineNo, FileName)
 
@@ -194,11 +197,12 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
         if not InfSectionObject.SetPpi(PpiList, Arch=ArchList):
             Logger.Error('InfParser',
                          FORMAT_INVALID,
-                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % ("[Ppis]"),
+                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (
+                             "[Ppis]"),
                          File=FileName,
                          Line=LineIndex)
 
-    ## InfUserExtensionParser
+    # InfUserExtensionParser
     #
     #
     def InfUserExtensionParser(self, SectionString, InfSectionObject, FileName):
@@ -245,7 +249,8 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                 if not IsValidUserId(UserId):
                     Logger.Error('InfParser',
                                  FORMAT_INVALID,
-                                 ST.ERR_INF_PARSER_UE_SECTION_USER_ID_ERROR % (Item[1]),
+                                 ST.ERR_INF_PARSER_UE_SECTION_USER_ID_ERROR % (
+                                     Item[1]),
                                  File=GlobalData.gINF_MODULE_NAME,
                                  Line=SectionLineNo,
                                  ExtraData=None)
@@ -253,7 +258,8 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                 if not IsValidIdString(IdString):
                     Logger.Error('InfParser',
                                  FORMAT_INVALID,
-                                 ST.ERR_INF_PARSER_UE_SECTION_ID_STRING_ERROR % (IdString),
+                                 ST.ERR_INF_PARSER_UE_SECTION_ID_STRING_ERROR % (
+                                     IdString),
                                  File=GlobalData.gINF_MODULE_NAME, Line=SectionLineNo,
                                  ExtraData=None)
                 IdContentList.append((UserId, IdString, Arch))
@@ -272,7 +278,7 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                 Logger.Error('InfParser',
                              FORMAT_INVALID,
                              ST.ERR_INF_PARSER_UE_SECTION_DUPLICATE_ERROR % (
-                                                                    IdString),
+                                 IdString),
                              File=GlobalData.gINF_MODULE_NAME,
                              Line=SectionLineNo,
                              ExtraData=None)
@@ -281,10 +287,10 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
         if not InfSectionObject.SetUserExtension(UserExtensionContent,
                                                  IdContent=IdContentList,
                                                  LineNo=SectionLineNo):
-            Logger.Error\
-            ('InfParser', FORMAT_INVALID, \
-             ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % ("[UserExtension]"), \
-             File=FileName, Line=LastItem[4])
+            Logger.Error('InfParser', FORMAT_INVALID,
+                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (
+                             "[UserExtension]"),
+                         File=FileName, Line=LastItem[4])
 
     def InfProtocolParser(self, SectionString, InfSectionObject, FileName):
         #
@@ -315,10 +321,10 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                 #
                 if LineContent.find(DT.TAB_COMMENT_SPLIT) > -1:
                     CommentsList.append((
-                            LineContent[LineContent.find(DT.TAB_COMMENT_SPLIT):],
-                            LineNo))
+                        LineContent[LineContent.find(DT.TAB_COMMENT_SPLIT):],
+                        LineNo))
                     LineContent = \
-                            LineContent[:LineContent.find(DT.TAB_COMMENT_SPLIT)]
+                        LineContent[:LineContent.find(DT.TAB_COMMENT_SPLIT)]
 
             if LineContent != '':
                 #
@@ -334,14 +340,15 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                     CommentsList = []
                     continue
 
-                TokenList = GetSplitValueList(LineContent, DT.TAB_VALUE_SPLIT, 1)
+                TokenList = GetSplitValueList(
+                    LineContent, DT.TAB_VALUE_SPLIT, 1)
                 ValueList[0:len(TokenList)] = TokenList
 
                 #
                 # Replace with Local section Macro and [Defines] section Macro.
                 #
                 ValueList = [InfExpandMacro(Value, (FileName, LineContent, LineNo), self.FileLocalMacros, SectionMacros)
-                            for Value in ValueList]
+                             for Value in ValueList]
 
                 CurrentLineVar = (LineContent, LineNo, FileName)
 
@@ -362,7 +369,7 @@ class InfGuidPpiProtocolSectionParser(InfParserSectionRoot):
                 ArchList.append(Item[1])
 
         if not InfSectionObject.SetProtocol(ProtocolList, Arch=ArchList):
-            Logger.Error\
-            ('InfParser', FORMAT_INVALID, \
-             ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % ("[Protocol]"), \
-             File=FileName, Line=LineIndex)
+            Logger.Error('InfParser', FORMAT_INVALID,
+                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (
+                             "[Protocol]"),
+                         File=FileName, Line=LineIndex)

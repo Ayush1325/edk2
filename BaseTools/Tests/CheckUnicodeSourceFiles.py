@@ -1,4 +1,4 @@
-## @file
+# @file
 #  Unit tests for AutoGen.UniClassObject
 #
 #  Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
@@ -21,6 +21,7 @@ import AutoGen.UniClassObject as BtUni
 
 from Common import EdkLogger
 EdkLogger.InitializeForUnitTest()
+
 
 class Tests(TestTools.BaseToolsTest):
 
@@ -167,6 +168,7 @@ class Tests(TestTools.BaseToolsTest):
         data = codecs.BOM_UTF8 + b'\xed\xa0\x81'
 
         self.CheckFile(encoding=None, shouldPass=False, string=data)
+
 
 TheTestSuite = TestTools.MakeTheTestSuite(locals())
 

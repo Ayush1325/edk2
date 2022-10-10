@@ -1,4 +1,4 @@
-## @file
+# @file
 # Unit tests for TianoCompress utility
 #
 #  Copyright (c) 2008, Intel Corporation. All rights reserved.<BR>
@@ -17,6 +17,7 @@ import unittest
 
 import TestTools
 
+
 class Tests(TestTools.BaseToolsTest):
 
     def setUp(self):
@@ -25,7 +26,7 @@ class Tests(TestTools.BaseToolsTest):
 
     def testHelp(self):
         result = self.RunTool('--help', logFile='help')
-        #self.DisplayFile('help')
+        # self.DisplayFile('help')
         self.assertTrue(result == 0)
 
     def compressionTestCycle(self, data):
@@ -35,13 +36,13 @@ class Tests(TestTools.BaseToolsTest):
             '-e',
             '-o', self.GetTmpFilePath('output1'),
             self.GetTmpFilePath('input')
-            )
+        )
         self.assertTrue(result == 0)
         result = self.RunTool(
             '-d',
             '-o', self.GetTmpFilePath('output2'),
             self.GetTmpFilePath('output1')
-            )
+        )
         self.assertTrue(result == 0)
         start = self.ReadTmpFile('input')
         finish = self.ReadTmpFile('output2')
@@ -50,7 +51,8 @@ class Tests(TestTools.BaseToolsTest):
             print()
             print('Original data did not match decompress(compress(data))')
             self.DisplayBinaryData('original data', start)
-            self.DisplayBinaryData('after compression', self.ReadTmpFile('output1'))
+            self.DisplayBinaryData('after compression',
+                                   self.ReadTmpFile('output1'))
             self.DisplayBinaryData('after decompression', finish)
         self.assertTrue(startEqualsFinish)
 
@@ -60,10 +62,9 @@ class Tests(TestTools.BaseToolsTest):
             self.compressionTestCycle(data)
             self.CleanUpTmpDir()
 
+
 TheTestSuite = TestTools.MakeTheTestSuite(locals())
 
 if __name__ == '__main__':
     allTests = TheTestSuite()
     unittest.TextTestRunner().run(allTests)
-
-

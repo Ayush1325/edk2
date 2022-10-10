@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to create/update/query/erase table for fdf datas
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -14,19 +14,21 @@ import CommonDataClass.DataClass as DataClass
 from Table.Table import Table
 from Common.StringUtils import ConvertToSqlString
 
-## TableFdf
+# TableFdf
 #
 # This class defined a table used for data model
 #
 # @param object:       Inherited from object class
 #
 #
+
+
 class TableFdf(Table):
     def __init__(self, Cursor):
         Table.__init__(self, Cursor)
         self.Table = 'Fdf'
 
-    ## Create table
+    # Create table
     #
     # Create table Fdf
     #
@@ -62,7 +64,7 @@ class TableFdf(Table):
                                                       )""" % self.Table
         Table.Create(self, SqlCommand)
 
-    ## Insert table
+    # Insert table
     #
     # Insert a record into table Fdf
     #
@@ -82,14 +84,15 @@ class TableFdf(Table):
     #
     def Insert(self, Model, Value1, Value2, Value3, Scope1, Scope2, BelongsToItem, BelongsToFile, StartLine, StartColumn, EndLine, EndColumn, Enabled):
         self.ID = self.ID + 1
-        (Value1, Value2, Value3, Scope1, Scope2) = ConvertToSqlString((Value1, Value2, Value3, Scope1, Scope2))
+        (Value1, Value2, Value3, Scope1, Scope2) = ConvertToSqlString(
+            (Value1, Value2, Value3, Scope1, Scope2))
         SqlCommand = """insert into %s values(%s, %s, '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s)""" \
                      % (self.Table, self.ID, Model, Value1, Value2, Value3, Scope1, Scope2, BelongsToItem, BelongsToFile, StartLine, StartColumn, EndLine, EndColumn, Enabled)
         Table.Insert(self, SqlCommand)
 
         return self.ID
 
-    ## Query table
+    # Query table
     #
     # @param Model:  The Model of Record
     #

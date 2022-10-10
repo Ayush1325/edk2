@@ -1,4 +1,4 @@
-## @file
+# @file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
 #
@@ -13,8 +13,10 @@ import os
 import logging
 import core.pe as pe
 
+
 def GetLogger():
     return logging.getLogger('EFI Binary File')
+
 
 class EFIBinaryError(Exception):
     def __init__(self, message):
@@ -23,6 +25,7 @@ class EFIBinaryError(Exception):
 
     def GetMessage(self):
         return self._message
+
 
 class EfiFd(object):
     EFI_FV_HEADER_SIZE = 0x48
@@ -43,28 +46,29 @@ class EfiFd(object):
     def GetFvs(self):
         return self._fvs
 
+
 class EfiFv(object):
     FILE_SYSTEM_GUID = uuid.UUID('{8c8ce578-8a3d-4f1c-9935-896185c32dd3}')
 
     def __init__(self, parent=None):
-        self._size         = 0
-        self._filename     = None
-        self._fvheader     = None
+        self._size = 0
+        self._filename = None
+        self._fvheader = None
         self._blockentries = []
-        self._ffs          = []
+        self._ffs = []
 
         # following field is for FV in FD
-        self._parent       = parent
-        self._offset       = 0
-        self._raw          = array.array('B')
+        self._parent = parent
+        self._offset = 0
+        self._raw = array.array('B')
 
     def Load(self, fd):
-        self._offset   = fd.tell()
+        self._offset = fd.tell()
         self._filename = fd.name
 
         # get file header
         self._fvheader = EfiFirmwareVolumeHeader.Read(fd)
-        #self._fvheader.Dump()
+        # self._fvheader.Dump()
 
         self._size = self._fvheader.GetFvLength()
 
@@ -80,10 +84,10 @@ class EfiFv(object):
             self._blockentries.append(blockentry)
             blockentry = BlockMapEntry.Read(fd)
 
-
         if self._fvheader.GetSize() + (len(self._blockentries)) * 8 != \
            self._fvheader.GetHeaderLength():
-            raise EFIBinaryError("Volume Header length not consistent with block map!")
+            raise EFIBinaryError(
+                "Volume Header length not consistent with block map!")
 
         index = align(fd.tell(), 8)
         count = 0
@@ -120,10 +124,11 @@ class EfiFv(object):
     def GetRawData(self):
         return self._raw.tolist()
 
+
 class BinaryItem(object):
     def __init__(self, parent=None):
         self._size = 0
-        self._arr  = array.array('B')
+        self._arr = array.array('B')
         self._parent = parent
 
     @classmethod
@@ -143,6 +148,7 @@ class BinaryItem(object):
 
     def GetParent(self):
         return self._parent
+
 
 class EfiFirmwareVolumeHeader(BinaryItem):
     def GetSize(self):
@@ -267,6 +273,7 @@ class EfiFirmwareVolumeHeader(BinaryItem):
     def GetRawData(self):
         return self._arr.tolist()
 
+
 class BlockMapEntry(BinaryItem):
     def GetSize(self):
         return 8
@@ -285,15 +292,16 @@ class BlockMapEntry(BinaryItem):
     def __str__(self):
         return '[BlockEntry] Number = 0x%X, length=0x%X' % (self.GetNumberBlocks(), self.GetLength())
 
+
 class EfiFfs(object):
-    FFS_HEADER_SIZE  = 24
+    FFS_HEADER_SIZE = 24
 
     def __init__(self, parent=None):
         self._header = None
 
         # following field is for FFS in FV file.
-        self._parent  = parent
-        self._offset  = 0
+        self._parent = parent
+        self._offset = 0
         self._sections = []
 
     def Load(self, fd):
@@ -335,8 +343,8 @@ class EfiFfs(object):
         return self._header.GetNameGuid()
 
     def DumpContent(self):
-        list  = self._content.tolist()
-        line  = []
+        list = self._content.tolist()
+        line = []
         count = 0
         for item in list:
             if count < 32:
@@ -358,13 +366,14 @@ class EfiFfs(object):
     def GetSections(self):
         return self._sections
 
+
 class EfiFfsHeader(BinaryItem):
-    ffs_state_map = {0x01:'EFI_FILE_HEADER_CONSTRUCTION',
-                     0x02:'EFI_FILE_HEADER_VALID',
-                     0x04:'EFI_FILE_DATA_VALID',
-                     0x08:'EFI_FILE_MARKED_FOR_UPDATE',
-                     0x10:'EFI_FILE_DELETED',
-                     0x20:'EFI_FILE_HEADER_INVALID'}
+    ffs_state_map = {0x01: 'EFI_FILE_HEADER_CONSTRUCTION',
+                     0x02: 'EFI_FILE_HEADER_VALID',
+                     0x04: 'EFI_FILE_DATA_VALID',
+                     0x08: 'EFI_FILE_MARKED_FOR_UPDATE',
+                     0x10: 'EFI_FILE_DELETED',
+                     0x20: 'EFI_FILE_HEADER_INVALID'}
 
     def GetSize(self):
         return 24
@@ -376,7 +385,6 @@ class EfiFfsHeader(BinaryItem):
     def GetType(self):
         list = self._arr.tolist()
         return int(list[18])
-
 
     def GetTypeString(self):
         value = self.GetType()
@@ -454,7 +462,7 @@ class EfiSection(object):
     EFI_SECTION_HEADER_SIZE = 4
 
     def __init__(self, parent=None):
-        self._size   = 0
+        self._size = 0
         self._parent = parent
         self._offset = 0
         self._contents = array.array('B')
@@ -465,8 +473,8 @@ class EfiSection(object):
         self._header = EfiSectionHeader.Read(fd, self)
 
         if self._header.GetTypeString() == "EFI_SECTION_PE32":
-             pefile = pe.PEFile(self)
-             pefile.Load(fd, self.GetContentSize())
+            pefile = pe.PEFile(self)
+            pefile.Load(fd, self.GetContentSize())
 
         fd.seek(self._offset)
         self._contents.fromfile(fd, self.GetContentSize())
@@ -491,6 +499,7 @@ class EfiSection(object):
     def GetSectionOffset(self):
         return self._offset + self.EFI_SECTION_HEADER_SIZE
 
+
 class EfiSectionHeader(BinaryItem):
     section_type_map = {0x01: 'EFI_SECTION_COMPRESSION',
                         0x02: 'EFI_SECTION_GUID_DEFINED',
@@ -505,6 +514,7 @@ class EfiSectionHeader(BinaryItem):
                         0x18: 'EFI_SECTION_FREEFORM_SUBTYPE_GUID',
                         0x19: 'EFI_SECTION_RAW',
                         0x1B: 'EFI_SECTION_PEI_DEPEX'}
+
     def GetSize(self):
         return 4
 
@@ -527,8 +537,10 @@ class EfiSectionHeader(BinaryItem):
         print('type = 0x%X' % self.GetType())
 
 
+rMapEntry = re.compile(
+    '^(\w+)[ \(\w\)]* \(BaseAddress=([0-9a-fA-F]+), EntryPoint=([0-9a-fA-F]+), GUID=([0-9a-fA-F\-]+)')
 
-rMapEntry = re.compile('^(\w+)[ \(\w\)]* \(BaseAddress=([0-9a-fA-F]+), EntryPoint=([0-9a-fA-F]+), GUID=([0-9a-fA-F\-]+)')
+
 class EfiFvMapFile(object):
     def __init__(self):
         self._mapentries = {}
@@ -549,12 +561,13 @@ class EfiFvMapFile(object):
                 # new entry
                 ret = rMapEntry.match(line)
                 if ret is not None:
-                    name     = ret.groups()[0]
+                    name = ret.groups()[0]
                     baseaddr = int(ret.groups()[1], 16)
-                    entry    = int(ret.groups()[2], 16)
-                    guidstr  = '{' + ret.groups()[3] + '}'
-                    guid     = uuid.UUID(guidstr)
-                    self._mapentries[guid] = EfiFvMapFileEntry(name, baseaddr, entry, guid)
+                    entry = int(ret.groups()[2], 16)
+                    guidstr = '{' + ret.groups()[3] + '}'
+                    guid = uuid.UUID(guidstr)
+                    self._mapentries[guid] = EfiFvMapFileEntry(
+                        name, baseaddr, entry, guid)
         return True
 
     def GetEntry(self, guid):
@@ -562,12 +575,13 @@ class EfiFvMapFile(object):
             return self._mapentries[guid]
         return None
 
+
 class EfiFvMapFileEntry(object):
     def __init__(self, name, baseaddr, entry, guid):
-        self._name     = name
+        self._name = name
         self._baseaddr = baseaddr
-        self._entry    = entry
-        self._guid     = guid
+        self._entry = entry
+        self._guid = guid
 
     def GetName(self):
         return self._name
@@ -578,6 +592,7 @@ class EfiFvMapFileEntry(object):
     def GetEntryPoint(self):
         return self._entry
 
+
 def list2guid(list):
     val1 = list2int(list[0:4])
     val2 = list2int(list[4:6])
@@ -586,9 +601,10 @@ def list2guid(list):
     for item in list[8:16]:
         val4 = (val4 << 8) | int(item)
 
-    val  = val1 << 12 * 8 | val2 << 10 * 8 | val3 << 8 * 8 | val4
+    val = val1 << 12 * 8 | val2 << 10 * 8 | val3 << 8 * 8 | val4
     guid = uuid.UUID(int=val)
     return guid
+
 
 def list2int(list):
     val = 0
@@ -596,10 +612,14 @@ def list2int(list):
         val = (val << 8) | int(list[index])
     return val
 
+
 def align(value, alignment):
     return (value + ((alignment - value) & (alignment - 1)))
 
+
 gInvalidGuid = uuid.UUID(int=0xffffffffffffffffffffffffffffffff)
+
+
 def isValidGuid(guid):
     if guid == gInvalidGuid:
         return False

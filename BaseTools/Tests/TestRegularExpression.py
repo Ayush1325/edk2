@@ -1,4 +1,4 @@
-## @file
+# @file
 # Routines for generating Pcd Database
 #
 # Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
@@ -7,6 +7,7 @@
 import unittest
 from Common.Misc import RemoveCComments
 from Workspace.BuildClassObject import ArrayIndex
+
 
 class TestRe(unittest.TestCase):
     def test_ccomments(self):
@@ -42,7 +43,9 @@ class TestRe(unittest.TestCase):
         self.assertEquals(['[1]'], ArrayIndex.findall(TestStr1))
 
         TestStr2 = """[1][2][0x1][0x01][]"""
-        self.assertEquals(['[1]','[2]','[0x1]','[0x01]','[]'], ArrayIndex.findall(TestStr2))
+        self.assertEquals(['[1]', '[2]', '[0x1]', '[0x01]',
+                          '[]'], ArrayIndex.findall(TestStr2))
+
 
 if __name__ == '__main__':
     unittest.main()

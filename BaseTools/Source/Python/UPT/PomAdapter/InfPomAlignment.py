@@ -1,4 +1,4 @@
-## @file InfPomAlignment.py
+# @file InfPomAlignment.py
 # This file contained the adapter for convert INF parser object to POM Object
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -47,12 +47,14 @@ from Parser import InfParser
 from PomAdapter.DecPomAlignment import DecPomAlignment
 from Common.MultipleWorkspace import MultipleWorkspace as mws
 
-## InfPomAlignment
+# InfPomAlignment
 #
 # Inherit from ModuleObject
 #
+
+
 class InfPomAlignment(ModuleObject):
-    ## Construct of InfPomAlignment
+    # Construct of InfPomAlignment
     # Skip means that UPT don't care the syntax of INF, this may be the not
     # distributed INF files during creation or the INF files checked for
     # dependency rule during remove.
@@ -110,7 +112,7 @@ class InfPomAlignment(ModuleObject):
         self._GenGuidProtocolPpis(DT.TAB_PPIS)
         self._GenDepexes()
 
-    ## Convert [Defines] section content to InfDefObject
+    # Convert [Defines] section content to InfDefObject
     #
     # Convert [Defines] section content to InfDefObject
     #
@@ -152,7 +154,8 @@ class InfPomAlignment(ModuleObject):
         ModulePath = os.path.split(CombinePath)[0]
         ModuleRelativePath = ModulePath
         if self.GetPackagePath() != '':
-            ModuleRelativePath = GetRelativePath(ModulePath, self.GetPackagePath())
+            ModuleRelativePath = GetRelativePath(
+                ModulePath, self.GetPackagePath())
         self.SetModulePath(ModuleRelativePath)
         #
         # For Define Seciton Items.
@@ -173,7 +176,8 @@ class InfPomAlignment(ModuleObject):
         SpecList = DefineObj.GetSpecification()
         NewSpecList = []
         for SpecItem in SpecList:
-            NewSpecList.append((SpecItem[0], ConvertVersionToDecimal(SpecItem[1])))
+            NewSpecList.append(
+                (SpecItem[0], ConvertVersionToDecimal(SpecItem[1])))
         self.SetSpecList(NewSpecList)
 
         #
@@ -205,7 +209,8 @@ class InfPomAlignment(ModuleObject):
         else:
             self.SetBaseName(DefineObj.GetBaseName().GetValue())
         if DefineObj.GetModuleUniFileName():
-            self.UniFileClassObject = UniFileClassObject([PathClass(DefineObj.GetModuleUniFileName())])
+            self.UniFileClassObject = UniFileClassObject(
+                [PathClass(DefineObj.GetModuleUniFileName())])
         else:
             self.UniFileClassObject = None
         if DefineObj.GetInfVersion() is None:
@@ -248,7 +253,8 @@ class InfPomAlignment(ModuleObject):
         if DefineObj.GetShadow():
             ModuleTypeValue = DefineObj.GetModuleType().GetValue()
             if not (ModuleTypeValue == 'SEC' or ModuleTypeValue == 'PEI_CORE' or ModuleTypeValue == 'PEIM'):
-                Logger.Error("InfParser", FORMAT_INVALID, ST.ERR_INF_PARSER_DEFINE_SHADOW_INVALID, File=self.FullPath)
+                Logger.Error("InfParser", FORMAT_INVALID,
+                             ST.ERR_INF_PARSER_DEFINE_SHADOW_INVALID, File=self.FullPath)
 
         if DefineObj.GetPcdIsDriver() is not None:
             self.SetPcdIsDriver(DefineObj.GetPcdIsDriver().GetValue())
@@ -284,7 +290,8 @@ class InfPomAlignment(ModuleObject):
             UserExtension.SetDefinesDict(DefinesDictNew)
             UserExtension.SetIdentifier('DefineModifiers')
             UserExtension.SetUserID('EDK2')
-            self.SetUserExtensionList(self.GetUserExtensionList() + [UserExtension])
+            self.SetUserExtensionList(
+                self.GetUserExtensionList() + [UserExtension])
         #
         # Get all meta-file header information
         # the record is list of items formatted:
@@ -311,15 +318,18 @@ class InfPomAlignment(ModuleObject):
         #
         InfBinaryHeaderObj = self.Parser.InfBinaryHeader
         if InfBinaryHeaderObj.GetAbstract():
-            self.SetBinaryHeaderAbstract((Lang, InfBinaryHeaderObj.GetAbstract()))
+            self.SetBinaryHeaderAbstract(
+                (Lang, InfBinaryHeaderObj.GetAbstract()))
         if InfBinaryHeaderObj.GetDescription():
-            self.SetBinaryHeaderDescription((Lang, InfBinaryHeaderObj.GetDescription()))
+            self.SetBinaryHeaderDescription(
+                (Lang, InfBinaryHeaderObj.GetDescription()))
         if InfBinaryHeaderObj.GetCopyright():
-            self.SetBinaryHeaderCopyright(('', InfBinaryHeaderObj.GetCopyright()))
+            self.SetBinaryHeaderCopyright(
+                ('', InfBinaryHeaderObj.GetCopyright()))
         if InfBinaryHeaderObj.GetLicense():
             self.SetBinaryHeaderLicense(('', InfBinaryHeaderObj.GetLicense()))
 
-    ## GenModuleHeaderLibClass
+    # GenModuleHeaderLibClass
     #
     #
     def _GenModuleHeaderLibClass(self, DefineObj, ArchList):
@@ -334,9 +344,10 @@ class InfPomAlignment(ModuleObject):
             Lib.SetSupArchList(ArchList)
             self.SetLibraryClassList(self.GetLibraryClassList() + [Lib])
             self.SetIsLibrary(True)
-            self.SetIsLibraryModList(self.GetIsLibraryModList() + SupModuleList)
+            self.SetIsLibraryModList(
+                self.GetIsLibraryModList() + SupModuleList)
 
-    ## GenModuleHeaderExterns
+    # GenModuleHeaderExterns
     #
     #
     def _GenModuleHeaderExterns(self, DefineObj):
@@ -382,7 +393,7 @@ class InfPomAlignment(ModuleObject):
             Image.SetDestructor(DestructorItem.GetCName())
             self.SetExternList(self.GetExternList() + [Image])
 
-    ## GenModuleHeaderExterns
+    # GenModuleHeaderExterns
     # BootMode/HOB/Event
     #
     def _GenSpecialComments(self):
@@ -421,7 +432,8 @@ class InfPomAlignment(ModuleObject):
                 BootModeList = []
                 for Item in SpecialCommentsList[Key]:
                     BootMode = BootModeObject()
-                    BootMode.SetSupportedBootModes(Item.GetSupportedBootModes())
+                    BootMode.SetSupportedBootModes(
+                        Item.GetSupportedBootModes())
                     BootMode.SetUsage(Item.GetUsage())
                     if Item.GetHelpString():
                         HelpTextObj = CommonObject.TextObject()
@@ -432,7 +444,7 @@ class InfPomAlignment(ModuleObject):
                     BootModeList.append(BootMode)
                 self.SetBootModeList(BootModeList)
 
-    ## GenBuildOptions
+    # GenBuildOptions
     #
     # Gen BuildOptions of Inf
     # [<Family>:]<ToolFlag>=Flag
@@ -460,14 +472,15 @@ class InfPomAlignment(ModuleObject):
             UserExtension.SetBuildOptionDict(BuildOptionDict)
             UserExtension.SetIdentifier('BuildOptionModifiers')
             UserExtension.SetUserID('EDK2')
-            self.SetUserExtensionList(self.GetUserExtensionList() + [UserExtension])
+            self.SetUserExtensionList(
+                self.GetUserExtensionList() + [UserExtension])
         else:
             #
             # Not process this information, will be processed in GenBinaries()
             #
             pass
 
-    ## GenLibraryClasses
+    # GenLibraryClasses
     #
     # Get LibraryClass of Inf
     # <LibraryClassKeyWord>|<LibraryInstance>
@@ -487,7 +500,8 @@ class InfPomAlignment(ModuleObject):
                     LibraryClass.SetLibraryClass(Item.GetLibName())
                     LibraryClass.SetRecommendedInstance(None)
                     LibraryClass.SetFeatureFlag(Item.GetFeatureFlagExp())
-                    LibraryClass.SetSupArchList(ConvertArchList(Item.GetSupArchList()))
+                    LibraryClass.SetSupArchList(
+                        ConvertArchList(Item.GetSupArchList()))
                     LibraryClass.SetSupModuleList(Item.GetSupModuleList())
                     HelpStringObj = Item.GetHelpString()
                     if HelpStringObj is not None:
@@ -498,9 +512,10 @@ class InfPomAlignment(ModuleObject):
                             HelpTextHeaderObj.SetLang(DT.TAB_LANGUAGE_EN_X)
                         HelpTextHeaderObj.SetString(CommentString)
                         LibraryClass.SetHelpTextList([HelpTextHeaderObj])
-                    self.SetLibraryClassList(self.GetLibraryClassList() + [LibraryClass])
+                    self.SetLibraryClassList(
+                        self.GetLibraryClassList() + [LibraryClass])
 
-    ## GenPackages
+    # GenPackages
     #
     # Gen Packages of Inf
     #
@@ -521,11 +536,15 @@ class InfPomAlignment(ModuleObject):
             # Need package information for dependency check usage
             #
             PackageDependency = PackageDependencyObject()
-            PackageDependency.SetPackageFilePath(NormPath(PackageItemObj.GetPackageName()))
-            PackageDependency.SetSupArchList(ConvertArchList(PackageItemObj.GetSupArchList()))
-            PackageDependency.SetFeatureFlag(PackageItemObj.GetFeatureFlagExp())
+            PackageDependency.SetPackageFilePath(
+                NormPath(PackageItemObj.GetPackageName()))
+            PackageDependency.SetSupArchList(
+                ConvertArchList(PackageItemObj.GetSupArchList()))
+            PackageDependency.SetFeatureFlag(
+                PackageItemObj.GetFeatureFlagExp())
 
-            PkgInfo = GetPkgInfoFromDec(mws.join(self.WorkSpace, NormPath(PackageItemObj.GetPackageName())))
+            PkgInfo = GetPkgInfoFromDec(
+                mws.join(self.WorkSpace, NormPath(PackageItemObj.GetPackageName())))
             if PkgInfo[1] and PkgInfo[2]:
                 PackageDependency.SetGuid(PkgInfo[1])
                 PackageDependency.SetVersion(PkgInfo[2])
@@ -539,7 +558,7 @@ class InfPomAlignment(ModuleObject):
             PackageDependencyList.append(PackageDependency)
             self.SetPackageDependencyList(PackageDependencyList)
 
-    ## GenPcds
+    # GenPcds
     #
     # Gen Pcds of Inf
     # <TokenSpaceGuidCName>.<PcdCName>[|<Value> [|<FFE>]]
@@ -565,22 +584,25 @@ class InfPomAlignment(ModuleObject):
                         for CommentItem in CommentList:
                             Pcd = CommonObject.PcdObject()
                             Pcd.SetCName(PcdItemObj.GetCName())
-                            Pcd.SetTokenSpaceGuidCName(PcdItemObj.GetTokenSpaceGuidCName())
+                            Pcd.SetTokenSpaceGuidCName(
+                                PcdItemObj.GetTokenSpaceGuidCName())
                             Pcd.SetDefaultValue(PcdItemObj.GetDefaultValue())
                             Pcd.SetItemType(PcdType)
                             Pcd.SetValidUsage(CommentItem.GetUsageItem())
                             Pcd.SetFeatureFlag(PcdItemObj.GetFeatureFlagExp())
-                            Pcd.SetSupArchList(ConvertArchList(PcdItemObj.GetSupportArchList()))
+                            Pcd.SetSupArchList(ConvertArchList(
+                                PcdItemObj.GetSupportArchList()))
                             HelpTextObj = CommonObject.TextObject()
                             if self.UniFileClassObject:
                                 HelpTextObj.SetLang(DT.TAB_LANGUAGE_EN_X)
-                            HelpTextObj.SetString(CommentItem.GetHelpStringItem())
+                            HelpTextObj.SetString(
+                                CommentItem.GetHelpStringItem())
                             Pcd.SetHelpTextList([HelpTextObj])
                             PcdList = self.GetPcdList()
                             PcdList.append(Pcd)
                 self.SetPcdList(PcdList)
 
-    ## GenSources
+    # GenSources
     #
     # Gen Sources of Inf
     # <Filename>[|<Family>[|<TagName>[|<ToolCode>[|<PcdFeatureFlag>]]]]
@@ -615,11 +637,11 @@ class InfPomAlignment(ModuleObject):
 
         self.SetSourceFileList(self.GetSourceFileList() + SourceList)
 
-
-    ## GenUserExtensions
+    # GenUserExtensions
     #
     # Gen UserExtensions of Inf
     #
+
     def _GenUserExtensions(self):
         #
         # UserExtensions
@@ -645,19 +667,21 @@ class InfPomAlignment(ModuleObject):
                     self._GenMiscFiles(UserExtensionDataObj.GetContent())
                 UserExtension.SetIdentifier(Identifier)
                 UserExtension.SetStatement(UserExtensionDataObj.GetContent())
-                UserExtension.SetSupArchList(ConvertArchList(UserExtensionDataObj.GetSupArchList()))
-                self.SetUserExtensionList(self.GetUserExtensionList() + [UserExtension])
+                UserExtension.SetSupArchList(ConvertArchList(
+                    UserExtensionDataObj.GetSupArchList()))
+                self.SetUserExtensionList(
+                    self.GetUserExtensionList() + [UserExtension])
 
         #
         #  Gen UserExtensions of TianoCore."BinaryHeader"
         #
 
-        #Get Binary header from INF file
+        # Get Binary header from INF file
         BinaryAbstractList = self.BinaryHeaderAbstractList
         BinaryDescriptionList = self.BinaryHeaderDescriptionList
         BinaryCopyrightList = self.BinaryHeaderCopyrightList
         BinaryLicenseList = self.BinaryHeaderLicenseList
-        #Get Binary header from UNI file
+        # Get Binary header from UNI file
         # Initialize UniStrDict, the top keys are language codes
         UniStrDict = {}
         if self.UniFileClassObject:
@@ -666,9 +690,11 @@ class InfPomAlignment(ModuleObject):
                 for StringDefClassObject in UniStrDict[Lang]:
                     Lang = GetLanguageCode1766(Lang)
                     if StringDefClassObject.StringName == DT.TAB_INF_BINARY_ABSTRACT:
-                        BinaryAbstractList.append((Lang, ConvertSpecialUnicodes(StringDefClassObject.StringValue)))
+                        BinaryAbstractList.append(
+                            (Lang, ConvertSpecialUnicodes(StringDefClassObject.StringValue)))
                     if StringDefClassObject.StringName == DT.TAB_INF_BINARY_DESCRIPTION:
-                        BinaryDescriptionList.append((Lang, ConvertSpecialUnicodes(StringDefClassObject.StringValue)))
+                        BinaryDescriptionList.append(
+                            (Lang, ConvertSpecialUnicodes(StringDefClassObject.StringValue)))
         if BinaryAbstractList or BinaryDescriptionList or BinaryCopyrightList or BinaryLicenseList:
             BinaryUserExtension = CommonObject.UserExtensionObject()
             BinaryUserExtension.SetBinaryAbstract(BinaryAbstractList)
@@ -677,7 +703,8 @@ class InfPomAlignment(ModuleObject):
             BinaryUserExtension.SetBinaryLicense(BinaryLicenseList)
             BinaryUserExtension.SetIdentifier(DT.TAB_BINARY_HEADER_IDENTIFIER)
             BinaryUserExtension.SetUserID(DT.TAB_BINARY_HEADER_USERID)
-            self.SetUserExtensionList(self.GetUserExtensionList() + [BinaryUserExtension])
+            self.SetUserExtensionList(
+                self.GetUserExtensionList() + [BinaryUserExtension])
 
     def _GenDepexesList(self, SmmDepexList, DxeDepexList, PeiDepexList):
         if SmmDepexList:
@@ -687,7 +714,7 @@ class InfPomAlignment(ModuleObject):
         if PeiDepexList:
             self.SetPeiDepex(PeiDepexList)
 
-    ## GenDepexes
+    # GenDepexes
     #
     # Gen Depex of Inf
     #
@@ -737,7 +764,8 @@ class InfPomAlignment(ModuleObject):
                     ModuleType = self.ModuleType
                 if ModuleType not in DT.VALID_DEPEX_MODULE_TYPE_LIST:
                     Logger.Error("\nMkPkg", PARSER_ERROR,
-                                 ST.ERR_INF_PARSER_DEPEX_SECTION_MODULE_TYPE_ERROR % (ModuleType),
+                                 ST.ERR_INF_PARSER_DEPEX_SECTION_MODULE_TYPE_ERROR % (
+                                     ModuleType),
                                  self.GetFullPath(), RaiseError=True)
                 if ModuleType != self.ModuleType:
                     Logger.Error("\nMkPkg", PARSER_ERROR, ST.ERR_INF_PARSER_DEPEX_SECTION_NOT_DETERMINED,
@@ -757,7 +785,8 @@ class InfPomAlignment(ModuleObject):
                     HelpIns = CommonObject.TextObject()
                     if self.UniFileClassObject:
                         HelpIns.SetLang(DT.TAB_LANGUAGE_EN_X)
-                    HelpIns.SetString(GetHelpStringByRemoveHashKey(Depex.HelpString))
+                    HelpIns.SetString(
+                        GetHelpStringByRemoveHashKey(Depex.HelpString))
                     DepexIns.SetHelpText(HelpIns)
 
                 if ModuleType in SMM_LIST:
@@ -773,11 +802,11 @@ class InfPomAlignment(ModuleObject):
                         Logger.Error("\nMkPkg", PARSER_ERROR, ST.ERR_INF_PARSER_DEPEX_SECTION_INVALID_FOR_DRIVER,
                                      self.GetFullPath(), RaiseError=True)
 
-            #End of for ModuleType in ModuleTypeList
+            # End of for ModuleType in ModuleTypeList
             self._GenDepexesList(SmmDepexList, DxeDepexList, PeiDepexList)
-        #End of for Depex in DepexData
+        # End of for Depex in DepexData
 
-    ## GenBinaries
+    # GenBinaries
     #
     # Gen Binary of Inf, must be called after Pcd/Library is generated
     # <FileType>|<Filename>|<Target>[|<TokenSpaceGuidCName>.<PcdCName>]
@@ -829,7 +858,8 @@ class InfPomAlignment(ModuleObject):
         #
         # PatchPcd and PcdEx
         #
-        AsBuildIns = self._GenAsBuiltPcds(self.Parser.InfPcdSection.GetPcds(), AsBuildIns)
+        AsBuildIns = self._GenAsBuiltPcds(
+            self.Parser.InfPcdSection.GetPcds(), AsBuildIns)
 
         #
         # Parse the DEC file that contains the GUID value of the GUID CName which is used by
@@ -843,13 +873,15 @@ class InfPomAlignment(ModuleObject):
                 TempPath = ModulePath
                 ModulePath = os.path.dirname(ModulePath)
             PackageName = TempPath
-            DecFilePath = os.path.normpath(os.path.join(WorkSpace, PackageName))
+            DecFilePath = os.path.normpath(
+                os.path.join(WorkSpace, PackageName))
             if DecFilePath:
                 for File in os.listdir(DecFilePath):
                     if File.upper().endswith('.DEC'):
-                        DecFileFullPath = os.path.normpath(os.path.join(DecFilePath, File))
-                        DecObjList.append(DecPomAlignment(DecFileFullPath, self.WorkSpace))
-
+                        DecFileFullPath = os.path.normpath(
+                            os.path.join(DecFilePath, File))
+                        DecObjList.append(DecPomAlignment(
+                            DecFileFullPath, self.WorkSpace))
 
         BinariesDict, AsBuildIns, BinaryFileObjectList = GenBinaryData(BinaryData, BinaryObj,
                                                                        BinariesDict,
@@ -882,9 +914,10 @@ class InfPomAlignment(ModuleObject):
             UserExtension.SetBinariesDict(BinariesDict2)
             UserExtension.SetIdentifier('BinaryFileModifiers')
             UserExtension.SetUserID('EDK2')
-            self.SetUserExtensionList(self.GetUserExtensionList() + [UserExtension])
+            self.SetUserExtensionList(
+                self.GetUserExtensionList() + [UserExtension])
 
-    ## GenAsBuiltPcds
+    # GenAsBuiltPcds
     #
     #
     def _GenAsBuiltPcds(self, PcdList, AsBuildIns):
@@ -902,16 +935,18 @@ class InfPomAlignment(ModuleObject):
                 if PcdItemObj.GetTokenSpaceGuidValue() == '' and self.BinaryModule:
                     Logger.Error("\nMkPkg",
                                  PARSER_ERROR,
-                                 ST.ERR_ASBUILD_PCD_TOKENSPACE_GUID_VALUE_MISS % \
+                                 ST.ERR_ASBUILD_PCD_TOKENSPACE_GUID_VALUE_MISS %
                                  (PcdItemObj.GetTokenSpaceGuidCName()),
                                  self.GetFullPath(), RaiseError=True)
                 else:
-                    Pcd.SetTokenSpaceGuidValue(PcdItemObj.GetTokenSpaceGuidValue())
+                    Pcd.SetTokenSpaceGuidValue(
+                        PcdItemObj.GetTokenSpaceGuidValue())
                 if (PcdItemObj.GetToken() == '' or PcdItemObj.GetDatumType() == '') and self.BinaryModule:
                     Logger.Error("\nMkPkg",
                                  PARSER_ERROR,
-                                 ST.ERR_ASBUILD_PCD_DECLARITION_MISS % \
-                                 (PcdItemObj.GetTokenSpaceGuidCName() + '.' + PcdItemObj.GetCName()),
+                                 ST.ERR_ASBUILD_PCD_DECLARITION_MISS %
+                                 (PcdItemObj.GetTokenSpaceGuidCName() +
+                                  '.' + PcdItemObj.GetCName()),
                                  self.GetFullPath(), RaiseError=True)
                 Pcd.SetToken(PcdItemObj.GetToken())
                 Pcd.SetDatumType(PcdItemObj.GetDatumType())
@@ -920,7 +955,8 @@ class InfPomAlignment(ModuleObject):
                 Pcd.SetOffset(PcdItemObj.GetOffset())
                 Pcd.SetItemType(PcdItem[0])
                 Pcd.SetFeatureFlag(PcdItemObj.GetFeatureFlagExp())
-                Pcd.SetSupArchList(ConvertArchList(PcdItemObj.GetSupportArchList()))
+                Pcd.SetSupArchList(ConvertArchList(
+                    PcdItemObj.GetSupportArchList()))
                 Pcd.SetValidUsage(PcdItemObj.GetValidUsage())
                 for CommentItem in PcdItemObj.GetHelpStringList():
                     HelpTextObj = CommonObject.TextObject()
@@ -939,7 +975,8 @@ class InfPomAlignment(ModuleObject):
                 Pcd.SetDefaultValue(PcdItemObj.GetDefaultValue())
                 Pcd.SetItemType(PcdItem[0])
                 Pcd.SetFeatureFlag(PcdItemObj.GetFeatureFlagExp())
-                Pcd.SetSupArchList(ConvertArchList(PcdItemObj.GetSupportArchList()))
+                Pcd.SetSupArchList(ConvertArchList(
+                    PcdItemObj.GetSupportArchList()))
                 Pcd.SetValidUsage(PcdItemObj.GetValidUsage())
                 for CommentItem in PcdItemObj.GetHelpStringList():
                     HelpTextObj = CommonObject.TextObject()
@@ -953,7 +990,7 @@ class InfPomAlignment(ModuleObject):
 
         return AsBuildIns
 
-    ## GenGuidProtocolPpis
+    # GenGuidProtocolPpis
     #
     # Gen Guids/Protocol/Ppis of INF
     # <CName>=<GuidValue>
@@ -980,12 +1017,15 @@ class InfPomAlignment(ModuleObject):
                 if CommentList:
                     for GuidComentItem in CommentList:
                         ListObject = CommonObject.GuidObject()
-                        ListObject.SetGuidTypeList([GuidComentItem.GetGuidTypeItem()])
-                        ListObject.SetVariableName(GuidComentItem.GetVariableNameItem())
+                        ListObject.SetGuidTypeList(
+                            [GuidComentItem.GetGuidTypeItem()])
+                        ListObject.SetVariableName(
+                            GuidComentItem.GetVariableNameItem())
                         ListObject.SetUsage(GuidComentItem.GetUsageItem())
                         ListObject.SetName(Item.GetName())
                         ListObject.SetCName(Item.GetName())
-                        ListObject.SetSupArchList(ConvertArchList(Item.GetSupArchList()))
+                        ListObject.SetSupArchList(
+                            ConvertArchList(Item.GetSupArchList()))
                         ListObject.SetFeatureFlag(Item.GetFeatureFlagExp())
                         HelpString = GuidComentItem.GetHelpStringItem()
                         if HelpString.strip():
@@ -1003,7 +1043,8 @@ class InfPomAlignment(ModuleObject):
                 for CommentItem in CommentList:
                     ListObject = CommonObject.ProtocolObject()
                     ListObject.SetCName(Item.GetName())
-                    ListObject.SetSupArchList(ConvertArchList(Item.GetSupArchList()))
+                    ListObject.SetSupArchList(
+                        ConvertArchList(Item.GetSupArchList()))
                     ListObject.SetFeatureFlag(Item.GetFeatureFlagExp())
                     ListObject.SetNotify(CommentItem.GetNotify())
                     ListObject.SetUsage(CommentItem.GetUsageItem())
@@ -1022,7 +1063,8 @@ class InfPomAlignment(ModuleObject):
                 for CommentItem in CommentList:
                     ListObject = CommonObject.PpiObject()
                     ListObject.SetCName(Item.GetName())
-                    ListObject.SetSupArchList(ConvertArchList(Item.GetSupArchList()))
+                    ListObject.SetSupArchList(
+                        ConvertArchList(Item.GetSupArchList()))
                     ListObject.SetFeatureFlag(Item.GetFeatureFlagExp())
                     ListObject.SetNotify(CommentItem.GetNotify())
                     ListObject.SetUsage(CommentItem.GetUsage())
@@ -1042,7 +1084,7 @@ class InfPomAlignment(ModuleObject):
         elif Type == DT.TAB_PPIS:
             self.SetPpiList(self.GetPpiList() + GuidProtocolPpiList)
 
-    ## GenMiscFiles
+    # GenMiscFiles
     #
     # Gen MiscellaneousFiles of Inf
     #
@@ -1060,12 +1102,13 @@ class InfPomAlignment(ModuleObject):
                 if IsValidPath(FileName, GlobalData.gINF_MODULE_DIR):
                     FileObj = CommonObject.FileObject()
                     FileObj.SetURI(FileName)
-                    MiscFileObj.SetFileList(MiscFileObj.GetFileList()+[FileObj])
+                    MiscFileObj.SetFileList(
+                        MiscFileObj.GetFileList()+[FileObj])
                 else:
                     Logger.Error("InfParser",
                                  FORMAT_INVALID,
-                                 ST.ERR_INF_PARSER_FILE_NOT_EXIST_OR_NAME_INVALID%(Line),
+                                 ST.ERR_INF_PARSER_FILE_NOT_EXIST_OR_NAME_INVALID % (
+                                     Line),
                                  File=GlobalData.gINF_MODULE_NAME,
                                  ExtraData=Line)
         self.SetMiscFileList(self.GetMiscFileList()+[MiscFileObj])
-

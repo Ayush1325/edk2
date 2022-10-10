@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to define the functions to operate bios binary file.
 #
 # Copyright (c) 2021-, Intel Corporation. All rights reserved.<BR>
@@ -13,7 +13,9 @@ global Fv_count
 Fv_count = 0
 
 # The ROOT_TYPE can be 'ROOT_TREE', 'ROOT_FV_TREE', 'ROOT_FFS_TREE', 'ROOT_SECTION_TREE'
-def ViewFile(inputfile: str, ROOT_TYPE: str, layoutfile: str=None, outputfile: str=None) -> None:
+
+
+def ViewFile(inputfile: str, ROOT_TYPE: str, layoutfile: str = None, outputfile: str = None) -> None:
     if not os.path.exists(inputfile):
         logger.error("Invalid inputfile, can not open {}.".format(inputfile))
         raise Exception("Process Failed: Invalid inputfile!")
@@ -36,9 +38,11 @@ def ViewFile(inputfile: str, ROOT_TYPE: str, layoutfile: str=None, outputfile: s
             layoutfilename = layoutfile
             layoutfileformat = os.path.splitext(layoutfile)[1][1:].lower()
         else:
-            layoutfilename = "Layout_{}{}".format(os.path.basename(inputfile),".{}".format(layoutfile.lower()))
+            layoutfilename = "Layout_{}{}".format(os.path.basename(
+                inputfile), ".{}".format(layoutfile.lower()))
             layoutfileformat = layoutfile.lower()
-        GetFormatter(layoutfileformat).dump(InfoDict, FmmtParser.BinaryInfo, layoutfilename)
+        GetFormatter(layoutfileformat).dump(
+            InfoDict, FmmtParser.BinaryInfo, layoutfilename)
     # 4. Data Encapsulation
     if outputfile:
         logger.debug('Start encapsulating data......')
@@ -47,7 +51,8 @@ def ViewFile(inputfile: str, ROOT_TYPE: str, layoutfile: str=None, outputfile: s
             f.write(FmmtParser.FinalData)
         logger.debug('Encapsulated data is saved in {}.'.format(outputfile))
 
-def DeleteFfs(inputfile: str, TargetFfs_name: str, outputfile: str, Fv_name: str=None) -> None:
+
+def DeleteFfs(inputfile: str, TargetFfs_name: str, outputfile: str, Fv_name: str = None) -> None:
     if not os.path.exists(inputfile):
         logger.error("Invalid inputfile, can not open {}.".format(inputfile))
         raise Exception("Process Failed: Invalid inputfile!")
@@ -60,7 +65,8 @@ def DeleteFfs(inputfile: str, TargetFfs_name: str, outputfile: str, Fv_name: str
     FmmtParser.ParserFromRoot(FmmtParser.WholeFvTree, whole_data)
     logger.debug('Done!')
     # 3. Data Modify
-    FmmtParser.WholeFvTree.FindNode(TargetFfs_name, FmmtParser.WholeFvTree.Findlist)
+    FmmtParser.WholeFvTree.FindNode(
+        TargetFfs_name, FmmtParser.WholeFvTree.Findlist)
     # Choose the Specfic DeleteFfs with Fv info
     if Fv_name:
         for item in FmmtParser.WholeFvTree.Findlist:
@@ -80,6 +86,7 @@ def DeleteFfs(inputfile: str, TargetFfs_name: str, outputfile: str, Fv_name: str
         with open(outputfile, "wb") as f:
             f.write(FmmtParser.FinalData)
         logger.debug('Encapsulated data is saved in {}.'.format(outputfile))
+
 
 def AddNewFfs(inputfile: str, Fv_name: str, newffsfile: str, outputfile: str) -> None:
     if not os.path.exists(inputfile):
@@ -109,11 +116,14 @@ def AddNewFfs(inputfile: str, Fv_name: str, newffsfile: str, outputfile: str) ->
             TargetFfsPad = TargetFv.Child[-1]
             logger.debug('Parsing newffsfile data......')
             if TargetFfsPad.type == FFS_FREE_SPACE:
-                NewFmmtParser.ParserFromRoot(NewFmmtParser.WholeFvTree, new_ffs_data, TargetFfsPad.Data.HOffset)
+                NewFmmtParser.ParserFromRoot(
+                    NewFmmtParser.WholeFvTree, new_ffs_data, TargetFfsPad.Data.HOffset)
             else:
-                NewFmmtParser.ParserFromRoot(NewFmmtParser.WholeFvTree, new_ffs_data, TargetFfsPad.Data.HOffset+TargetFfsPad.Data.Size)
+                NewFmmtParser.ParserFromRoot(
+                    NewFmmtParser.WholeFvTree, new_ffs_data, TargetFfsPad.Data.HOffset+TargetFfsPad.Data.Size)
             logger.debug('Done!')
-            FfsMod = FvHandler(NewFmmtParser.WholeFvTree.Child[0], TargetFfsPad)
+            FfsMod = FvHandler(
+                NewFmmtParser.WholeFvTree.Child[0], TargetFfsPad)
             Status = FfsMod.AddFfs()
     else:
         logger.error('Target Fv not found!!!')
@@ -125,7 +135,8 @@ def AddNewFfs(inputfile: str, Fv_name: str, newffsfile: str, outputfile: str) ->
             f.write(FmmtParser.FinalData)
         logger.debug('Encapsulated data is saved in {}.'.format(outputfile))
 
-def ReplaceFfs(inputfile: str, Ffs_name: str, newffsfile: str, outputfile: str, Fv_name: str=None) -> None:
+
+def ReplaceFfs(inputfile: str, Ffs_name: str, newffsfile: str, outputfile: str, Fv_name: str = None) -> None:
     if not os.path.exists(inputfile):
         logger.error("Invalid inputfile, can not open {}.".format(inputfile))
         raise Exception("Process Failed: Invalid inputfile!")
@@ -146,7 +157,8 @@ def ReplaceFfs(inputfile: str, Ffs_name: str, newffsfile: str, outputfile: str, 
     Status = False
     # 3. Data Modify
     new_ffs = newFmmtParser.WholeFvTree.Child[0]
-    new_ffs.Data.PadData = GetPadSize(new_ffs.Data.Size, FFS_COMMON_ALIGNMENT) * b'\xff'
+    new_ffs.Data.PadData = GetPadSize(
+        new_ffs.Data.Size, FFS_COMMON_ALIGNMENT) * b'\xff'
     FmmtParser.WholeFvTree.FindNode(Ffs_name, FmmtParser.WholeFvTree.Findlist)
     if Fv_name:
         for item in FmmtParser.WholeFvTree.Findlist:
@@ -166,7 +178,8 @@ def ReplaceFfs(inputfile: str, Ffs_name: str, newffsfile: str, outputfile: str, 
             f.write(FmmtParser.FinalData)
         logger.debug('Encapsulated data is saved in {}.'.format(outputfile))
 
-def ExtractFfs(inputfile: str, Ffs_name: str, outputfile: str, Fv_name: str=None) -> None:
+
+def ExtractFfs(inputfile: str, Ffs_name: str, outputfile: str, Fv_name: str = None) -> None:
     if not os.path.exists(inputfile):
         logger.error("Invalid inputfile, can not open {}.".format(inputfile))
         raise Exception("Process Failed: Invalid inputfile!")
@@ -189,7 +202,8 @@ def ExtractFfs(inputfile: str, Ffs_name: str, outputfile: str, Fv_name: str=None
         if TargetFv.Data.Header.Attributes & EFI_FVB2_ERASE_POLARITY:
             TargetNode.Data.Header.State = c_uint8(
                 ~TargetNode.Data.Header.State)
-        FinalData = struct2stream(TargetNode.Data.Header) + TargetNode.Data.Data
+        FinalData = struct2stream(
+            TargetNode.Data.Header) + TargetNode.Data.Data
         with open(outputfile, "wb") as f:
             f.write(FinalData)
         logger.debug('Extract ffs data is saved in {}.'.format(outputfile))

@@ -1,4 +1,4 @@
-## @file
+# @file
 # Create makefile for MS nmake and GNU make
 #
 # Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
@@ -9,7 +9,7 @@ import multiprocessing as mp
 import threading
 from Common.Misc import PathClass
 from AutoGen.ModuleAutoGen import ModuleAutoGen
-from AutoGen.ModuleAutoGenHelper import WorkSpaceInfo,AutoGenInfo
+from AutoGen.ModuleAutoGenHelper import WorkSpaceInfo, AutoGenInfo
 import Common.GlobalData as GlobalData
 import Common.EdkLogger as EdkLogger
 import os
@@ -26,6 +26,7 @@ from AutoGen.DataPipe import MemoryDataPipe
 import logging
 import time
 
+
 def clearQ(q):
     try:
         while True:
@@ -33,16 +34,19 @@ def clearQ(q):
     except Empty:
         pass
 
+
 class LogAgent(threading.Thread):
-    def __init__(self,log_q,log_level,log_file=None):
-        super(LogAgent,self).__init__()
+    def __init__(self, log_q, log_level, log_file=None):
+        super(LogAgent, self).__init__()
         self.log_q = log_q
         self.log_level = log_level
         self.log_file = log_file
+
     def InitLogger(self):
         # For DEBUG level (All DEBUG_0~9 are applicable)
         self._DebugLogger_agent = logging.getLogger("tool_debug_agent")
-        _DebugFormatter = logging.Formatter("[%(asctime)s.%(msecs)d]: %(message)s", datefmt="%H:%M:%S")
+        _DebugFormatter = logging.Formatter(
+            "[%(asctime)s.%(msecs)d]: %(message)s", datefmt="%H:%M:%S")
         self._DebugLogger_agent.setLevel(self.log_level)
         _DebugChannel = logging.StreamHandler(sys.stdout)
         _DebugChannel.setFormatter(_DebugFormatter)
@@ -71,7 +75,7 @@ class LogAgent(threading.Thread):
             _Ch.setFormatter(_DebugFormatter)
             self._DebugLogger_agent.addHandler(_Ch)
 
-            _Ch= logging.FileHandler(self.log_file)
+            _Ch = logging.FileHandler(self.log_file)
             _Ch.setFormatter(_InfoFormatter)
             self._InfoLogger_agent.addHandler(_Ch)
 
@@ -86,23 +90,30 @@ class LogAgent(threading.Thread):
             if log_message is None:
                 break
             if log_message.name == "tool_error":
-                self._ErrorLogger_agent.log(log_message.levelno,log_message.getMessage())
+                self._ErrorLogger_agent.log(
+                    log_message.levelno, log_message.getMessage())
             elif log_message.name == "tool_info":
-                self._InfoLogger_agent.log(log_message.levelno,log_message.getMessage())
+                self._InfoLogger_agent.log(
+                    log_message.levelno, log_message.getMessage())
             elif log_message.name == "tool_debug":
-                self._DebugLogger_agent.log(log_message.levelno,log_message.getMessage())
+                self._DebugLogger_agent.log(
+                    log_message.levelno, log_message.getMessage())
             else:
-                self._InfoLogger_agent.log(log_message.levelno,log_message.getMessage())
+                self._InfoLogger_agent.log(
+                    log_message.levelno, log_message.getMessage())
 
     def kill(self):
         self.log_q.put(None)
+
+
 class AutoGenManager(threading.Thread):
-    def __init__(self,autogen_workers, feedback_q,error_event):
-        super(AutoGenManager,self).__init__()
+    def __init__(self, autogen_workers, feedback_q, error_event):
+        super(AutoGenManager, self).__init__()
         self.autogen_workers = autogen_workers
         self.feedback_q = feedback_q
         self.Status = True
         self.error_event = error_event
+
     def run(self):
         try:
             fin_num = 0
@@ -113,10 +124,12 @@ class AutoGenManager(threading.Thread):
                 if badnews == "Done":
                     fin_num += 1
                 elif badnews == "QueueEmpty":
-                    EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" % (os.getpid(), badnews))
+                    EdkLogger.debug(EdkLogger.DEBUG_9,
+                                    "Worker %s: %s" % (os.getpid(), badnews))
                     self.TerminateWorkers()
                 else:
-                    EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" % (os.getpid(), badnews))
+                    EdkLogger.debug(EdkLogger.DEBUG_9,
+                                    "Worker %s: %s" % (os.getpid(), badnews))
                     self.Status = False
                     self.TerminateWorkers()
                 if fin_num == len(self.autogen_workers):
@@ -143,20 +156,23 @@ class AutoGenManager(threading.Thread):
                     cache_num += 1
                 else:
                     GlobalData.gModuleAllCacheStatus.add(item)
-                if cache_num  == len(self.autogen_workers):
+                if cache_num == len(self.autogen_workers):
                     break
         except:
-            print ("cache_q error")
+            print("cache_q error")
 
     def TerminateWorkers(self):
         self.error_event.set()
+
     def kill(self):
         self.feedback_q.put(None)
+
+
 class AutoGenWorkerInProcess(mp.Process):
-    def __init__(self,module_queue,data_pipe_file_path,feedback_q,file_lock,cache_q,log_q,error_event):
+    def __init__(self, module_queue, data_pipe_file_path, feedback_q, file_lock, cache_q, log_q, error_event):
         mp.Process.__init__(self)
         self.module_queue = module_queue
-        self.data_pipe_file_path =data_pipe_file_path
+        self.data_pipe_file_path = data_pipe_file_path
         self.data_pipe = None
         self.feedback_q = feedback_q
         self.PlatformMetaFileSet = {}
@@ -164,12 +180,14 @@ class AutoGenWorkerInProcess(mp.Process):
         self.cache_q = cache_q
         self.log_q = log_q
         self.error_event = error_event
-    def GetPlatformMetaFile(self,filepath,root):
+
+    def GetPlatformMetaFile(self, filepath, root):
         try:
-            return self.PlatformMetaFileSet[(filepath,root)]
+            return self.PlatformMetaFileSet[(filepath, root)]
         except:
-            self.PlatformMetaFileSet[(filepath,root)]  = filepath
-            return self.PlatformMetaFileSet[(filepath,root)]
+            self.PlatformMetaFileSet[(filepath, root)] = filepath
+            return self.PlatformMetaFileSet[(filepath, root)]
+
     def run(self):
         try:
             taskname = "Init"
@@ -178,7 +196,8 @@ class AutoGenWorkerInProcess(mp.Process):
                     self.data_pipe = MemoryDataPipe()
                     self.data_pipe.load(self.data_pipe_file_path)
                 except:
-                    self.feedback_q.put(taskname + ":" + "load data pipe %s failed." % self.data_pipe_file_path)
+                    self.feedback_q.put(
+                        taskname + ":" + "load data pipe %s failed." % self.data_pipe_file_path)
             EdkLogger.LogClientInitialize(self.log_q)
             loglevel = self.data_pipe.Get("LogLevel")
             if not loglevel:
@@ -193,12 +212,13 @@ class AutoGenWorkerInProcess(mp.Process):
             PackagesPath = os.getenv("PACKAGES_PATH")
             mws.setWs(workspacedir, PackagesPath)
             self.Wa = WorkSpaceInfo(
-                workspacedir,active_p,target,toolchain,archlist
-                )
+                workspacedir, active_p, target, toolchain, archlist
+            )
             self.Wa._SrcTimeStamp = self.data_pipe.Get("Workspace_timestamp")
             GlobalData.gGlobalDefines = self.data_pipe.Get("G_defines")
             GlobalData.gCommandLineDefines = self.data_pipe.Get("CL_defines")
-            GlobalData.gCommandMaxLength = self.data_pipe.Get('gCommandMaxLength')
+            GlobalData.gCommandMaxLength = self.data_pipe.Get(
+                'gCommandMaxLength')
             os.environ._data = self.data_pipe.Get("Env_Var")
             GlobalData.gWorkspace = workspacedir
             GlobalData.gDisableIncludePathCheck = False
@@ -208,23 +228,26 @@ class AutoGenWorkerInProcess(mp.Process):
             GlobalData.gUseHashCache = self.data_pipe.Get("UseHashCache")
             GlobalData.gBinCacheSource = self.data_pipe.Get("BinCacheSource")
             GlobalData.gBinCacheDest = self.data_pipe.Get("BinCacheDest")
-            GlobalData.gPlatformHashFile = self.data_pipe.Get("PlatformHashFile")
+            GlobalData.gPlatformHashFile = self.data_pipe.Get(
+                "PlatformHashFile")
             GlobalData.gModulePreMakeCacheStatus = dict()
             GlobalData.gModuleMakeCacheStatus = dict()
             GlobalData.gHashChainStatus = dict()
             GlobalData.gCMakeHashFile = dict()
             GlobalData.gModuleHashFile = dict()
             GlobalData.gFileHashDict = dict()
-            GlobalData.gEnableGenfdsMultiThread = self.data_pipe.Get("EnableGenfdsMultiThread")
-            GlobalData.gPlatformFinalPcds = self.data_pipe.Get("gPlatformFinalPcds")
+            GlobalData.gEnableGenfdsMultiThread = self.data_pipe.Get(
+                "EnableGenfdsMultiThread")
+            GlobalData.gPlatformFinalPcds = self.data_pipe.Get(
+                "gPlatformFinalPcds")
             GlobalData.file_lock = self.file_lock
             CommandTarget = self.data_pipe.Get("CommandTarget")
             pcd_from_build_option = []
             for pcd_tuple in self.data_pipe.Get("BuildOptPcd"):
-                pcd_id = ".".join((pcd_tuple[0],pcd_tuple[1]))
+                pcd_id = ".".join((pcd_tuple[0], pcd_tuple[1]))
                 if pcd_tuple[2].strip():
-                    pcd_id = ".".join((pcd_id,pcd_tuple[2]))
-                pcd_from_build_option.append("=".join((pcd_id,pcd_tuple[3])))
+                    pcd_id = ".".join((pcd_id, pcd_tuple[2]))
+                pcd_from_build_option.append("=".join((pcd_id, pcd_tuple[3])))
             GlobalData.BuildOptionPcd = pcd_from_build_option
             module_count = 0
             FfsCmd = self.data_pipe.Get("FfsCommand")
@@ -232,36 +255,40 @@ class AutoGenWorkerInProcess(mp.Process):
                 FfsCmd = {}
             GlobalData.FfsCmd = FfsCmd
             PlatformMetaFile = self.GetPlatformMetaFile(self.data_pipe.Get("P_Info").get("ActivePlatform"),
-                                             self.data_pipe.Get("P_Info").get("WorkspaceDir"))
+                                                        self.data_pipe.Get("P_Info").get("WorkspaceDir"))
             while True:
                 if self.error_event.is_set():
                     break
                 module_count += 1
                 try:
-                    module_file,module_root,module_path,module_basename,module_originalpath,module_arch,IsLib = self.module_queue.get_nowait()
+                    module_file, module_root, module_path, module_basename, module_originalpath, module_arch, IsLib = self.module_queue.get_nowait()
                 except Empty:
-                    EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" % (os.getpid(), "Fake Empty."))
+                    EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" % (
+                        os.getpid(), "Fake Empty."))
                     time.sleep(0.01)
                     continue
                 if module_file is None:
-                    EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" % (os.getpid(), "Worker get the last item in the queue."))
+                    EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" % (
+                        os.getpid(), "Worker get the last item in the queue."))
                     self.feedback_q.put("QueueEmpty")
                     time.sleep(0.01)
                     continue
 
-                modulefullpath = os.path.join(module_root,module_file)
-                taskname = " : ".join((modulefullpath,module_arch))
-                module_metafile = PathClass(module_file,module_root)
+                modulefullpath = os.path.join(module_root, module_file)
+                taskname = " : ".join((modulefullpath, module_arch))
+                module_metafile = PathClass(module_file, module_root)
                 if module_path:
                     module_metafile.Path = module_path
                 if module_basename:
                     module_metafile.BaseName = module_basename
                 if module_originalpath:
-                    module_metafile.OriginalPath = PathClass(module_originalpath,module_root)
+                    module_metafile.OriginalPath = PathClass(
+                        module_originalpath, module_root)
                 arch = module_arch
                 target = self.data_pipe.Get("P_Info").get("Target")
                 toolchain = self.data_pipe.Get("P_Info").get("ToolChain")
-                Ma = ModuleAutoGen(self.Wa,module_metafile,target,toolchain,arch,PlatformMetaFile,self.data_pipe)
+                Ma = ModuleAutoGen(self.Wa, module_metafile, target,
+                                   toolchain, arch, PlatformMetaFile, self.data_pipe)
                 Ma.IsLibrary = IsLib
                 # SourceFileList calling sequence impact the makefile string sequence.
                 # Create cached SourceFileList here to unify its calling sequence for both
@@ -275,13 +302,16 @@ class AutoGenWorkerInProcess(mp.Process):
                         self.feedback_q.put(taskname)
 
                     if CacheResult:
-                        self.cache_q.put((Ma.MetaFile.Path, Ma.Arch, "PreMakeCache", True))
+                        self.cache_q.put(
+                            (Ma.MetaFile.Path, Ma.Arch, "PreMakeCache", True))
                         continue
                     else:
-                        self.cache_q.put((Ma.MetaFile.Path, Ma.Arch, "PreMakeCache", False))
+                        self.cache_q.put(
+                            (Ma.MetaFile.Path, Ma.Arch, "PreMakeCache", False))
 
                 Ma.CreateCodeFile(False)
-                Ma.CreateMakeFile(False,GenFfsList=FfsCmd.get((Ma.MetaFile.Path, Ma.Arch),[]))
+                Ma.CreateMakeFile(False, GenFfsList=FfsCmd.get(
+                    (Ma.MetaFile.Path, Ma.Arch), []))
                 Ma.CreateAsBuiltInf()
                 if GlobalData.gBinCacheSource and CommandTarget in [None, "", "all"]:
                     try:
@@ -291,22 +321,28 @@ class AutoGenWorkerInProcess(mp.Process):
                         self.feedback_q.put(taskname)
 
                     if CacheResult:
-                        self.cache_q.put((Ma.MetaFile.Path, Ma.Arch, "MakeCache", True))
+                        self.cache_q.put(
+                            (Ma.MetaFile.Path, Ma.Arch, "MakeCache", True))
                         continue
                     else:
-                        self.cache_q.put((Ma.MetaFile.Path, Ma.Arch, "MakeCache", False))
+                        self.cache_q.put(
+                            (Ma.MetaFile.Path, Ma.Arch, "MakeCache", False))
 
         except Exception as e:
-            EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" % (os.getpid(), str(e)))
+            EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" %
+                            (os.getpid(), str(e)))
             self.feedback_q.put(taskname)
         finally:
-            EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" % (os.getpid(), "Done"))
+            EdkLogger.debug(EdkLogger.DEBUG_9, "Worker %s: %s" %
+                            (os.getpid(), "Done"))
             self.feedback_q.put("Done")
             self.cache_q.put("CacheDone")
 
     def printStatus(self):
-        print("Processs ID: %d Run %d modules in AutoGen " % (os.getpid(),len(AutoGen.Cache())))
-        print("Processs ID: %d Run %d modules in AutoGenInfo " % (os.getpid(),len(AutoGenInfo.GetCache())))
+        print("Processs ID: %d Run %d modules in AutoGen " %
+              (os.getpid(), len(AutoGen.Cache())))
+        print("Processs ID: %d Run %d modules in AutoGenInfo " %
+              (os.getpid(), len(AutoGenInfo.GetCache())))
         groupobj = {}
         for buildobj in BuildDB.BuildObject.GetCache().values():
             if str(buildobj).lower().endswith("dec"):
@@ -326,6 +362,9 @@ class AutoGenWorkerInProcess(mp.Process):
                 except:
                     groupobj['inf'] = [str(buildobj)]
 
-        print("Processs ID: %d Run %d pkg in WDB " % (os.getpid(),len(groupobj.get("dec",[]))))
-        print("Processs ID: %d Run %d pla in WDB " % (os.getpid(),len(groupobj.get("dsc",[]))))
-        print("Processs ID: %d Run %d inf in WDB " % (os.getpid(),len(groupobj.get("inf",[]))))
+        print("Processs ID: %d Run %d pkg in WDB " %
+              (os.getpid(), len(groupobj.get("dec", []))))
+        print("Processs ID: %d Run %d pla in WDB " %
+              (os.getpid(), len(groupobj.get("dsc", []))))
+        print("Processs ID: %d Run %d inf in WDB " %
+              (os.getpid(), len(groupobj.get("inf", []))))

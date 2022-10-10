@@ -1,4 +1,4 @@
-## @file
+# @file
 #  Check a patch for various format issues
 #
 #  Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
@@ -7,14 +7,14 @@
 #
 
 from __future__ import print_function
+import sys
+import os
+import codecs
+import argparse
 
 VersionNumber = '0.1'
 __copyright__ = "Copyright (c) 2015, Intel Corporation  All rights reserved."
 
-import argparse
-import codecs
-import os
-import sys
 
 class ConvertOneArg:
     """Converts utf-16 to utf-8 for one command line argument.
@@ -82,7 +82,8 @@ class ConvertOneArg:
         f.write(new_content)
         f.close()
 
-        print(source + ": converted, size", len(file_content), '=>', len(new_content))
+        print(source + ": converted, size",
+              len(file_content), '=>', len(new_content))
         return True
 
 
@@ -120,6 +121,7 @@ class ConvertUniApp:
                            help="Convert from utf-8 to utf-16")
         self.args = parser.parse_args()
         self.utf8 = not self.args.utf_16
+
 
 if __name__ == "__main__":
     sys.exit(ConvertUniApp().retval)

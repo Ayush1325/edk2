@@ -1,4 +1,4 @@
-## @file
+# @file
 # Detect unreferenced PCD and GUID/Protocols/PPIs.
 #
 # Copyright (c) 2019, Intel Corporation. All rights reserved.
@@ -73,7 +73,8 @@ class PROCESS(object):
                     Comment_Line.append(Index)
                     if NotComment:
                         if content != "\n" and content != "\r\n":
-                            ItemName[Index] = content.split('=')[0].split('|')[0].split('#')[0].strip()
+                            ItemName[Index] = content.split('=')[0].split('|')[
+                                0].split('#')[0].strip()
                             Comments[Index] = Comment_Line
                             Comment_Line = []
         return ItemName, Comments
@@ -103,7 +104,8 @@ class PROCESS(object):
         InfDscFdfContent = self.ParserDscFdfInfFile()
         for LineNum in list(DecItem.keys()):
             DecItemName = DecItem[LineNum]
-            Match_reg = re.compile("(?<![a-zA-Z0-9_-])%s(?![a-zA-Z0-9_-])" % DecItemName)
+            Match_reg = re.compile(
+                "(?<![a-zA-Z0-9_-])%s(?![a-zA-Z0-9_-])" % DecItemName)
             MatchFlag = False
             for Line in InfDscFdfContent:
                 if Match_reg.search(Line):
@@ -115,13 +117,16 @@ class PROCESS(object):
         return NotUsedItem, DecComments
 
     def Display(self, UnuseDict):
-        print("DEC File:\n%s\n%s%s" % (self.Dec, "{:<15}".format("Line Number"), "{:<0}".format("Unused Item")))
+        print("DEC File:\n%s\n%s%s" % (self.Dec, "{:<15}".format(
+            "Line Number"), "{:<0}".format("Unused Item")))
         self.Log.append(
             "DEC File:\n%s\n%s%s\n" % (self.Dec, "{:<15}".format("Line Number"), "{:<0}".format("Unused Item")))
         for num in list(sorted(UnuseDict.keys())):
             ItemName = UnuseDict[num]
-            print("%s%s%s" % (" " * 3, "{:<12}".format(num + 1), "{:<1}".format(ItemName)))
-            self.Log.append(("%s%s%s\n" % (" " * 3, "{:<12}".format(num + 1), "{:<1}".format(ItemName))))
+            print("%s%s%s" %
+                  (" " * 3, "{:<12}".format(num + 1), "{:<1}".format(ItemName)))
+            self.Log.append(
+                ("%s%s%s\n" % (" " * 3, "{:<12}".format(num + 1), "{:<1}".format(ItemName))))
 
     def Clean(self, UnUseDict, Comments):
         removednum = []
@@ -174,7 +179,8 @@ def main():
     parser = argparse.ArgumentParser(prog=__prog__,
                                      description=__description__ + __copyright__,
                                      conflict_handler='resolve')
-    parser.add_argument('-i', '--input', metavar="", dest='InputDec', help="Input DEC file name.")
+    parser.add_argument('-i', '--input', metavar="",
+                        dest='InputDec', help="Input DEC file name.")
     parser.add_argument('--dirs', metavar="", action='append', dest='Dirs',
                         help="The package directory. To specify more directories, please repeat this option.")
     parser.add_argument('--clean', action='store_true', default=False, dest='Clean',
@@ -187,7 +193,8 @@ def main():
             print("Error: Invalid DEC file input: %s" % options.InputDec)
         if options.Dirs:
             M = Main()
-            M.mainprocess(options.InputDec, options.Dirs, options.Clean, options.Logfile)
+            M.mainprocess(options.InputDec, options.Dirs,
+                          options.Clean, options.Logfile)
         else:
             print("Error: the following argument is required:'--dirs'.")
     else:

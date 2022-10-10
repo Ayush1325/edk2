@@ -1,4 +1,4 @@
-## @file GenMetaFileMisc.py
+# @file GenMetaFileMisc.py
 #
 # This file contained the miscellaneous routines for GenMetaFile usage.
 #
@@ -21,57 +21,69 @@ from Parser.DecParser import Dec
 #  @param Arch:     string of source file family field
 #  @param ExternList:  string of source file FeatureFlag field
 #
+
+
 def AddExternToDefineSec(SectionDict, Arch, ExternList):
     LeftOffset = 31
     for ArchList, EntryPoint, UnloadImage, Constructor, Destructor, FFE, HelpStringList in ExternList:
         if Arch or ArchList:
             if EntryPoint:
-                Statement = (u'%s ' % DT.TAB_INF_DEFINES_ENTRY_POINT).ljust(LeftOffset) + u'= %s' % EntryPoint
+                Statement = (u'%s ' % DT.TAB_INF_DEFINES_ENTRY_POINT).ljust(
+                    LeftOffset) + u'= %s' % EntryPoint
                 if FFE:
                     Statement += ' | %s' % FFE
                 if len(HelpStringList) > 0:
-                    Statement = HelpStringList[0].GetString() + '\n' + Statement
+                    Statement = HelpStringList[0].GetString(
+                    ) + '\n' + Statement
                 if len(HelpStringList) > 1:
                     Statement = Statement + HelpStringList[1].GetString()
                 SectionDict[Arch] = SectionDict[Arch] + [Statement]
 
             if UnloadImage:
-                Statement = (u'%s ' % DT.TAB_INF_DEFINES_UNLOAD_IMAGE).ljust(LeftOffset) + u'= %s' % UnloadImage
+                Statement = (u'%s ' % DT.TAB_INF_DEFINES_UNLOAD_IMAGE).ljust(
+                    LeftOffset) + u'= %s' % UnloadImage
                 if FFE:
                     Statement += ' | %s' % FFE
 
                 if len(HelpStringList) > 0:
-                    Statement = HelpStringList[0].GetString() + '\n' + Statement
+                    Statement = HelpStringList[0].GetString(
+                    ) + '\n' + Statement
                 if len(HelpStringList) > 1:
                     Statement = Statement + HelpStringList[1].GetString()
                 SectionDict[Arch] = SectionDict[Arch] + [Statement]
 
             if Constructor:
-                Statement = (u'%s ' % DT.TAB_INF_DEFINES_CONSTRUCTOR).ljust(LeftOffset) + u'= %s' % Constructor
+                Statement = (u'%s ' % DT.TAB_INF_DEFINES_CONSTRUCTOR).ljust(
+                    LeftOffset) + u'= %s' % Constructor
                 if FFE:
                     Statement += ' | %s' % FFE
 
                 if len(HelpStringList) > 0:
-                    Statement = HelpStringList[0].GetString() + '\n' + Statement
+                    Statement = HelpStringList[0].GetString(
+                    ) + '\n' + Statement
                 if len(HelpStringList) > 1:
                     Statement = Statement + HelpStringList[1].GetString()
                 SectionDict[Arch] = SectionDict[Arch] + [Statement]
 
             if Destructor:
-                Statement = (u'%s ' % DT.TAB_INF_DEFINES_DESTRUCTOR).ljust(LeftOffset) + u'= %s' % Destructor
+                Statement = (u'%s ' % DT.TAB_INF_DEFINES_DESTRUCTOR).ljust(
+                    LeftOffset) + u'= %s' % Destructor
                 if FFE:
                     Statement += ' | %s' % FFE
 
                 if len(HelpStringList) > 0:
-                    Statement = HelpStringList[0].GetString() + '\n' + Statement
+                    Statement = HelpStringList[0].GetString(
+                    ) + '\n' + Statement
                 if len(HelpStringList) > 1:
                     Statement = Statement + HelpStringList[1].GetString()
                 SectionDict[Arch] = SectionDict[Arch] + [Statement]
 
-## ObtainPcdName
+# ObtainPcdName
 #
 # Using TokenSpaceGuidValue and Token to obtain PcdName from DEC file
 #
+
+
 def ObtainPcdName(Packages, TokenSpaceGuidValue, Token):
     TokenSpaceGuidName = ''
     PcdCName = ''
@@ -149,11 +161,13 @@ def ObtainPcdName(Packages, TokenSpaceGuidValue, Token):
 
     return TokenSpaceGuidName, PcdCName
 
-## _TransferDict
+# _TransferDict
 #  transfer dict that using (Statement, SortedArch) as key,
 #  (GenericComment, UsageComment) as value into a dict that using SortedArch as
 #  key and NewStatement as value
 #
+
+
 def TransferDict(OrigDict, Type=None):
     NewDict = {}
     LeftOffset = 0
@@ -175,7 +189,8 @@ def TransferDict(OrigDict, Type=None):
             NewStateMent = Comment + Statement
         else:
             if LeftOffset:
-                NewStateMent = Statement.ljust(LeftOffset) + ' ' + Comment.rstrip('\n')
+                NewStateMent = Statement.ljust(
+                    LeftOffset) + ' ' + Comment.rstrip('\n')
             else:
                 NewStateMent = Statement + ' ' + Comment.rstrip('\n')
 
@@ -185,4 +200,3 @@ def TransferDict(OrigDict, Type=None):
             NewDict[SortedArch] = [NewStateMent]
 
     return NewDict
-

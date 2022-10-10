@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to define class objects of INF file [Pcds] section.
 # It will consumed by InfParser.
 #
@@ -33,6 +33,7 @@ from Parser.DecParser import Dec
 
 from Object.Parser.InfPackagesObject import InfPackageItem
 
+
 def ValidateArch(ArchItem, PcdTypeItem1, LineNo, SupArchDict, SupArchList):
     #
     # Validate Arch
@@ -46,7 +47,8 @@ def ValidateArch(ArchItem, PcdTypeItem1, LineNo, SupArchDict, SupArchList):
             if not IsValidArch(ArchItemNew):
                 Logger.Error("InfParser",
                              ToolError.FORMAT_INVALID,
-                             ST.ERR_INF_PARSER_DEFINE_FROMAT_INVALID % (ArchItemNew),
+                             ST.ERR_INF_PARSER_DEFINE_FROMAT_INVALID % (
+                                 ArchItemNew),
                              File=GlobalData.gINF_MODULE_NAME,
                              Line=LineNo,
                              ExtraData=ArchItemNew)
@@ -55,6 +57,7 @@ def ValidateArch(ArchItem, PcdTypeItem1, LineNo, SupArchDict, SupArchList):
         SupArchList.append(ArchItem)
 
     return SupArchList, SupArchDict
+
 
 def ParsePcdComment(CommentList, PcdTypeItem, PcdItemObj):
     CommentInsList = []
@@ -67,10 +70,10 @@ def ParsePcdComment(CommentList, PcdTypeItem, PcdItemObj):
     for CommentItem in CommentList:
         Count = Count + 1
         CommentItemUsage, CommentType, CommentString, CommentItemHelpText = ParseComment(CommentItem,
-                                                                             DT.ALL_USAGE_TOKENS,
-                                                                             {},
-                                                                             [],
-                                                                             False)
+                                                                                         DT.ALL_USAGE_TOKENS,
+                                                                                         {},
+                                                                                         [],
+                                                                                         False)
         if CommentType and CommentString:
             pass
 
@@ -162,6 +165,7 @@ def ParsePcdComment(CommentList, PcdTypeItem, PcdItemObj):
 
     return PcdItemObj
 
+
 class InfPcdItemCommentContent():
     def __init__(self):
         #
@@ -175,15 +179,17 @@ class InfPcdItemCommentContent():
 
     def SetUsageItem(self, UsageItem):
         self.UsageItem = UsageItem
+
     def GetUsageItem(self):
         return self.UsageItem
 
     def SetHelpStringItem(self, HelpStringItem):
         self.HelpStringItem = HelpStringItem
+
     def GetHelpStringItem(self):
         return self.HelpStringItem
 
-## InfPcdItem
+# InfPcdItem
 #
 # This class defined Pcd item used in Module files
 #
@@ -199,6 +205,8 @@ class InfPcdItemCommentContent():
 # @param SkuInfoList:          Input value for SkuInfoList, default is {}
 # @param SupModuleList:        Input value for SupModuleList, default is []
 #
+
+
 class InfPcdItem():
     def __init__(self):
         self.CName = ''
@@ -219,71 +227,85 @@ class InfPcdItem():
 
     def SetCName(self, CName):
         self.CName = CName
+
     def GetCName(self):
         return self.CName
 
     def SetToken(self, Token):
         self.Token = Token
+
     def GetToken(self):
         return self.Token
 
     def SetTokenSpaceGuidCName(self, TokenSpaceGuidCName):
         self.TokenSpaceGuidCName = TokenSpaceGuidCName
+
     def GetTokenSpaceGuidCName(self):
         return self.TokenSpaceGuidCName
 
     def SetTokenSpaceGuidValue(self, TokenSpaceGuidValue):
         self.TokenSpaceGuidValue = TokenSpaceGuidValue
+
     def GetTokenSpaceGuidValue(self):
         return self.TokenSpaceGuidValue
 
     def SetDatumType(self, DatumType):
         self.DatumType = DatumType
+
     def GetDatumType(self):
         return self.DatumType
 
     def SetMaxDatumSize(self, MaxDatumSize):
         self.MaxDatumSize = MaxDatumSize
+
     def GetMaxDatumSize(self):
         return self.MaxDatumSize
 
     def SetDefaultValue(self, DefaultValue):
         self.DefaultValue = DefaultValue
+
     def GetDefaultValue(self):
         return self.DefaultValue
 
     def SetPcdErrorsList(self, PcdErrorsList):
         self.PcdErrorsList = PcdErrorsList
+
     def GetPcdErrorsList(self):
         return self.PcdErrorsList
 
     def SetItemType(self, ItemType):
         self.ItemType = ItemType
+
     def GetItemType(self):
         return self.ItemType
 
     def SetSupModuleList(self, SupModuleList):
         self.SupModuleList = SupModuleList
+
     def GetSupModuleList(self):
         return self.SupModuleList
 
     def SetHelpStringList(self, HelpStringList):
         self.HelpStringList = HelpStringList
+
     def GetHelpStringList(self):
         return self.HelpStringList
 
     def SetFeatureFlagExp(self, FeatureFlagExp):
         self.FeatureFlagExp = FeatureFlagExp
+
     def GetFeatureFlagExp(self):
         return self.FeatureFlagExp
 
     def SetSupportArchList(self, ArchList):
         self.SupArchList = ArchList
+
     def GetSupportArchList(self):
         return self.SupArchList
 
     def SetOffset(self, Offset):
         self.Offset = Offset
+
     def GetOffset(self):
         return self.Offset
 
@@ -297,6 +319,8 @@ class InfPcdItem():
 #
 #
 #
+
+
 class InfPcdObject():
     def __init__(self, FileName):
         self.Pcds = Sdict()
@@ -315,7 +339,8 @@ class InfPcdObject():
         SupArchDict = {}
         PcdTypeItem = ''
         for (PcdTypeItem1, ArchItem, LineNo) in KeysList:
-            SupArchList, SupArchDict = ValidateArch(ArchItem, PcdTypeItem1, LineNo, SupArchDict, SupArchList)
+            SupArchList, SupArchDict = ValidateArch(
+                ArchItem, PcdTypeItem1, LineNo, SupArchDict, SupArchList)
 
             #
             # Validate PcdType
@@ -326,7 +351,8 @@ class InfPcdObject():
                 if not IsValidPcdType(PcdTypeItem1):
                     Logger.Error("InfParser",
                                  ToolError.FORMAT_INVALID,
-                                 ST.ERR_INF_PARSER_PCD_SECTION_TYPE_ERROR % (DT.PCD_USAGE_TYPE_LIST_OF_MODULE),
+                                 ST.ERR_INF_PARSER_PCD_SECTION_TYPE_ERROR % (
+                                     DT.PCD_USAGE_TYPE_LIST_OF_MODULE),
                                  File=GlobalData.gINF_MODULE_NAME,
                                  Line=LineNo,
                                  ExtraData=PcdTypeItem1)
@@ -341,14 +367,16 @@ class InfPcdObject():
                 PcdItem = PcdItem[0]
 
                 if CommentList is not None and len(CommentList) != 0:
-                    PcdItemObj = ParsePcdComment(CommentList, PcdTypeItem, PcdItemObj)
+                    PcdItemObj = ParsePcdComment(
+                        CommentList, PcdTypeItem, PcdItemObj)
                 else:
                     CommentItemIns = InfPcdItemCommentContent()
                     CommentItemIns.SetUsageItem(DT.ITEM_UNDEFINED)
                     PcdItemObj.SetHelpStringList([CommentItemIns])
 
                 if len(PcdItem) >= 1 and len(PcdItem) <= 3:
-                    PcdItemObj = SetPcdName(PcdItem, CurrentLineOfPcdItem, PcdItemObj)
+                    PcdItemObj = SetPcdName(
+                        PcdItem, CurrentLineOfPcdItem, PcdItemObj)
 
                 if len(PcdItem) >= 2 and len(PcdItem) <= 3:
                     #
@@ -385,7 +413,8 @@ class InfPcdObject():
                     if not FeatureFlagRtv[0]:
                         Logger.Error("InfParser",
                                      ToolError.FORMAT_INVALID,
-                                     ST.ERR_INF_PARSER_FEATURE_FLAG_EXP_SYNTAX_INVLID % (FeatureFlagRtv[1]),
+                                     ST.ERR_INF_PARSER_FEATURE_FLAG_EXP_SYNTAX_INVLID % (
+                                         FeatureFlagRtv[1]),
                                      File=CurrentLineOfPcdItem[2],
                                      Line=CurrentLineOfPcdItem[1],
                                      ExtraData=CurrentLineOfPcdItem[0])
@@ -429,9 +458,11 @@ class InfPcdObject():
                 CommentItemIns = InfPcdItemCommentContent()
                 CommentItemIns.SetHelpStringItem(CommentString)
                 CommentItemIns.SetUsageItem(CommentString)
-                PcdItemObj.SetHelpStringList(PcdItemObj.GetHelpStringList() + [CommentItemIns])
+                PcdItemObj.SetHelpStringList(
+                    PcdItemObj.GetHelpStringList() + [CommentItemIns])
                 if PcdItemObj.GetValidUsage():
-                    PcdItemObj.SetValidUsage(PcdItemObj.GetValidUsage() + DT.TAB_VALUE_SPLIT + CommentString)
+                    PcdItemObj.SetValidUsage(
+                        PcdItemObj.GetValidUsage() + DT.TAB_VALUE_SPLIT + CommentString)
                 else:
                     PcdItemObj.SetValidUsage(CommentString)
 
@@ -444,10 +475,10 @@ class InfPcdObject():
             # Set Value/DatumType/OffSet/Token
             #
             PcdItemObj = SetValueDatumTypeMaxSizeToken(PcdItem,
-                                                      CurrentLineOfPcdItem,
-                                                      PcdItemObj,
-                                                      KeysList[0][1],
-                                                      PackageInfo)
+                                                       CurrentLineOfPcdItem,
+                                                       PcdItemObj,
+                                                       KeysList[0][1],
+                                                       PackageInfo)
 
             PcdTypeItem = KeysList[0][0]
             if (PcdTypeItem, PcdItemObj) in self.Pcds:
@@ -462,6 +493,7 @@ class InfPcdObject():
     def GetPcds(self):
         return self.Pcds
 
+
 def ParserPcdInfoInDec(String):
     ValueList = GetSplitValueList(String, DT.TAB_VALUE_SPLIT, 3)
 
@@ -470,6 +502,7 @@ def ParserPcdInfoInDec(String):
     #
     return ValueList[2], ValueList[3]
 
+
 def SetValueDatumTypeMaxSizeToken(PcdItem, CurrentLineOfPcdItem, PcdItemObj, Arch, PackageInfo=None):
     #
     # Package information not been generated currently, we need to parser INF file to get information.
@@ -477,7 +510,8 @@ def SetValueDatumTypeMaxSizeToken(PcdItem, CurrentLineOfPcdItem, PcdItemObj, Arc
     if not PackageInfo:
         PackageInfo = []
         InfFileName = CurrentLineOfPcdItem[2]
-        PackageInfoList = GetPackageListInfo(InfFileName, GlobalData.gWORKSPACE, -1)
+        PackageInfoList = GetPackageListInfo(
+            InfFileName, GlobalData.gWORKSPACE, -1)
         for PackageInfoListItem in PackageInfoList:
             PackageInfoIns = InfPackageItem()
             PackageInfoIns.SetPackageName(PackageInfoListItem)
@@ -491,7 +525,8 @@ def SetValueDatumTypeMaxSizeToken(PcdItem, CurrentLineOfPcdItem, PcdItemObj, Arc
         #
         # Open DEC file to get information
         #
-        FullFileName = os.path.normpath(os.path.realpath(os.path.join(GlobalData.gWORKSPACE, PackageName)))
+        FullFileName = os.path.normpath(os.path.realpath(
+            os.path.join(GlobalData.gWORKSPACE, PackageName)))
 
         DecParser = None
         if FullFileName not in GlobalData.gPackageDict:
@@ -506,7 +541,7 @@ def SetValueDatumTypeMaxSizeToken(PcdItem, CurrentLineOfPcdItem, PcdItemObj, Arc
         DecPcdsDict = DecParser.GetPcdSectionObject().ValueDict
         for Key in DecPcdsDict.keys():
             if (Key[0] == 'PCDSDYNAMICEX' and PcdItemObj.GetItemType() == 'PcdEx') and \
-                (Key[1] == 'COMMON' or Key[1] == Arch):
+                    (Key[1] == 'COMMON' or Key[1] == Arch):
                 for PcdInDec in DecPcdsDict[Key]:
                     if PcdInDec.TokenCName == PcdItemObj.CName and \
                        PcdInDec.TokenSpaceGuidCName == PcdItemObj.TokenSpaceGuidCName:
@@ -516,7 +551,7 @@ def SetValueDatumTypeMaxSizeToken(PcdItem, CurrentLineOfPcdItem, PcdItemObj, Arc
                         PcdItemObj.SetDefaultValue(PcdInDec.DefaultValue)
 
             if (Key[0] == 'PCDSPATCHABLEINMODULE' and PcdItemObj.GetItemType() == 'PatchPcd') and \
-           (Key[1] == 'COMMON' or Key[1] == Arch):
+                    (Key[1] == 'COMMON' or Key[1] == Arch):
                 for PcdInDec in DecPcdsDict[Key]:
                     if PcdInDec.TokenCName == PcdItemObj.CName and \
                        PcdInDec.TokenSpaceGuidCName == PcdItemObj.TokenSpaceGuidCName:
@@ -526,7 +561,8 @@ def SetValueDatumTypeMaxSizeToken(PcdItem, CurrentLineOfPcdItem, PcdItemObj, Arc
 
         if PcdItemObj.GetDatumType() == 'VOID*':
             if len(PcdItem) > 1:
-                PcdItemObj.SetMaxDatumSize('%s' % (len(GetSplitValueList(PcdItem[1], DT.TAB_COMMA_SPLIT))))
+                PcdItemObj.SetMaxDatumSize(
+                    '%s' % (len(GetSplitValueList(PcdItem[1], DT.TAB_COMMA_SPLIT))))
 
         DecGuidsDict = DecParser.GetGuidSectionObject().ValueDict
         for Key in DecGuidsDict.keys():
@@ -555,34 +591,37 @@ def SetValueDatumTypeMaxSizeToken(PcdItem, CurrentLineOfPcdItem, PcdItemObj, Arc
             PcdItemObj.SetDefaultValue(PcdItem[1])
         else:
             Logger.Error("InfParser",
-                     ToolError.FORMAT_INVALID,
-                     ST.ERR_ASBUILD_PCD_VALUE_INVALID % ("\"" + PcdItem[1] + "\"", "\"" +
-                                                       PcdItemObj.GetDatumType() + "\""),
-                     File=CurrentLineOfPcdItem[2],
-                     Line=CurrentLineOfPcdItem[1],
-                     ExtraData=CurrentLineOfPcdItem[0])
+                         ToolError.FORMAT_INVALID,
+                         ST.ERR_ASBUILD_PCD_VALUE_INVALID % ("\"" + PcdItem[1] + "\"", "\"" +
+                                                             PcdItemObj.GetDatumType() + "\""),
+                         File=CurrentLineOfPcdItem[2],
+                         Line=CurrentLineOfPcdItem[1],
+                         ExtraData=CurrentLineOfPcdItem[0])
         #
         # validate offset
         #
         if PcdItemObj.GetItemType().upper() == DT.TAB_INF_PATCH_PCD.upper():
             if not IsHexDigitUINT32(PcdItem[2]):
                 Logger.Error("InfParser",
-                         ToolError.FORMAT_INVALID,
-                         ST.ERR_ASBUILD_PCD_OFFSET_FORMAT_INVALID % ("\"" + PcdItem[2] + "\""),
-                         File=CurrentLineOfPcdItem[2],
-                         Line=CurrentLineOfPcdItem[1],
-                         ExtraData=CurrentLineOfPcdItem[0])
+                             ToolError.FORMAT_INVALID,
+                             ST.ERR_ASBUILD_PCD_OFFSET_FORMAT_INVALID % (
+                                 "\"" + PcdItem[2] + "\""),
+                             File=CurrentLineOfPcdItem[2],
+                             Line=CurrentLineOfPcdItem[1],
+                             ExtraData=CurrentLineOfPcdItem[0])
             PcdItemObj.SetOffset(PcdItem[2])
 
     if PcdItemObj.GetToken() == '' or PcdItemObj.GetDatumType() == '':
         Logger.Error("InfParser",
                      ToolError.FORMAT_INVALID,
-                     ST.ERR_ASBUILD_PCD_DECLARITION_MISS % ("\"" + PcdItem[0] + "\""),
+                     ST.ERR_ASBUILD_PCD_DECLARITION_MISS % (
+                         "\"" + PcdItem[0] + "\""),
                      File=CurrentLineOfPcdItem[2],
                      Line=CurrentLineOfPcdItem[1],
                      ExtraData=CurrentLineOfPcdItem[0])
 
     return PcdItemObj
+
 
 def ValidatePcdValueOnDatumType(Value, Type):
 
@@ -618,11 +657,11 @@ def ValidatePcdValueOnDatumType(Value, Type):
 
         if not ReIsValidUint8z.match(Value) and Type == 'UINT8':
             return False
-        elif not ReIsValidUint16z.match(Value) and  Type == 'UINT16':
+        elif not ReIsValidUint16z.match(Value) and Type == 'UINT16':
             return False
-        elif not ReIsValidUint32z.match(Value) and  Type == 'UINT32':
+        elif not ReIsValidUint32z.match(Value) and Type == 'UINT32':
             return False
-        elif not ReIsValidUint64z.match(Value) and  Type == 'UINT64':
+        elif not ReIsValidUint64z.match(Value) and Type == 'UINT64':
             return False
     else:
         #
@@ -631,6 +670,7 @@ def ValidatePcdValueOnDatumType(Value, Type):
         pass
 
     return True
+
 
 def SetPcdName(PcdItem, CurrentLineOfPcdItem, PcdItemObj):
     #

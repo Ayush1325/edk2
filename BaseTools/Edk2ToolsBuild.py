@@ -143,7 +143,8 @@ class Edk2ToolsBuild(BaseAbstractInvocable):
 
         elif self.tool_chain_tag.lower().startswith("gcc"):
             cpu_count = self.GetCpuThreads()
-            ret = RunCmd("make", f"-C .  -j {cpu_count}", workingdir=shell_env.get_shell_var("EDK_TOOLS_PATH"))
+            ret = RunCmd(
+                "make", f"-C .  -j {cpu_count}", workingdir=shell_env.get_shell_var("EDK_TOOLS_PATH"))
             if ret != 0:
                 raise Exception("Failed to build.")
 
@@ -166,7 +167,6 @@ class Edk2ToolsBuild(BaseAbstractInvocable):
             # will handle error by just doing single proc build
             pass
         return cpus
-
 
 
 def main():

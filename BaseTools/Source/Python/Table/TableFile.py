@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to create/update/query/erase table for files
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -15,18 +15,20 @@ from Common.StringUtils import ConvertToSqlString
 import Common.LongFilePathOs as os
 from CommonDataClass.DataClass import FileClass
 
-## TableFile
+# TableFile
 #
 # This class defined a table used for file
 #
 # @param object:       Inherited from object class
 #
+
+
 class TableFile(Table):
     def __init__(self, Cursor):
         Table.__init__(self, Cursor)
         self.Table = 'File'
 
-    ## Create table
+    # Create table
     #
     # Create table File
     #
@@ -49,7 +51,7 @@ class TableFile(Table):
                                                       )""" % self.Table
         Table.Create(self, SqlCommand)
 
-    ## Insert table
+    # Insert table
     #
     # Insert a record into table File
     #
@@ -63,13 +65,14 @@ class TableFile(Table):
     #
     def Insert(self, Name, ExtName, Path, FullPath, Model, TimeStamp):
         self.ID = self.ID + 1
-        (Name, ExtName, Path, FullPath) = ConvertToSqlString((Name, ExtName, Path, FullPath))
+        (Name, ExtName, Path, FullPath) = ConvertToSqlString(
+            (Name, ExtName, Path, FullPath))
         SqlCommand = """insert into %s values(%s, '%s', '%s', '%s', '%s', %s, '%s')""" \
-                                           % (self.Table, self.ID, Name, ExtName, Path, FullPath, Model, TimeStamp)
+            % (self.Table, self.ID, Name, ExtName, Path, FullPath, Model, TimeStamp)
         Table.Insert(self, SqlCommand)
 
         return self.ID
-    ## InsertFile
+    # InsertFile
     #
     # Insert one file to table
     #
@@ -78,21 +81,24 @@ class TableFile(Table):
     #
     # @retval FileID:       The ID after record is inserted
     #
+
     def InsertFile(self, FileFullPath, Model):
         (Filepath, Name) = os.path.split(FileFullPath)
         (Root, Ext) = os.path.splitext(FileFullPath)
         TimeStamp = os.stat(FileFullPath)[8]
-        File = FileClass(-1, Name, Ext, Filepath, FileFullPath, Model, '', [], [], [])
+        File = FileClass(-1, Name, Ext, Filepath,
+                         FileFullPath, Model, '', [], [], [])
         return self.Insert(File.Name, File.ExtName, File.Path, File.FullPath, File.Model, TimeStamp)
 
-    ## Get ID of a given file
+    # Get ID of a given file
     #
     #   @param  FilePath    Path of file
     #
     #   @retval ID          ID value of given file in the table
     #
     def GetFileId(self, File):
-        QueryScript = "select ID from %s where FullPath = '%s'" % (self.Table, str(File))
+        QueryScript = "select ID from %s where FullPath = '%s'" % (
+            self.Table, str(File))
         RecordList = self.Exec(QueryScript)
         if len(RecordList) == 0:
             return None

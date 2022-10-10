@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to parse a Package file of .PKG file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -35,6 +35,8 @@ from Xml.PcdXml import PcdEntryXml
 ##
 # IndustryStandardHeaderXml
 #
+
+
 class IndustryStandardHeaderXml(object):
     def __init__(self):
         self.HeaderFile = ''
@@ -72,6 +74,8 @@ class IndustryStandardHeaderXml(object):
 ##
 # PackageIncludeHeaderXml
 #
+
+
 class PackageIncludeHeaderXml(object):
     def __init__(self):
         self.HeaderFile = ''
@@ -80,7 +84,8 @@ class PackageIncludeHeaderXml(object):
 
     def FromXml(self, Item, Key):
         self.HeaderFile = XmlElement(Item, '%s/HeaderFile' % Key)
-        self.CommonDefines.FromXml(XmlNode(Item, '%s/HeaderFile' % Key), 'HeaderFile')
+        self.CommonDefines.FromXml(
+            XmlNode(Item, '%s/HeaderFile' % Key), 'HeaderFile')
         for HelpTextItem in XmlList(Item, '%s/HelpText' % Key):
             HelpTextObj = HelpTextXml()
             HelpTextObj.FromXml(HelpTextItem, '%s/HelpText' % Key)
@@ -98,10 +103,11 @@ class PackageIncludeHeaderXml(object):
     def ToXml(self, PackageIncludeHeader, Key):
         if self.HeaderFile:
             pass
-        AttributeList = [['SupArchList', GetStringOfList(PackageIncludeHeader.GetSupArchList())], \
+        AttributeList = [['SupArchList', GetStringOfList(PackageIncludeHeader.GetSupArchList())],
                          ['SupModList', GetStringOfList(PackageIncludeHeader.GetSupModuleList())], ]
 
-        HeaderFileNode = CreateXmlElement('HeaderFile', PackageIncludeHeader.FilePath, [], AttributeList)
+        HeaderFileNode = CreateXmlElement(
+            'HeaderFile', PackageIncludeHeader.FilePath, [], AttributeList)
 
         NodeList = [HeaderFileNode]
         for Item in PackageIncludeHeader.GetHelpTextList():
@@ -121,6 +127,8 @@ class PackageIncludeHeaderXml(object):
 ##
 # PcdCheckXml
 #
+
+
 class PcdCheckXml(object):
     def __init__(self):
         self.PcdCheck = ''
@@ -144,6 +152,8 @@ class PcdCheckXml(object):
 ##
 # PackageSurfaceAreaXml
 #
+
+
 class PackageSurfaceAreaXml(object):
     def __init__(self):
         self.Package = None
@@ -159,13 +169,15 @@ class PackageSurfaceAreaXml(object):
         # Header
         #
         Tmp = PackageHeaderXml()
-        Tmp.FromXml(XmlNode(Item, '/PackageSurfaceArea/Header'), 'Header', Package)
+        Tmp.FromXml(XmlNode(Item, '/PackageSurfaceArea/Header'),
+                    'Header', Package)
         #
         # ClonedFrom
         #
         Tmp = ClonedFromXml()
         if XmlNode(Item, '/PackageSurfaceArea/ClonedFrom'):
-            ClonedFrom = Tmp.FromXml(XmlNode(Item, '/PackageSurfaceArea/ClonedFrom'), 'ClonedFrom')
+            ClonedFrom = Tmp.FromXml(
+                XmlNode(Item, '/PackageSurfaceArea/ClonedFrom'), 'ClonedFrom')
             Package.SetClonedFromList([ClonedFrom])
         #
         # LibraryClass
@@ -174,7 +186,8 @@ class PackageSurfaceAreaXml(object):
         for SubItem in XmlList(Item, '/PackageSurfaceArea/LibraryClassDeclarations/LibraryClass'):
             Tmp = LibraryClassXml()
             LibraryClass = Tmp.FromXml(SubItem, 'LibraryClass')
-            Package.SetLibraryClassList(Package.GetLibraryClassList() + [LibraryClass])
+            Package.SetLibraryClassList(
+                Package.GetLibraryClassList() + [LibraryClass])
 
         if XmlList(Item, '/PackageSurfaceArea/LibraryClassDeclarations') and \
            not XmlList(Item, '/PackageSurfaceArea/LibraryClassDeclarations/LibraryClass'):
@@ -186,12 +199,12 @@ class PackageSurfaceAreaXml(object):
         for SubItem in XmlList(Item, '/PackageSurfaceArea/IndustryStandardIncludes/IndustryStandardHeader'):
             Tmp = IndustryStandardHeaderXml()
             Include = Tmp.FromXml(SubItem, 'IndustryStandardHeader')
-            Package.SetStandardIncludeFileList(Package.GetStandardIncludeFileList() + [Include])
+            Package.SetStandardIncludeFileList(
+                Package.GetStandardIncludeFileList() + [Include])
 
         if XmlList(Item, '/PackageSurfaceArea/IndustryStandardIncludes') and \
-        not XmlList(Item, '/PackageSurfaceArea/IndustryStandardIncludes/IndustryStandardHeader'):
+                not XmlList(Item, '/PackageSurfaceArea/IndustryStandardIncludes/IndustryStandardHeader'):
             Package.SetStandardIncludeFileList([None])
-
 
         #
         # PackageHeader
@@ -199,7 +212,8 @@ class PackageSurfaceAreaXml(object):
         for SubItem in XmlList(Item, '/PackageSurfaceArea/PackageIncludes/PackageHeader'):
             Tmp = PackageIncludeHeaderXml()
             Include = Tmp.FromXml(SubItem, 'PackageHeader')
-            Package.SetPackageIncludeFileList(Package.GetPackageIncludeFileList() + [Include])
+            Package.SetPackageIncludeFileList(
+                Package.GetPackageIncludeFileList() + [Include])
 
         if XmlList(Item, '/PackageSurfaceArea/PackageIncludes') and not \
            XmlList(Item, '/PackageSurfaceArea/PackageIncludes/PackageHeader'):
@@ -223,7 +237,8 @@ class PackageSurfaceAreaXml(object):
         for SubItem in XmlList(Item, '/PackageSurfaceArea/ProtocolDeclarations/Entry'):
             Tmp = ProtocolXml('Package')
             GuidProtocolPpi = Tmp.FromXml(SubItem, 'Entry')
-            Package.SetProtocolList(Package.GetProtocolList() + [GuidProtocolPpi])
+            Package.SetProtocolList(
+                Package.GetProtocolList() + [GuidProtocolPpi])
 
         if XmlList(Item, '/PackageSurfaceArea/ProtocolDeclarations') and not \
            XmlList(Item, '/PackageSurfaceArea/ProtocolDeclarations/Entry'):
@@ -256,8 +271,7 @@ class PackageSurfaceAreaXml(object):
                 PcdErrorMessageList = PcdErrorObj.GetErrorMessageList()
                 if PcdErrorMessageList:
                     Package.PcdErrorCommentDict[(PcdEntry.GetTokenSpaceGuidCName(), PcdErrorObj.GetErrorNumber())] = \
-                    PcdErrorMessageList
-
+                        PcdErrorMessageList
 
         if XmlList(Item, '/PackageSurfaceArea/PcdDeclarations') and not \
            XmlList(Item, '/PackageSurfaceArea/PcdDeclarations/PcdEntry'):
@@ -277,13 +291,15 @@ class PackageSurfaceAreaXml(object):
         for SubItem in XmlList(Item, '/PackageSurfaceArea/Modules/ModuleSurfaceArea'):
             Tmp = ModuleSurfaceAreaXml()
             Module = Tmp.FromXml(SubItem, 'ModuleSurfaceArea')
-            ModuleDictKey = (Module.GetGuid(), Module.GetVersion(), Module.GetName(), Module.GetModulePath())
+            ModuleDictKey = (Module.GetGuid(), Module.GetVersion(),
+                             Module.GetName(), Module.GetModulePath())
             Package.ModuleDict[ModuleDictKey] = Module
         #
         # MiscellaneousFile
         #
         Tmp = MiscellaneousFileXml()
-        MiscFileList = Tmp.FromXml(XmlNode(Item, '/PackageSurfaceArea/MiscellaneousFiles'), 'MiscellaneousFiles')
+        MiscFileList = Tmp.FromXml(
+            XmlNode(Item, '/PackageSurfaceArea/MiscellaneousFiles'), 'MiscellaneousFiles')
         if MiscFileList:
             Package.SetMiscFileList([MiscFileList])
         else:
@@ -317,30 +333,37 @@ class PackageSurfaceAreaXml(object):
         #
         Tmp = ClonedFromXml()
         if Package.GetClonedFromList() != []:
-            DomPackage.appendChild(Tmp.ToXml(Package.GetClonedFromList[0], 'ClonedFrom'))
+            DomPackage.appendChild(
+                Tmp.ToXml(Package.GetClonedFromList[0], 'ClonedFrom'))
         #
         # LibraryClass
         #
-        LibraryClassNode = CreateXmlElement('LibraryClassDeclarations', '', [], [])
+        LibraryClassNode = CreateXmlElement(
+            'LibraryClassDeclarations', '', [], [])
         for LibraryClass in Package.GetLibraryClassList():
             Tmp = LibraryClassXml()
-            LibraryClassNode.appendChild(Tmp.ToXml(LibraryClass, 'LibraryClass'))
+            LibraryClassNode.appendChild(
+                Tmp.ToXml(LibraryClass, 'LibraryClass'))
         DomPackage.appendChild(LibraryClassNode)
         #
         # IndustryStandardHeader
         #
-        IndustryStandardHeaderNode = CreateXmlElement('IndustryStandardIncludes', '', [], [])
+        IndustryStandardHeaderNode = CreateXmlElement(
+            'IndustryStandardIncludes', '', [], [])
         for Include in Package.GetStandardIncludeFileList():
             Tmp = IndustryStandardHeaderXml()
-            IndustryStandardHeaderNode.appendChild(Tmp.ToXml(Include, 'IndustryStandardHeader'))
+            IndustryStandardHeaderNode.appendChild(
+                Tmp.ToXml(Include, 'IndustryStandardHeader'))
         DomPackage.appendChild(IndustryStandardHeaderNode)
         #
         # PackageHeader
         #
-        PackageIncludeHeaderNode = CreateXmlElement('PackageIncludes', '', [], [])
+        PackageIncludeHeaderNode = CreateXmlElement(
+            'PackageIncludes', '', [], [])
         for Include in Package.GetPackageIncludeFileList():
             Tmp = PackageIncludeHeaderXml()
-            PackageIncludeHeaderNode.appendChild(Tmp.ToXml(Include, 'PackageHeader'))
+            PackageIncludeHeaderNode.appendChild(
+                Tmp.ToXml(Include, 'PackageHeader'))
         DomPackage.appendChild(PackageIncludeHeaderNode)
         ModuleNode = CreateXmlElement('Modules', '', [], [])
         for Module in Package.GetModuleDict().values():
@@ -353,18 +376,18 @@ class PackageSurfaceAreaXml(object):
         GuidProtocolPpiNode = CreateXmlElement('GuidDeclarations', '', [], [])
         for GuidProtocolPpi in Package.GetGuidList():
             Tmp = GuidXml('Package')
-            GuidProtocolPpiNode.appendChild(Tmp.ToXml\
+            GuidProtocolPpiNode.appendChild(Tmp.ToXml
                                             (GuidProtocolPpi, 'Entry'))
         DomPackage.appendChild(GuidProtocolPpiNode)
         #
         # Protocol
         #
         GuidProtocolPpiNode = \
-        CreateXmlElement('ProtocolDeclarations', '', [], [])
+            CreateXmlElement('ProtocolDeclarations', '', [], [])
         for GuidProtocolPpi in Package.GetProtocolList():
             Tmp = ProtocolXml('Package')
-            GuidProtocolPpiNode.appendChild\
-            (Tmp.ToXml(GuidProtocolPpi, 'Entry'))
+            GuidProtocolPpiNode.appendChild(
+                Tmp.ToXml(GuidProtocolPpi, 'Entry'))
         DomPackage.appendChild(GuidProtocolPpiNode)
         #
         # Ppi
@@ -372,8 +395,8 @@ class PackageSurfaceAreaXml(object):
         GuidProtocolPpiNode = CreateXmlElement('PpiDeclarations', '', [], [])
         for GuidProtocolPpi in Package.GetPpiList():
             Tmp = PpiXml('Package')
-            GuidProtocolPpiNode.appendChild\
-            (Tmp.ToXml(GuidProtocolPpi, 'Entry'))
+            GuidProtocolPpiNode.appendChild(
+                Tmp.ToXml(GuidProtocolPpi, 'Entry'))
         DomPackage.appendChild(GuidProtocolPpiNode)
         #
         # PcdEntry
@@ -389,7 +412,8 @@ class PackageSurfaceAreaXml(object):
         #
         Tmp = MiscellaneousFileXml()
         if Package.GetMiscFileList():
-            DomPackage.appendChild(Tmp.ToXml(Package.GetMiscFileList()[0], 'MiscellaneousFiles'))
+            DomPackage.appendChild(
+                Tmp.ToXml(Package.GetMiscFileList()[0], 'MiscellaneousFiles'))
 
         #
         # UserExtensions
@@ -397,6 +421,7 @@ class PackageSurfaceAreaXml(object):
         if Package.GetUserExtensionList():
             for UserExtension in Package.GetUserExtensionList():
                 Tmp = UserExtensionsXml()
-                DomPackage.appendChild(Tmp.ToXml(UserExtension, 'UserExtensions'))
+                DomPackage.appendChild(
+                    Tmp.ToXml(UserExtension, 'UserExtensions'))
 
         return DomPackage

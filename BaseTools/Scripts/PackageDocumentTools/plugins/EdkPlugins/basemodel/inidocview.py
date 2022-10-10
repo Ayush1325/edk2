@@ -1,4 +1,4 @@
-## @file
+# @file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
 #
@@ -6,6 +6,7 @@
 #
 
 import core.editor
+
 
 class INIDoc(core.editor.EditorDocument):
     def __init__(self):

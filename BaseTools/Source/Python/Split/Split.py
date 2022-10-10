@@ -92,16 +92,20 @@ def getFileSize(filename):
 
     return length
 
-def getoutputfileabs(inputfile, prefix, outputfile,index):
+
+def getoutputfileabs(inputfile, prefix, outputfile, index):
     inputfile = os.path.abspath(inputfile)
     if outputfile is None:
         if prefix is None:
-            outputfileabs = os.path.join(os.path.dirname(inputfile), "{}{}".format(os.path.basename(inputfile),index))
+            outputfileabs = os.path.join(os.path.dirname(
+                inputfile), "{}{}".format(os.path.basename(inputfile), index))
         else:
             if os.path.isabs(prefix):
-                outputfileabs = os.path.join(prefix, "{}{}".format(os.path.basename(inputfile),index))
+                outputfileabs = os.path.join(prefix, "{}{}".format(
+                    os.path.basename(inputfile), index))
             else:
-                outputfileabs = os.path.join(os.getcwd(), prefix, "{}{}".format(os.path.basename(inputfile),index))
+                outputfileabs = os.path.join(os.getcwd(), prefix, "{}{}".format(
+                    os.path.basename(inputfile), index))
     elif not os.path.isabs(outputfile):
         if prefix is None:
             outputfileabs = os.path.join(os.getcwd(), outputfile)
@@ -113,6 +117,7 @@ def getoutputfileabs(inputfile, prefix, outputfile,index):
     else:
         outputfileabs = outputfile
     return outputfileabs
+
 
 def splitFile(inputfile, position, outputdir=None, outputfile1=None, outputfile2=None):
     '''
@@ -132,12 +137,12 @@ def splitFile(inputfile, position, outputdir=None, outputfile1=None, outputfile2
     # Create dir for the output files
     try:
 
-        outputfile1 = getoutputfileabs(inputfile, outputdir, outputfile1,1)
+        outputfile1 = getoutputfileabs(inputfile, outputdir, outputfile1, 1)
         outputfolder = os.path.dirname(outputfile1)
         if not os.path.exists(outputfolder):
             os.makedirs(outputfolder)
 
-        outputfile2 = getoutputfileabs(inputfile, outputdir, outputfile2,2)
+        outputfile2 = getoutputfileabs(inputfile, outputdir, outputfile2, 2)
         outputfolder = os.path.dirname(outputfile2)
         if not os.path.exists(outputfolder):
             os.makedirs(outputfolder)

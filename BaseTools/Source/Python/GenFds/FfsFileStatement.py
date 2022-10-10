@@ -1,4 +1,4 @@
-## @file
+# @file
 # process FFS generation from FILE statement
 #
 #  Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -23,11 +23,13 @@ from .Ffs import FdfFvFileTypeToFileType
 from .GenFdsGlobalVariable import GenFdsGlobalVariable
 import shutil
 
-## generate FFS from FILE
+# generate FFS from FILE
 #
 #
+
+
 class FileStatement (FileStatementClassObject):
-    ## The constructor
+    # The constructor
     #
     #   @param  self        The object pointer
     #
@@ -39,7 +41,7 @@ class FileStatement (FileStatementClassObject):
         self.InfFileName = None
         self.SubAlignment = None
 
-    ## GenFfs() method
+    # GenFfs() method
     #
     #   Generate FFS
     #
@@ -49,19 +51,19 @@ class FileStatement (FileStatementClassObject):
     #   @param  FvParentAddr Parent Fv base address
     #   @retval string       Generated FFS file name
     #
-    def GenFfs(self, Dict = None, FvChildAddr=[], FvParentAddr=None, IsMakefile=False, FvName=None):
+    def GenFfs(self, Dict=None, FvChildAddr=[], FvParentAddr=None, IsMakefile=False, FvName=None):
 
         if self.NameGuid and self.NameGuid.startswith('PCD('):
             PcdValue = GenFdsGlobalVariable.GetPcdValue(self.NameGuid)
             if len(PcdValue) == 0:
-                EdkLogger.error("GenFds", GENFDS_ERROR, '%s NOT defined.' \
-                            % (self.NameGuid))
+                EdkLogger.error("GenFds", GENFDS_ERROR, '%s NOT defined.'
+                                % (self.NameGuid))
             if PcdValue.startswith('{'):
                 PcdValue = GuidStructureByteArrayToGuidString(PcdValue)
             RegistryGuidStr = PcdValue
             if len(RegistryGuidStr) == 0:
-                EdkLogger.error("GenFds", GENFDS_ERROR, 'GUID value for %s in wrong format.' \
-                            % (self.NameGuid))
+                EdkLogger.error("GenFds", GENFDS_ERROR, 'GUID value for %s in wrong format.'
+                                % (self.NameGuid))
             self.NameGuid = RegistryGuidStr
 
         Str = self.NameGuid
@@ -81,15 +83,19 @@ class FileStatement (FileStatementClassObject):
         if self.FvName:
             Buffer = BytesIO()
             if self.FvName.upper() not in GenFdsGlobalVariable.FdfParser.Profile.FvDict:
-                EdkLogger.error("GenFds", GENFDS_ERROR, "FV (%s) is NOT described in FDF file!" % (self.FvName))
-            Fv = GenFdsGlobalVariable.FdfParser.Profile.FvDict.get(self.FvName.upper())
+                EdkLogger.error(
+                    "GenFds", GENFDS_ERROR, "FV (%s) is NOT described in FDF file!" % (self.FvName))
+            Fv = GenFdsGlobalVariable.FdfParser.Profile.FvDict.get(
+                self.FvName.upper())
             FileName = Fv.AddToBuffer(Buffer)
             SectionFiles = [FileName]
 
         elif self.FdName:
             if self.FdName.upper() not in GenFdsGlobalVariable.FdfParser.Profile.FdDict:
-                EdkLogger.error("GenFds", GENFDS_ERROR, "FD (%s) is NOT described in FDF file!" % (self.FdName))
-            Fd = GenFdsGlobalVariable.FdfParser.Profile.FdDict.get(self.FdName.upper())
+                EdkLogger.error(
+                    "GenFds", GENFDS_ERROR, "FD (%s) is NOT described in FDF file!" % (self.FdName))
+            Fd = GenFdsGlobalVariable.FdfParser.Profile.FdDict.get(
+                self.FdName.upper())
             FileName = Fd.GenFd()
             SectionFiles = [FileName]
 
@@ -103,37 +109,44 @@ class FileStatement (FileStatementClassObject):
                         try:
                             f = open(File, 'rb')
                         except:
-                            GenFdsGlobalVariable.ErrorLogger("Error opening RAW file %s." % (File))
+                            GenFdsGlobalVariable.ErrorLogger(
+                                "Error opening RAW file %s." % (File))
                         Content = f.read()
                         f.close()
                         AlignValue = 1
                         if self.SubAlignment[Index]:
-                            AlignValue = GenFdsGlobalVariable.GetAlignment(self.SubAlignment[Index])
+                            AlignValue = GenFdsGlobalVariable.GetAlignment(
+                                self.SubAlignment[Index])
                         if AlignValue > MaxAlignValue:
                             MaxAlignIndex = Index
                             MaxAlignValue = AlignValue
                         FileContent.write(Content)
                         if len(FileContent.getvalue()) % AlignValue != 0:
-                            Size = AlignValue - len(FileContent.getvalue()) % AlignValue
+                            Size = AlignValue - \
+                                len(FileContent.getvalue()) % AlignValue
                             for i in range(0, Size):
                                 FileContent.write(pack('B', 0xFF))
 
                     if FileContent.getvalue() != b'':
-                        OutputRAWFile = os.path.join(GenFdsGlobalVariable.FfsDir, self.NameGuid, self.NameGuid + '.raw')
-                        SaveFileOnChange(OutputRAWFile, FileContent.getvalue(), True)
+                        OutputRAWFile = os.path.join(
+                            GenFdsGlobalVariable.FfsDir, self.NameGuid, self.NameGuid + '.raw')
+                        SaveFileOnChange(
+                            OutputRAWFile, FileContent.getvalue(), True)
                         self.FileName = OutputRAWFile
                         self.SubAlignment = self.SubAlignment[MaxAlignIndex]
 
                 if self.Alignment and self.SubAlignment:
-                    if GenFdsGlobalVariable.GetAlignment (self.Alignment) < GenFdsGlobalVariable.GetAlignment (self.SubAlignment):
+                    if GenFdsGlobalVariable.GetAlignment(self.Alignment) < GenFdsGlobalVariable.GetAlignment(self.SubAlignment):
                         self.Alignment = self.SubAlignment
                 elif self.SubAlignment:
                     self.Alignment = self.SubAlignment
 
-            self.FileName = GenFdsGlobalVariable.ReplaceWorkspaceMacro(self.FileName)
-            #Replace $(SAPCE) with real space
+            self.FileName = GenFdsGlobalVariable.ReplaceWorkspaceMacro(
+                self.FileName)
+            # Replace $(SAPCE) with real space
             self.FileName = self.FileName.replace('$(SPACE)', ' ')
-            SectionFiles = [GenFdsGlobalVariable.MacroExtend(self.FileName, Dict)]
+            SectionFiles = [
+                GenFdsGlobalVariable.MacroExtend(self.FileName, Dict)]
 
         else:
             SectionFiles = []
@@ -141,7 +154,7 @@ class FileStatement (FileStatementClassObject):
             SectionAlignments = []
             for section in self.SectionList:
                 Index = Index + 1
-                SecIndex = '%d' %Index
+                SecIndex = '%d' % Index
                 # process the inside FvImage from FvSection or GuidSection
                 if FvChildAddr != []:
                     if isinstance(section, FvImageSection):
@@ -153,7 +166,8 @@ class FileStatement (FileStatementClassObject):
 
                 if self.KeepReloc == False:
                     section.KeepReloc = False
-                sectList, align = section.GenSection(OutputDir, self.NameGuid, SecIndex, self.KeyStringList, None, Dict)
+                sectList, align = section.GenSection(
+                    OutputDir, self.NameGuid, SecIndex, self.KeyStringList, None, Dict)
                 if sectList != []:
                     for sect in sectList:
                         SectionFiles.append(sect)
@@ -164,12 +178,13 @@ class FileStatement (FileStatementClassObject):
         #
         FfsFileOutput = os.path.join(OutputDir, self.NameGuid + '.ffs')
         GenFdsGlobalVariable.GenerateFfs(FfsFileOutput, SectionFiles,
-                                         FdfFvFileTypeToFileType.get(self.FvFileType),
+                                         FdfFvFileTypeToFileType.get(
+                                             self.FvFileType),
                                          self.NameGuid,
                                          Fixed=self.Fixed,
                                          CheckSum=self.CheckSum,
                                          Align=self.Alignment,
                                          SectionAlign=SectionAlignments
-                                        )
+                                         )
 
         return FfsFileOutput

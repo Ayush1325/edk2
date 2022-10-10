@@ -20,13 +20,15 @@ import subprocess
 import multiprocessing
 import copy
 import sys
-__prog__        = 'NmakeSubdirs'
-__version__     = '%s Version %s' % (__prog__, '0.10 ')
-__copyright__   = 'Copyright (c) 2018, Intel Corporation. All rights reserved.'
+__prog__ = 'NmakeSubdirs'
+__version__ = '%s Version %s' % (__prog__, '0.10 ')
+__copyright__ = 'Copyright (c) 2018, Intel Corporation. All rights reserved.'
 __description__ = 'Replace for NmakeSubdirs.bat in windows ,support parallel build for nmake.\n'
 
 cpu_count = multiprocessing.cpu_count()
 output_lock = threading.Lock()
+
+
 def RunCommand(WorkDir=None, *Args, **kwargs):
     if WorkDir is None:
         WorkDir = os.curdir
@@ -34,17 +36,21 @@ def RunCommand(WorkDir=None, *Args, **kwargs):
         kwargs["stderr"] = subprocess.STDOUT
     if "stdout" not in kwargs:
         kwargs["stdout"] = subprocess.PIPE
-    p = subprocess.Popen(Args, cwd=WorkDir, stderr=kwargs["stderr"], stdout=kwargs["stdout"])
+    p = subprocess.Popen(
+        Args, cwd=WorkDir, stderr=kwargs["stderr"], stdout=kwargs["stdout"])
     stdout, stderr = p.communicate()
     message = ""
     if stdout is not None:
-        message = stdout.decode(errors='ignore') #for compatibility in python 2 and 3
+        # for compatibility in python 2 and 3
+        message = stdout.decode(errors='ignore')
 
     if p.returncode != 0:
-        raise RuntimeError("Error while execute command \'{0}\' in direcotry {1}\n{2}".format(" ".join(Args), WorkDir, message))
+        raise RuntimeError("Error while execute command \'{0}\' in direcotry {1}\n{2}".format(
+            " ".join(Args), WorkDir, message))
 
     output_lock.acquire(True)
-    print("execute command \"{0}\" in directory {1}".format(" ".join(Args), WorkDir))
+    print("execute command \"{0}\" in directory {1}".format(
+        " ".join(Args), WorkDir))
     try:
         print(message)
     except:
@@ -52,6 +58,7 @@ def RunCommand(WorkDir=None, *Args, **kwargs):
     output_lock.release()
 
     return p.returncode, stdout
+
 
 class TaskUnit(object):
     def __init__(self, func, args, kwargs):
@@ -70,6 +77,7 @@ class TaskUnit(object):
         para.extend("{0}={1}".format(k, v)for k, v in self.kwargs.items())
 
         return "{0}({1})".format(self.func.__name__, ",".join(para))
+
 
 class ThreadControl(object):
 
@@ -123,7 +131,8 @@ class ThreadControl(object):
             try:
                 task.run()
             except RuntimeError as e:
-                if self.error: break
+                if self.error:
+                    break
                 self.errorLock.acquire(True)
                 self.error = True
                 self.errorMsg = str(e)
@@ -135,6 +144,7 @@ class ThreadControl(object):
         self.running.remove(threading.currentThread())
         self.runningLock.release()
 
+
 def Run():
     curdir = os.path.abspath(os.curdir)
     if len(args.subdirs) == 1:
@@ -142,25 +152,30 @@ def Run():
     if args.jobs == 1:
         try:
             for dir in args.subdirs:
-                RunCommand(os.path.join(curdir, dir), "nmake", args.target, stdout=sys.stdout, stderr=subprocess.STDOUT)
+                RunCommand(os.path.join(curdir, dir), "nmake", args.target,
+                           stdout=sys.stdout, stderr=subprocess.STDOUT)
         except RuntimeError:
             exit(1)
     else:
         controller = ThreadControl(args.jobs)
         for dir in args.subdirs:
-            controller.addTask(RunCommand, os.path.join(curdir, dir), "nmake", args.target)
+            controller.addTask(RunCommand, os.path.join(
+                curdir, dir), "nmake", args.target)
         controller.startSchedule()
         controller.waitComplete()
         if controller.error:
             exit(1)
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog=__prog__, description=__description__ + __copyright__, conflict_handler='resolve')
+    parser = argparse.ArgumentParser(
+        prog=__prog__, description=__description__ + __copyright__, conflict_handler='resolve')
 
     parser.add_argument("target", help="the target for nmake")
-    parser.add_argument("subdirs", nargs="+", help="the relative dir path of makefile")
-    parser.add_argument("--jobs", type=int, dest="jobs", default=cpu_count, help="thread number")
+    parser.add_argument("subdirs", nargs="+",
+                        help="the relative dir path of makefile")
+    parser.add_argument("--jobs", type=int, dest="jobs",
+                        default=cpu_count, help="thread number")
     parser.add_argument('--version', action='version', version=__version__)
     args = parser.parse_args()
     Run()
-

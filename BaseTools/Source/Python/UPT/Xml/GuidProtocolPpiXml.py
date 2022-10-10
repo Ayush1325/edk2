@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to parse a xml file of .PKG file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -28,8 +28,10 @@ from Xml.CommonXml import HelpTextXml
 from Xml.XmlParserMisc import GetHelpTextList
 
 ##
-#GUID/Protocol/Ppi Common
+# GUID/Protocol/Ppi Common
 #
+
+
 class GuidProtocolPpiXml(object):
     def __init__(self, Mode):
         self.UiName = ''
@@ -78,18 +80,22 @@ class GuidProtocolPpiXml(object):
         if self.GuidValue:
             pass
         AttributeList = \
-        [['Usage', GetStringOfList(GuidProtocolPpi.GetUsage())], \
-         ['UiName', GuidProtocolPpi.GetName()], \
-         ['GuidType', GetStringOfList(GuidProtocolPpi.GetGuidTypeList())], \
-         ['Notify', str(GuidProtocolPpi.GetNotify()).lower()], \
-         ['SupArchList', GetStringOfList(GuidProtocolPpi.GetSupArchList())], \
-         ['SupModList', GetStringOfList(GuidProtocolPpi.GetSupModuleList())], \
-         ['FeatureFlag', ConvertNEToNOTEQ(GuidProtocolPpi.GetFeatureFlag())]
-        ]
+            [['Usage', GetStringOfList(GuidProtocolPpi.GetUsage())],
+             ['UiName', GuidProtocolPpi.GetName()],
+                ['GuidType', GetStringOfList(
+                    GuidProtocolPpi.GetGuidTypeList())],
+                ['Notify', str(GuidProtocolPpi.GetNotify()).lower()],
+                ['SupArchList', GetStringOfList(
+                    GuidProtocolPpi.GetSupArchList())],
+                ['SupModList', GetStringOfList(
+                    GuidProtocolPpi.GetSupModuleList())],
+                ['FeatureFlag', ConvertNEToNOTEQ(
+                    GuidProtocolPpi.GetFeatureFlag())]
+             ]
         NodeList = [['CName', GuidProtocolPpi.GetCName()],
                     ['GuidValue', GuidProtocolPpi.GetGuid()],
                     ['VariableName', GuidProtocolPpi.VariableName]
-                   ]
+                    ]
         for Item in GuidProtocolPpi.GetHelpTextList():
             Tmp = HelpTextXml()
             NodeList.append(Tmp.ToXml(Item))
@@ -99,15 +105,17 @@ class GuidProtocolPpiXml(object):
 
     def __str__(self):
         Str = \
-        "UiName = %s Notify = %s GuidTypes = %s CName = %s GuidValue = %s %s" \
-        % (self.UiName, self.Notify, self.GuidTypes, self.CName, \
-           self.GuidValue, self.CommonDefines)
+            "UiName = %s Notify = %s GuidTypes = %s CName = %s GuidValue = %s %s" \
+            % (self.UiName, self.Notify, self.GuidTypes, self.CName,
+               self.GuidValue, self.CommonDefines)
         for Item in self.HelpText:
             Str = Str + "\n\t" + str(Item)
         return Str
 ##
-#GUID Xml
+# GUID Xml
 #
+
+
 class GuidXml(GuidProtocolPpiXml):
     def __init__(self, Mode):
         GuidProtocolPpiXml.__init__(self, Mode)
@@ -127,7 +135,8 @@ class GuidXml(GuidProtocolPpiXml):
             if self.GuidType:
                 GuidProtocolPpi.SetGuidTypeList([self.GuidType])
             GuidProtocolPpi.SetSupArchList(self.CommonDefines.SupArchList)
-            GuidProtocolPpi.SetFeatureFlag(ConvertNOTEQToNE(self.CommonDefines.FeatureFlag))
+            GuidProtocolPpi.SetFeatureFlag(
+                ConvertNOTEQToNE(self.CommonDefines.FeatureFlag))
             GuidProtocolPpi.SetCName(self.CName)
             GuidProtocolPpi.SetVariableName(self.VariableName)
         return GuidProtocolPpi
@@ -135,27 +144,29 @@ class GuidXml(GuidProtocolPpiXml):
     def ToXml(self, GuidProtocolPpi, Key):
         if self.Mode == 'Package':
             AttributeList = \
-            [['GuidType', \
-              GetStringOfList(GuidProtocolPpi.GetGuidTypeList())], \
-              ['SupArchList', \
-               GetStringOfList(GuidProtocolPpi.GetSupArchList())], \
-               ['SupModList', \
-                GetStringOfList(GuidProtocolPpi.GetSupModuleList())],
-            ]
+                [['GuidType',
+                  GetStringOfList(GuidProtocolPpi.GetGuidTypeList())],
+                 ['SupArchList',
+                    GetStringOfList(GuidProtocolPpi.GetSupArchList())],
+                    ['SupModList',
+                     GetStringOfList(GuidProtocolPpi.GetSupModuleList())],
+                 ]
             NodeList = [['CName', GuidProtocolPpi.GetCName()],
                         ['GuidValue', GuidProtocolPpi.GetGuid()],
-                       ]
+                        ]
         else:
             AttributeList = \
-            [['Usage', GetStringOfList(GuidProtocolPpi.GetUsage())], \
-             ['GuidType', GetStringOfList(GuidProtocolPpi.GetGuidTypeList())],\
-              ['SupArchList', \
-               GetStringOfList(GuidProtocolPpi.GetSupArchList())], \
-               ['FeatureFlag', ConvertNEToNOTEQ(GuidProtocolPpi.GetFeatureFlag())]
-            ]
+                [['Usage', GetStringOfList(GuidProtocolPpi.GetUsage())],
+                 ['GuidType', GetStringOfList(
+                     GuidProtocolPpi.GetGuidTypeList())],
+                    ['SupArchList',
+                     GetStringOfList(GuidProtocolPpi.GetSupArchList())],
+                    ['FeatureFlag', ConvertNEToNOTEQ(
+                        GuidProtocolPpi.GetFeatureFlag())]
+                 ]
             NodeList = [['CName', GuidProtocolPpi.GetCName()],
                         ['VariableName', GuidProtocolPpi.GetVariableName()]
-                       ]
+                        ]
 
         for Item in GuidProtocolPpi.GetHelpTextList():
             Tmp = HelpTextXml()
@@ -164,8 +175,10 @@ class GuidXml(GuidProtocolPpiXml):
 
         return Root
 ##
-#Protocol Xml
+# Protocol Xml
 #
+
+
 class ProtocolXml(GuidProtocolPpiXml):
     def __init__(self, Mode):
         GuidProtocolPpiXml.__init__(self, Mode)
@@ -188,7 +201,8 @@ class ProtocolXml(GuidProtocolPpiXml):
             else:
                 GuidProtocolPpi.SetNotify('')
             GuidProtocolPpi.SetSupArchList(self.CommonDefines.SupArchList)
-            GuidProtocolPpi.SetFeatureFlag(ConvertNOTEQToNE(self.CommonDefines.FeatureFlag))
+            GuidProtocolPpi.SetFeatureFlag(
+                ConvertNOTEQToNE(self.CommonDefines.FeatureFlag))
             GuidProtocolPpi.SetCName(self.CName)
 
         return GuidProtocolPpi
@@ -196,25 +210,26 @@ class ProtocolXml(GuidProtocolPpiXml):
     def ToXml(self, GuidProtocolPpi, Key):
         if self.Mode == 'Package':
             AttributeList = \
-            [['SupArchList', \
-              GetStringOfList(GuidProtocolPpi.GetSupArchList())], \
-              ['SupModList', \
-               GetStringOfList(GuidProtocolPpi.GetSupModuleList())], \
-               ['FeatureFlag', GuidProtocolPpi.GetFeatureFlag()]
-            ]
+                [['SupArchList',
+                  GetStringOfList(GuidProtocolPpi.GetSupArchList())],
+                 ['SupModList',
+                    GetStringOfList(GuidProtocolPpi.GetSupModuleList())],
+                    ['FeatureFlag', GuidProtocolPpi.GetFeatureFlag()]
+                 ]
             NodeList = [['CName', GuidProtocolPpi.GetCName()],
                         ['GuidValue', GuidProtocolPpi.GetGuid()],
-                       ]
+                        ]
         else:
             AttributeList = \
-            [['Usage', GetStringOfList(GuidProtocolPpi.GetUsage())], \
-             ['Notify', str(GuidProtocolPpi.GetNotify()).lower()], \
-             ['SupArchList', \
-              GetStringOfList(GuidProtocolPpi.GetSupArchList())], \
-              ['FeatureFlag', ConvertNEToNOTEQ(GuidProtocolPpi.GetFeatureFlag())]
-            ]
+                [['Usage', GetStringOfList(GuidProtocolPpi.GetUsage())],
+                 ['Notify', str(GuidProtocolPpi.GetNotify()).lower()],
+                    ['SupArchList',
+                     GetStringOfList(GuidProtocolPpi.GetSupArchList())],
+                    ['FeatureFlag', ConvertNEToNOTEQ(
+                        GuidProtocolPpi.GetFeatureFlag())]
+                 ]
             NodeList = [['CName', GuidProtocolPpi.GetCName()],
-                       ]
+                        ]
 
         for Item in GuidProtocolPpi.GetHelpTextList():
             Tmp = HelpTextXml()
@@ -223,8 +238,10 @@ class ProtocolXml(GuidProtocolPpiXml):
 
         return Root
 ##
-#Ppi Xml
+# Ppi Xml
 #
+
+
 class PpiXml(GuidProtocolPpiXml):
     def __init__(self, Mode):
         GuidProtocolPpiXml.__init__(self, Mode)
@@ -246,7 +263,8 @@ class PpiXml(GuidProtocolPpiXml):
             else:
                 GuidProtocolPpi.SetNotify('')
             GuidProtocolPpi.SetSupArchList(self.CommonDefines.SupArchList)
-            GuidProtocolPpi.SetFeatureFlag(ConvertNOTEQToNE(self.CommonDefines.FeatureFlag))
+            GuidProtocolPpi.SetFeatureFlag(
+                ConvertNOTEQToNE(self.CommonDefines.FeatureFlag))
             GuidProtocolPpi.SetCName(self.CName)
 
         return GuidProtocolPpi
@@ -254,22 +272,23 @@ class PpiXml(GuidProtocolPpiXml):
     def ToXml(self, GuidProtocolPpi, Key):
         if self.Mode == 'Package':
             AttributeList = \
-            [['SupArchList', \
-              GetStringOfList(GuidProtocolPpi.GetSupArchList())],
-            ]
+                [['SupArchList',
+                  GetStringOfList(GuidProtocolPpi.GetSupArchList())],
+                 ]
             NodeList = [['CName', GuidProtocolPpi.GetCName()],
                         ['GuidValue', GuidProtocolPpi.GetGuid()],
-                       ]
+                        ]
         else:
             AttributeList = \
-            [['Usage', GetStringOfList(GuidProtocolPpi.GetUsage())], \
-             ['Notify', str(GuidProtocolPpi.GetNotify()).lower()], \
-             ['SupArchList', \
-              GetStringOfList(GuidProtocolPpi.GetSupArchList())], \
-              ['FeatureFlag', ConvertNEToNOTEQ(GuidProtocolPpi.GetFeatureFlag())]
-            ]
+                [['Usage', GetStringOfList(GuidProtocolPpi.GetUsage())],
+                 ['Notify', str(GuidProtocolPpi.GetNotify()).lower()],
+                    ['SupArchList',
+                     GetStringOfList(GuidProtocolPpi.GetSupArchList())],
+                    ['FeatureFlag', ConvertNEToNOTEQ(
+                        GuidProtocolPpi.GetFeatureFlag())]
+                 ]
             NodeList = [['CName', GuidProtocolPpi.GetCName()],
-                       ]
+                        ]
 
         for Item in GuidProtocolPpi.GetHelpTextList():
             Tmp = HelpTextXml()

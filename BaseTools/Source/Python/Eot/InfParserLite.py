@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to parse INF file of EDK project
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -21,21 +21,23 @@ from Eot.Parser import *
 from Eot import Database
 from Eot import EotGlobalData
 
-## EdkInfParser() class
+# EdkInfParser() class
 #
 # This class defined basic INF object which is used by inheriting
 #
 # @param object:       Inherited from object class
 #
+
+
 class EdkInfParser(object):
-    ## The constructor
+    # The constructor
     #
     #  @param  self: The object pointer
     #  @param  Filename: INF file name
     #  @param  Database: Eot database
     #  @param  SourceFileList: A list for all source file belonging this INF file
     #
-    def __init__(self, Filename = None, Database = None, SourceFileList = None):
+    def __init__(self, Filename=None, Database=None, SourceFileList=None):
         self.Identification = Identification()
         self.Sources = []
         self.Macros = {}
@@ -51,27 +53,30 @@ class EdkInfParser(object):
 
         if SourceFileList:
             for Item in SourceFileList:
-                self.TblInf.Insert(MODEL_EFI_SOURCE_FILE, Item, '', '', '', '', 'COMMON', -1, self.FileID, -1, -1, -1, -1, 0)
+                self.TblInf.Insert(MODEL_EFI_SOURCE_FILE, Item, '', '',
+                                   '', '', 'COMMON', -1, self.FileID, -1, -1, -1, -1, 0)
 
-
-    ## LoadInffile() method
+    # LoadInffile() method
     #
     #  Load INF file and insert a record in database
     #
     #  @param  self: The object pointer
     #  @param Filename:  Input value for filename of Inf file
     #
-    def LoadInfFile(self, Filename = None):
+
+    def LoadInfFile(self, Filename=None):
         # Insert a record for file
         Filename = NormPath(Filename)
         self.Identification.FileFullPath = Filename
-        (self.Identification.FileRelativePath, self.Identification.FileName) = os.path.split(Filename)
+        (self.Identification.FileRelativePath,
+         self.Identification.FileName) = os.path.split(Filename)
 
         self.FileID = self.TblFile.InsertFile(Filename, MODEL_FILE_INF)
 
-        self.ParseInf(PreProcess(Filename, False), self.Identification.FileRelativePath, Filename)
+        self.ParseInf(PreProcess(Filename, False),
+                      self.Identification.FileRelativePath, Filename)
 
-    ## ParserSource() method
+    # ParserSource() method
     #
     #  Parse Source section and insert records in database
     #
@@ -91,9 +96,10 @@ class EdkInfParser(object):
             for Item in SectionItemList:
                 if CurrentSection.upper() == 'defines'.upper():
                     (Name, Value) = AddToSelfMacro(self.Macros, Item[0])
-                    self.TblInf.Insert(MODEL_META_DATA_HEADER, Name, Value, Third, '', '', Arch, -1, self.FileID, Item[1], -1, Item[1], -1, 0)
+                    self.TblInf.Insert(MODEL_META_DATA_HEADER, Name, Value, Third,
+                                       '', '', Arch, -1, self.FileID, Item[1], -1, Item[1], -1, 0)
 
-    ## ParseInf() method
+    # ParseInf() method
     #
     #  Parse INF file and get sections information
     #
@@ -102,9 +108,9 @@ class EdkInfParser(object):
     #  @param FileRelativePath: relative path of the file
     #  @param Filename: file name of INF file
     #
-    def ParseInf(self, Lines = [], FileRelativePath = '', Filename = ''):
+    def ParseInf(self, Lines=[], FileRelativePath='', Filename=''):
         IfDefList, SectionItemList, CurrentSection, ArchList, ThirdList, IncludeFiles = \
-        [], [], TAB_UNKNOWN, [], [], []
+            [], [], TAB_UNKNOWN, [], [], []
         LineNo = 0
 
         for Line in Lines:
@@ -112,7 +118,8 @@ class EdkInfParser(object):
             if Line == '':
                 continue
             if Line.startswith(TAB_SECTION_START) and Line.endswith(TAB_SECTION_END):
-                self.ParserSource(CurrentSection, SectionItemList, ArchList, ThirdList)
+                self.ParserSource(
+                    CurrentSection, SectionItemList, ArchList, ThirdList)
 
                 # Parse the new section
                 SectionItemList = []
@@ -120,18 +127,21 @@ class EdkInfParser(object):
                 ThirdList = []
                 # Parse section name
                 CurrentSection = ''
-                LineList = GetSplitValueList(Line[len(TAB_SECTION_START):len(Line) - len(TAB_SECTION_END)], TAB_COMMA_SPLIT)
+                LineList = GetSplitValueList(Line[len(TAB_SECTION_START):len(
+                    Line) - len(TAB_SECTION_END)], TAB_COMMA_SPLIT)
                 for Item in LineList:
                     ItemList = GetSplitValueList(Item, TAB_SPLIT)
                     if CurrentSection == '':
                         CurrentSection = ItemList[0]
                     else:
                         if CurrentSection != ItemList[0]:
-                            EdkLogger.error("Parser", PARSER_ERROR, "Different section names '%s' and '%s' are found in one section definition, this is not allowed." % (CurrentSection, ItemList[0]), File=Filename, Line=LineNo)
+                            EdkLogger.error("Parser", PARSER_ERROR, "Different section names '%s' and '%s' are found in one section definition, this is not allowed." % (
+                                CurrentSection, ItemList[0]), File=Filename, Line=LineNo)
                     ItemList.append('')
                     ItemList.append('')
                     if len(ItemList) > 5:
-                        RaiseParserError(Line, CurrentSection, Filename, '', LineNo)
+                        RaiseParserError(Line, CurrentSection,
+                                         Filename, '', LineNo)
                     else:
                         ArchList.append(ItemList[1].upper())
                         ThirdList.append(ItemList[2])
@@ -143,6 +153,4 @@ class EdkInfParser(object):
             # End of parse
 
         self.ParserSource(CurrentSection, SectionItemList, ArchList, ThirdList)
-        #End of For
-
-
+        # End of For

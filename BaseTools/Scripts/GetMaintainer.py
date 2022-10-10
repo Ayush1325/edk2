@@ -1,4 +1,4 @@
-## @file
+# @file
 #  Retrieves the people to request review from on submission of a commit.
 #
 #  Copyright (c) 2019, Linaro Ltd. All rights reserved.<BR>
@@ -25,6 +25,7 @@ EXPRESSIONS = {
     'webpage':    re.compile(r'^W:\s*(?P<webpage>.*?)\r*$')
 }
 
+
 def printsection(section):
     """Prints out the dictionary describing a Maintainers.txt section."""
     print('===')
@@ -32,6 +33,7 @@ def printsection(section):
         print("Key: %s" % key)
         for item in section[key]:
             print('  %s' % item)
+
 
 def pattern_to_regex(pattern):
     """Takes a string containing regular UNIX path wildcards
@@ -48,6 +50,7 @@ def pattern_to_regex(pattern):
         pattern += r'(?!.*?/.*?)'
 
     return pattern
+
 
 def path_in_section(path, section):
     """Returns True of False indicating whether the path is covered by
@@ -72,6 +75,7 @@ def path_in_section(path, section):
 
     return False
 
+
 def get_section_maintainers(path, section):
     """Returns a list with email addresses to any M: and R: entries
        matching the provided path in the provided section."""
@@ -82,7 +86,8 @@ def get_section_maintainers(path, section):
     if path_in_section(path, section):
         for status in section['status']:
             if status not in nowarn_status:
-                print('WARNING: Maintained status for "%s" is \'%s\'!' % (path, status))
+                print('WARNING: Maintained status for "%s" is \'%s\'!' %
+                      (path, status))
         for address in section['maintainer'], section['reviewer']:
             # Convert to list if necessary
             if isinstance(address, list):
@@ -97,6 +102,7 @@ def get_section_maintainers(path, section):
                 lists += [address]
 
     return maintainers, lists
+
 
 def get_maintainers(path, sections, level=0):
     """For 'path', iterates over all sections, returning maintainers
@@ -115,13 +121,15 @@ def get_maintainers(path, sections, level=0):
         # REPO.working_dir/<default>
         print('"%s": no maintainers found, looking for default' % path)
         if level == 0:
-            maintainers = get_maintainers('<default>', sections, level=level + 1)
+            maintainers = get_maintainers(
+                '<default>', sections, level=level + 1)
         else:
             print("No <default> maintainers set for project.")
         if not maintainers:
             return None
 
     return maintainers + lists
+
 
 def parse_maintainers_line(line):
     """Parse one line of Maintainers.txt, returning any match group and its key."""
@@ -130,6 +138,7 @@ def parse_maintainers_line(line):
         if match:
             return key, match.group(key)
     return None, None
+
 
 def parse_maintainers_file(filename):
     """Parse the Maintainers.txt from top-level of repo and
@@ -153,10 +162,12 @@ def parse_maintainers_file(filename):
 
         return sectionlist
 
+
 def get_modified_files(repo, args):
     """Returns a list of the files modified by the commit specified in 'args'."""
     commit = repo.commit(args.commit)
     return commit.stats.files
+
 
 if __name__ == '__main__':
     PARSER = argparse.ArgumentParser(
@@ -178,7 +189,7 @@ if __name__ == '__main__':
     SECTIONS = parse_maintainers_file(CONFIG_FILE)
 
     if ARGS.lookup:
-        FILES = [ARGS.lookup.replace('\\','/')]
+        FILES = [ARGS.lookup.replace('\\', '/')]
     else:
         FILES = get_modified_files(REPO, ARGS)
 

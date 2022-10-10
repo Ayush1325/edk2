@@ -1,4 +1,4 @@
-## @file
+# @file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
 #
@@ -11,10 +11,11 @@ import os
 
 from .message import *
 
+
 class BaseDoxygeItem:
     def __init__(self, name, tag=''):
         self.mName = name
-        self.mTag  = tag
+        self.mTag = tag
         self.mDescription = ''
         self.mText = []
 
@@ -27,6 +28,7 @@ class BaseDoxygeItem:
     def Generate(self):
         """This interface need to be override"""
 
+
 class Section(BaseDoxygeItem):
     def Generate(self):
         """This interface need to be override"""
@@ -38,13 +40,14 @@ class Section(BaseDoxygeItem):
         self.mText.append(self.mDescription)
         return self.mText
 
+
 class Page(BaseDoxygeItem):
     def __init__(self, name, tag=None, isSort=True):
         BaseDoxygeItem.__init__(self, name, tag)
-        self.mSubPages     = []
-        self.mIsMainPage   = False
-        self.mSections     = []
-        self.mIsSort       = isSort
+        self.mSubPages = []
+        self.mIsMainPage = False
+        self.mSections = []
+        self.mIsSort = isSort
 
     def GetSubpageCount(self):
         return len(self.mSubPages)
@@ -88,7 +91,8 @@ class Page(BaseDoxygeItem):
             if self.mIsSort:
                 self.mSubPages.sort(key=lambda x: x.mName.lower())
             for page in self.mSubPages:
-                self.mText.insert(endIndex, '<li>\subpage %s \"%s\" </li>' % (page.mTag, page.mName))
+                self.mText.insert(
+                    endIndex, '<li>\subpage %s \"%s\" </li>' % (page.mTag, page.mName))
                 endIndex += 1
                 self.mText += page.Generate()
             self.mText.insert(endIndex, '</ul>')
@@ -96,10 +100,11 @@ class Page(BaseDoxygeItem):
         self.mText.insert(endIndex, ' **/')
         return self.mText
 
+
 class DoxygenFile(Page):
     def __init__(self, name, file):
         Page.__init__(self, name)
-        self.mFilename  = file
+        self.mFilename = file
         self.mIsMainPage = True
 
     def GetFilename(self):
@@ -112,10 +117,11 @@ class DoxygenFile(Page):
             f.write('\n'.join(str))
             f.close()
         except IOError as e:
-            ErrorMsg ('Fail to write file %s' % self.mFilename)
+            ErrorMsg('Fail to write file %s' % self.mFilename)
             return False
 
         return True
+
 
 doxygenConfigTemplate = """
 DOXYFILE_ENCODING      = UTF-8
@@ -326,19 +332,21 @@ DOT_CLEANUP            = YES
 SEARCHENGINE           = NO
 
 """
+
+
 class DoxygenConfigFile:
     def __init__(self):
-        self.mProjectName  = ''
-        self.mOutputDir    = ''
-        self.mFileList     = []
-        self.mIncludeList  = []
-        self.mStripPath    = ''
-        self.mExamplePath  = ''
-        self.mPattern      = ['*.c', '*.h',
-                              '*.asm', '*.s', '.nasm', '*.html', '*.dox']
-        self.mMode         = 'HTML'
-        self.mWarningFile  = ''
-        self.mPreDefined   = []
+        self.mProjectName = ''
+        self.mOutputDir = ''
+        self.mFileList = []
+        self.mIncludeList = []
+        self.mStripPath = ''
+        self.mExamplePath = ''
+        self.mPattern = ['*.c', '*.h',
+                         '*.asm', '*.s', '.nasm', '*.html', '*.dox']
+        self.mMode = 'HTML'
+        self.mWarningFile = ''
+        self.mPreDefined = []
         self.mProjectVersion = 0.1
 
     def SetChmMode(self):
@@ -399,7 +407,7 @@ class DoxygenConfigFile:
         self.mPreDefined.append(macro)
 
     def Generate(self, path):
-        files    = ' \\\n'.join(self.mFileList)
+        files = ' \\\n'.join(self.mFileList)
         includes = ' \\\n'.join(self.mIncludeList)
         patterns = ' \\\n'.join(self.mPattern)
         if self.mMode.lower() == 'html':
@@ -409,32 +417,33 @@ class DoxygenConfigFile:
             sHtmlHelp = 'YES'
             sTreeView = 'NO'
 
-        text = doxygenConfigTemplate % {'ProjectName':self.mProjectName,
-                                        'OutputDir':self.mOutputDir,
-                                        'StripPath':self.mStripPath,
-                                        'ExamplePath':self.mExamplePath,
-                                        'FileList':files,
-                                        'Pattern':patterns,
-                                        'WhetherGenerateHtmlHelp':sHtmlHelp,
-                                        'WhetherGenerateTreeView':sTreeView,
-                                        'IncludePath':includes,
-                                        'WarningFile':self.mWarningFile,
-                                        'PreDefined':' '.join(self.mPreDefined),
-                                        'ProjectVersion':self.mProjectVersion}
+        text = doxygenConfigTemplate % {'ProjectName': self.mProjectName,
+                                        'OutputDir': self.mOutputDir,
+                                        'StripPath': self.mStripPath,
+                                        'ExamplePath': self.mExamplePath,
+                                        'FileList': files,
+                                        'Pattern': patterns,
+                                        'WhetherGenerateHtmlHelp': sHtmlHelp,
+                                        'WhetherGenerateTreeView': sTreeView,
+                                        'IncludePath': includes,
+                                        'WarningFile': self.mWarningFile,
+                                        'PreDefined': ' '.join(self.mPreDefined),
+                                        'ProjectVersion': self.mProjectVersion}
         try:
             f = open(path, 'w')
             f.write(text)
             f.close()
         except IOError as e:
-            ErrorMsg ('Fail to generate doxygen config file %s' % path)
+            ErrorMsg('Fail to generate doxygen config file %s' % path)
             return False
 
         return True
 
+
 ########################################################################
 #                  TEST                   CODE
 ########################################################################
-if __name__== '__main__':
+if __name__ == '__main__':
     df = DoxygenFile('Platform Document', 'm:\tree')
     df.AddPage(Page('Module', 'module'))
     p = df.AddPage(Page('Library', 'library'))

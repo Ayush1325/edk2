@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to create/update/query/erase table for dec datas
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -14,19 +14,21 @@ import CommonDataClass.DataClass as DataClass
 from Table.Table import Table
 from Common.StringUtils import ConvertToSqlString
 
-## TableDec
+# TableDec
 #
 # This class defined a table used for data model
 #
 # @param object:       Inherited from object class
 #
 #
+
+
 class TableDec(Table):
     def __init__(self, Cursor):
         Table.__init__(self, Cursor)
         self.Table = 'Dec'
 
-    ## Create table
+    # Create table
     #
     # Create table Dec
     #
@@ -61,7 +63,7 @@ class TableDec(Table):
                                                       )""" % self.Table
         Table.Create(self, SqlCommand)
 
-    ## Insert table
+    # Insert table
     #
     # Insert a record into table Dec
     #
@@ -81,14 +83,15 @@ class TableDec(Table):
     #
     def Insert(self, Model, Value1, Value2, Value3, Value4, Value5, Arch, BelongsToItem, BelongsToFile, StartLine, StartColumn, EndLine, EndColumn, Enabled):
         self.ID = self.ID + 1
-        (Value1, Value2, Value3, Arch) = ConvertToSqlString((Value1, Value2, Value3, Arch))
+        (Value1, Value2, Value3, Arch) = ConvertToSqlString(
+            (Value1, Value2, Value3, Arch))
         SqlCommand = """insert into %s values(%s, %s, '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s)""" \
                      % (self.Table, self.ID, Model, Value1, Value2, Value3, Arch, BelongsToItem, BelongsToFile, StartLine, StartColumn, EndLine, EndColumn, Enabled)
         Table.Insert(self, SqlCommand)
 
         return self.ID
 
-    ## Query table
+    # Query table
     #
     # @param Model:  The Model of Record
     #

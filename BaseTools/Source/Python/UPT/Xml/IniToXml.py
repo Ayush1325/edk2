@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is for converting package information data file to xml file.
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -28,38 +28,46 @@ from Library.StringUtils import ConvertSpecialChar
 from Library.ParserValidate import IsValidPath
 from Library import GlobalData
 
-## log error:
+# log error:
 #
 # @param error: error
 # @param File: File
 # @param Line: Line
 #
+
+
 def IniParseError(Error, File, Line):
     Logger.Error("UPT", UPT_INI_PARSE_ERROR, File=File,
                  Line=Line, ExtraData=Error)
 
-## __ValidatePath
+# __ValidatePath
 #
 # @param Path: Path to be checked
 #
+
+
 def __ValidatePath(Path, Root):
     Path = Path.strip()
     if os.path.isabs(Path) or not IsValidPath(Path, Root):
         return False, ST.ERR_FILELIST_LOCATION % (Root, Path)
     return True, ''
 
-## ValidateMiscFile
+# ValidateMiscFile
 #
 # @param Filename: File to be checked
 #
+
+
 def ValidateMiscFile(Filename):
     Root = GlobalData.gWORKSPACE
     return __ValidatePath(Filename, Root)
 
-## ValidateToolsFile
+# ValidateToolsFile
 #
 # @param Filename: File to be checked
 #
+
+
 def ValidateToolsFile(Filename):
     Valid, Cause = False, ''
     if not Valid and 'EDK_TOOLS_PATH' in os.environ:
@@ -68,13 +76,15 @@ def ValidateToolsFile(Filename):
         Valid, Cause = __ValidatePath(Filename, GlobalData.gWORKSPACE)
     return Valid, Cause
 
-## ParseFileList
+# ParseFileList
 #
 # @param Line: Line
 # @param Map: Map
 # @param CurrentKey: CurrentKey
 # @param PathFunc: Path validate function
 #
+
+
 def ParseFileList(Line, Map, CurrentKey, PathFunc):
     FileList = ["", {}]
     TokenList = Line.split(TAB_VALUE_SPLIT)
@@ -107,11 +117,13 @@ def ParseFileList(Line, Map, CurrentKey, PathFunc):
         Map[CurrentKey].append(FileList)
     return True, ''
 
-## Create header XML file
+# Create header XML file
 #
 # @param DistMap: DistMap
 # @param Root: Root
 #
+
+
 def CreateHeaderXml(DistMap, Root):
     Element1 = CreateXmlElement('Name', DistMap['Name'],
                                 [], [['BaseName', DistMap['BaseName']]])
@@ -133,12 +145,14 @@ def CreateHeaderXml(DistMap, Root):
     Root.appendChild(CreateXmlElement('DistributionHeader', '',
                                       NodeList, AttributeList))
 
-## Create tools XML file
+# Create tools XML file
 #
 # @param Map: Map
 # @param Root: Root
 # @param Tag: Tag
 #
+
+
 def CreateToolsXml(Map, Root, Tag):
     #
     # Check if all elements in this section are empty
@@ -154,7 +168,7 @@ def CreateToolsXml(Map, Root, Tag):
                 ['License', Map['License']],
                 ['Abstract', Map['Abstract']],
                 ['Description', Map['Description']],
-               ]
+                ]
     HeaderNode = CreateXmlElement('Header', '', NodeList, [])
     NodeList = [HeaderNode]
 
@@ -165,12 +179,14 @@ def CreateToolsXml(Map, Root, Tag):
         NodeList.append(CreateXmlElement('Filename', File[0], [], AttrList))
     Root.appendChild(CreateXmlElement(Tag, '', NodeList, []))
 
-## ValidateValues
+# ValidateValues
 #
 # @param Key: Key
 # @param Value: Value
 # @param SectionName: SectionName
 #
+
+
 def ValidateValues(Key, Value, SectionName):
     if SectionName == 'DistributionHeader':
         Valid, Cause = ValidateRegValues(Key, Value)
@@ -185,24 +201,26 @@ def ValidateValues(Key, Value, SectionName):
             return Valid, ST.ERR_VALUE_INVALID % (Key, SectionName)
     return True, ''
 
-## ValidateRegValues
+# ValidateRegValues
 #
 # @param Key: Key
 # @param Value: Value
 #
+
+
 def ValidateRegValues(Key, Value):
     ValidateMap = {
-        'ReadOnly'  :
+        'ReadOnly':
             ('true|false', ST.ERR_BOOLEAN_VALUE % (Key, Value)),
-        'RePackage' :
+        'RePackage':
             ('true|false', ST.ERR_BOOLEAN_VALUE % (Key, Value)),
-        'GUID'      :
+        'GUID':
             ('[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}'
-            '-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}',
-            ST.ERR_GUID_VALUE % Value),
-        'Version'   :   ('[0-9]+(\.[0-9]+)?', ST.ERR_VERSION_VALUE % \
-                         (Key, Value)),
-        'XmlSpecification' : ('1\.1', ST.ERR_VERSION_XMLSPEC % Value)
+             '-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}',
+             ST.ERR_GUID_VALUE % Value),
+        'Version':   ('[0-9]+(\.[0-9]+)?', ST.ERR_VERSION_VALUE %
+                      (Key, Value)),
+        'XmlSpecification': ('1\.1', ST.ERR_VERSION_XMLSPEC % Value)
     }
     if Key not in ValidateMap:
         return True, ''
@@ -212,10 +230,12 @@ def ValidateRegValues(Key, Value):
         return True, ''
     return False, Elem[1]
 
-## __ValidateDistHeaderName
+# __ValidateDistHeaderName
 #
 # @param Name: Name
 #
+
+
 def __ValidateDistHeaderName(Name):
     if len(Name) < 1:
         return False
@@ -225,10 +245,12 @@ def __ValidateDistHeaderName(Name):
             return False
     return True
 
-## __ValidateDistHeaderBaseName
+# __ValidateDistHeaderBaseName
 #
 # @param BaseName: BaseName
 #
+
+
 def __ValidateDistHeaderBaseName(BaseName):
     if not BaseName:
         return False
@@ -241,78 +263,88 @@ def __ValidateDistHeaderBaseName(BaseName):
             return False
     return True
 
-## __ValidateDistHeaderAbstract
+# __ValidateDistHeaderAbstract
 #
 # @param Abstract: Abstract
 #
+
+
 def __ValidateDistHeaderAbstract(Abstract):
     return '\t' not in Abstract and len(Abstract.splitlines()) == 1
 
-## __ValidateOtherHeaderAbstract
+# __ValidateOtherHeaderAbstract
 #
 # @param Abstract: Abstract
 #
+
+
 def __ValidateOtherHeaderAbstract(Abstract):
     return __ValidateDistHeaderAbstract(Abstract)
 
-## __ValidateDistHeader
+# __ValidateDistHeader
 #
 # @param Key: Key
 # @param Value: Value
 #
+
+
 def __ValidateDistHeader(Key, Value):
     ValidateMap = {
-        'Name'      : __ValidateDistHeaderName,
-        'BaseName'  : __ValidateDistHeaderBaseName,
-        'Abstract'  : __ValidateDistHeaderAbstract,
-        'Vendor'    : __ValidateDistHeaderAbstract
+        'Name': __ValidateDistHeaderName,
+        'BaseName': __ValidateDistHeaderBaseName,
+        'Abstract': __ValidateDistHeaderAbstract,
+        'Vendor': __ValidateDistHeaderAbstract
     }
     return not (Value and Key in ValidateMap and not ValidateMap[Key](Value))
 
-## __ValidateOtherHeader
+# __ValidateOtherHeader
 #
 # @param Key: Key
 # @param Value: Value
 #
+
+
 def __ValidateOtherHeader(Key, Value):
     ValidateMap = {
-        'Name'      : __ValidateDistHeaderName,
-        'Abstract'  : __ValidateOtherHeaderAbstract
+        'Name': __ValidateDistHeaderName,
+        'Abstract': __ValidateOtherHeaderAbstract
     }
     return not (Value and Key in ValidateMap and not ValidateMap[Key](Value))
 
-## Convert ini file to xml file
+# Convert ini file to xml file
 #
 # @param IniFile
 #
+
+
 def IniToXml(IniFile):
     if not os.path.exists(IniFile):
         Logger.Error("UPT", FILE_NOT_FOUND, ST.ERR_TEMPLATE_NOTFOUND % IniFile)
 
-    DistMap = {'ReadOnly' : '', 'RePackage' : '', 'Name' : '',
-               'BaseName' : '', 'GUID' : '', 'Version' : '', 'Vendor' : '',
-               'Date' : '', 'Copyright' : '', 'License' : '', 'Abstract' : '',
-               'Description' : '', 'Signature' : '', 'XmlSpecification' : ''
-                }
+    DistMap = {'ReadOnly': '', 'RePackage': '', 'Name': '',
+               'BaseName': '', 'GUID': '', 'Version': '', 'Vendor': '',
+               'Date': '', 'Copyright': '', 'License': '', 'Abstract': '',
+               'Description': '', 'Signature': '', 'XmlSpecification': ''
+               }
 
-    ToolsMap = {'Name' : '', 'Copyright' : '', 'License' : '',
-                'Abstract' : '', 'Description' : '', 'FileList' : []}
+    ToolsMap = {'Name': '', 'Copyright': '', 'License': '',
+                'Abstract': '', 'Description': '', 'FileList': []}
     #
     # Only FileList is a list: [['file1', {}], ['file2', {}], ...]
     #
-    MiscMap = {'Name' : '', 'Copyright' : '', 'License' : '',
-               'Abstract' : '', 'Description' : '', 'FileList' : []}
+    MiscMap = {'Name': '', 'Copyright': '', 'License': '',
+               'Abstract': '', 'Description': '', 'FileList': []}
 
     SectionMap = {
-                   'DistributionHeader' : DistMap,
-                   'ToolsHeader' : ToolsMap,
-                   'MiscellaneousFilesHeader' : MiscMap
-                   }
+        'DistributionHeader': DistMap,
+        'ToolsHeader': ToolsMap,
+        'MiscellaneousFilesHeader': MiscMap
+    }
 
     PathValidator = {
-                'ToolsHeader' : ValidateToolsFile,
-                'MiscellaneousFilesHeader' : ValidateMiscFile
-                }
+        'ToolsHeader': ValidateToolsFile,
+        'MiscellaneousFilesHeader': ValidateMiscFile
+    }
 
     ParsedSection = []
 
@@ -332,11 +364,11 @@ def IniToXml(IniFile):
             SectionName = Line[1:-1].strip()
             if SectionName not in SectionMap:
                 IniParseError(ST.ERR_SECTION_NAME_INVALID % SectionName,
-                      IniFile, Index+1)
+                              IniFile, Index+1)
 
             if SectionName in ParsedSection:
                 IniParseError(ST.ERR_SECTION_REDEFINE % SectionName,
-                      IniFile, Index+1)
+                              IniFile, Index+1)
             else:
                 ParsedSection.append(SectionName)
 
@@ -419,7 +451,7 @@ def IniToXml(IniFile):
     return CreateXml(DistMap, ToolsMap, MiscMap, IniFile)
 
 
-## CheckMdtKeys
+# CheckMdtKeys
 #
 # @param MdtDistKeys: All mandatory keys
 # @param DistMap: Dist content
@@ -428,7 +460,8 @@ def IniToXml(IniFile):
 # @param Maps: Tools and Misc section name and map. (('section_name', map),*)
 #
 def CheckMdtKeys(DistMap, IniFile, LastIndex, Maps):
-    MdtDistKeys = ['Name', 'GUID', 'Version', 'Vendor', 'Copyright', 'License', 'Abstract', 'XmlSpecification']
+    MdtDistKeys = ['Name', 'GUID', 'Version', 'Vendor',
+                   'Copyright', 'License', 'Abstract', 'XmlSpecification']
     for Key in MdtDistKeys:
         if Key not in DistMap or DistMap[Key] == '':
             IniParseError(ST.ERR_KEYWORD_MANDATORY % Key, IniFile, LastIndex+1)
@@ -460,22 +493,26 @@ def CheckMdtKeys(DistMap, IniFile, LastIndex, Maps):
                 NonEmptyKey += 1
 
         if NonEmptyKey > 0 and not Map['FileList']:
-            IniParseError(ST.ERR_KEYWORD_MANDATORY % (Item[0] + '.FileList'), IniFile, LastIndex+1)
+            IniParseError(ST.ERR_KEYWORD_MANDATORY %
+                          (Item[0] + '.FileList'), IniFile, LastIndex+1)
 
         if NonEmptyKey > 0 and not Map['Name']:
-            IniParseError(ST.ERR_KEYWORD_MANDATORY % (Item[0] + '.Name'), IniFile, LastIndex+1)
+            IniParseError(ST.ERR_KEYWORD_MANDATORY %
+                          (Item[0] + '.Name'), IniFile, LastIndex+1)
 
-## CreateXml
+# CreateXml
 #
 # @param DistMap:  Dist Content
 # @param ToolsMap: Tools Content
 # @param MiscMap:  Misc Content
 # @param IniFile:  Ini File
 #
+
+
 def CreateXml(DistMap, ToolsMap, MiscMap, IniFile):
     Attrs = [['xmlns', 'http://www.uefi.org/2011/1.1'],
              ['xmlns:xsi', 'http:/www.w3.org/2001/XMLSchema-instance'],
-            ]
+             ]
     Root = CreateXmlElement('DistributionPackage', '', [], Attrs)
     CreateHeaderXml(DistMap, Root)
     CreateToolsXml(ToolsMap, Root, 'Tools')
@@ -489,8 +526,7 @@ def CreateXml(DistMap, ToolsMap, MiscMap, IniFile):
     File = open(FileName, 'w')
 
     try:
-        File.write(Root.toprettyxml(indent = '  '))
+        File.write(Root.toprettyxml(indent='  '))
     finally:
         File.close()
     return FileName
-

@@ -1,4 +1,4 @@
-## @file
+# @file
 # Common routines used by workspace
 #
 # Copyright (c) 2012 - 2020, Intel Corporation. All rights reserved.<BR>
@@ -17,6 +17,7 @@ from Common.BuildToolError import OPTION_MISSING
 from Common.BuildToolError import BUILD_ERROR
 import Common.EdkLogger as EdkLogger
 
+
 class OrderedListDict(OrderedDict):
     def __init__(self, *args, **kwargs):
         super(OrderedListDict, self).__init__(*args, **kwargs)
@@ -26,7 +27,7 @@ class OrderedListDict(OrderedDict):
         self[key] = Value = self.default_factory()
         return Value
 
-## Get all packages from platform for specified arch, target and toolchain
+# Get all packages from platform for specified arch, target and toolchain
 #
 #  @param Platform: DscBuildData instance
 #  @param BuildDatabase: The database saves all data for all metafiles
@@ -35,6 +36,8 @@ class OrderedListDict(OrderedDict):
 #  @param Toolchain: Current toolchain
 #  @retval: List of packages which are DecBuildData instances
 #
+
+
 def GetPackageList(Platform, BuildDatabase, Arch, Target, Toolchain):
     PkgSet = set()
     if Platform.Packages:
@@ -46,7 +49,7 @@ def GetPackageList(Platform, BuildDatabase, Arch, Target, Toolchain):
             PkgSet.update(Lib.Packages)
     return list(PkgSet)
 
-## Get all declared PCD from platform for specified arch, target and toolchain
+# Get all declared PCD from platform for specified arch, target and toolchain
 #
 #  @param Platform: DscBuildData instance
 #  @param BuildDatabase: The database saves all data for all metafiles
@@ -56,6 +59,8 @@ def GetPackageList(Platform, BuildDatabase, Arch, Target, Toolchain):
 #  @retval: A dictionary contains instances of PcdClassObject with key (PcdCName, TokenSpaceGuid)
 #  @retval: A dictionary contains real GUIDs of TokenSpaceGuid
 #
+
+
 def GetDeclaredPcd(Platform, BuildDatabase, Arch, Target, Toolchain, additionalPkgs):
     PkgList = GetPackageList(Platform, BuildDatabase, Arch, Target, Toolchain)
     PkgList = set(PkgList)
@@ -77,7 +82,7 @@ def GetDeclaredPcd(Platform, BuildDatabase, Arch, Target, Toolchain, additionalP
                 DecPcds[PcdCName, PcdTokenName] = Pkg.Pcds[Pcd]
     return DecPcds, GuidDict
 
-## Get all dependent libraries for a module
+# Get all dependent libraries for a module
 #
 #  @param Module: InfBuildData instance
 #  @param Platform: DscBuildData instance
@@ -87,10 +92,13 @@ def GetDeclaredPcd(Platform, BuildDatabase, Arch, Target, Toolchain, additionalP
 #  @param Toolchain: Current toolchain
 #  @retval: List of dependent libraries which are InfBuildData instances
 #
-def GetLiabraryInstances(Module, Platform, BuildDatabase, Arch, Target, Toolchain):
-    return GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolchain,Platform.MetaFile,EdkLogger)
 
-def GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolchain, FileName = '', EdkLogger = None):
+
+def GetLiabraryInstances(Module, Platform, BuildDatabase, Arch, Target, Toolchain):
+    return GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolchain, Platform.MetaFile, EdkLogger)
+
+
+def GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolchain, FileName='', EdkLogger=None):
     if Module.LibInstances:
         return Module.LibInstances
     ModuleType = Module.ModuleType
@@ -103,12 +111,14 @@ def GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolcha
     if Module.ModuleType != SUP_MODULE_USER_DEFINED:
         for LibraryClass in Platform.LibraryClasses.GetKeys():
             if LibraryClass.startswith("NULL") and Platform.LibraryClasses[LibraryClass, Module.ModuleType]:
-                Module.LibraryClasses[LibraryClass] = Platform.LibraryClasses[LibraryClass, Module.ModuleType]
+                Module.LibraryClasses[LibraryClass] = Platform.LibraryClasses[LibraryClass,
+                                                                              Module.ModuleType]
 
     # add forced library instances (specified in module overrides)
     for LibraryClass in Platform.Modules[str(Module)].LibraryClasses:
         if LibraryClass.startswith("NULL"):
-            Module.LibraryClasses[LibraryClass] = Platform.Modules[str(Module)].LibraryClasses[LibraryClass]
+            Module.LibraryClasses[LibraryClass] = Platform.Modules[str(
+                Module)].LibraryClasses[LibraryClass]
 
     # EdkII module
     LibraryConsumerList = [Module]
@@ -118,14 +128,16 @@ def GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolcha
 
     if not Module.LibraryClass:
         EdkLogger.verbose("")
-        EdkLogger.verbose("Library instances of module [%s] [%s]:" % (str(Module), Arch))
+        EdkLogger.verbose(
+            "Library instances of module [%s] [%s]:" % (str(Module), Arch))
 
     while len(LibraryConsumerList) > 0:
         M = LibraryConsumerList.pop()
         for LibraryClassName in M.LibraryClasses:
             if LibraryClassName not in LibraryInstance:
                 # override library instance for this module
-                LibraryPath = Platform.Modules[str(Module)].LibraryClasses.get(LibraryClassName,Platform.LibraryClasses[LibraryClassName, ModuleType])
+                LibraryPath = Platform.Modules[str(Module)].LibraryClasses.get(
+                    LibraryClassName, Platform.LibraryClasses[LibraryClassName, ModuleType])
                 if LibraryPath is None:
                     LibraryPath = M.LibraryClasses.get(LibraryClassName)
                     if LibraryPath is None:
@@ -137,20 +149,22 @@ def GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolcha
                         else:
                             return []
 
-                LibraryModule = BuildDatabase[LibraryPath, Arch, Target, Toolchain]
+                LibraryModule = BuildDatabase[LibraryPath,
+                                              Arch, Target, Toolchain]
                 # for those forced library instance (NULL library), add a fake library class
                 if LibraryClassName.startswith("NULL"):
-                    LibraryModule.LibraryClass.append(LibraryClassObject(LibraryClassName, [ModuleType]))
+                    LibraryModule.LibraryClass.append(
+                        LibraryClassObject(LibraryClassName, [ModuleType]))
                 elif LibraryModule.LibraryClass is None \
-                     or len(LibraryModule.LibraryClass) == 0 \
-                     or (ModuleType != SUP_MODULE_USER_DEFINED and ModuleType != SUP_MODULE_HOST_APPLICATION
-                         and ModuleType not in LibraryModule.LibraryClass[0].SupModList):
+                    or len(LibraryModule.LibraryClass) == 0 \
+                    or (ModuleType != SUP_MODULE_USER_DEFINED and ModuleType != SUP_MODULE_HOST_APPLICATION
+                        and ModuleType not in LibraryModule.LibraryClass[0].SupModList):
                     # only USER_DEFINED can link against any library instance despite of its SupModList
                     if not Module.LibraryClass:
                         EdkLogger.error("build", OPTION_MISSING,
-                                        "Module type [%s] is not supported by library instance [%s]" \
+                                        "Module type [%s] is not supported by library instance [%s]"
                                         % (ModuleType, LibraryPath), File=FileName,
-                                        ExtraData="consumed by library instance [%s] which is consumed by module [%s]" \
+                                        ExtraData="consumed by library instance [%s] which is consumed by module [%s]"
                                         % (str(M), str(Module))
                                         )
                     else:
@@ -159,7 +173,8 @@ def GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolcha
                 LibraryInstance[LibraryClassName] = LibraryModule
                 LibraryConsumerList.append(LibraryModule)
                 if not Module.LibraryClass:
-                    EdkLogger.verbose("\t" + str(LibraryClassName) + " : " + str(LibraryModule))
+                    EdkLogger.verbose(
+                        "\t" + str(LibraryClassName) + " : " + str(LibraryModule))
             else:
                 LibraryModule = LibraryInstance[LibraryClassName]
 
@@ -181,7 +196,7 @@ def GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolcha
     #
     # Q <- Set of all nodes with no incoming edges
     #
-    LibraryList = [] #LibraryInstance.values()
+    LibraryList = []  # LibraryInstance.values()
     Q = []
     for LibraryClassName in LibraryInstance:
         M = LibraryInstance[LibraryClassName]
@@ -240,7 +255,9 @@ def GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolcha
     for Item in LibraryList:
         if ConsumedByList[Item] and Item in Constructor and len(Constructor) > 1:
             if not Module.LibraryClass:
-                ErrorMessage = "\tconsumed by " + "\n\tconsumed by ".join(str(L) for L in ConsumedByList[Item])
+                ErrorMessage = "\tconsumed by " + \
+                    "\n\tconsumed by ".join(str(L)
+                                            for L in ConsumedByList[Item])
                 EdkLogger.error("build", BUILD_ERROR, 'Library [%s] with constructors has a cycle' % str(Item),
                                 ExtraData=ErrorMessage, File=FileName)
             else:
@@ -254,5 +271,6 @@ def GetModuleLibInstances(Module, Platform, BuildDatabase, Arch, Target, Toolcha
     #
     SortedLibraryList.reverse()
     Module.LibInstances = SortedLibraryList
-    SortedLibraryList = [lib.SetReferenceModule(Module) for lib in SortedLibraryList]
+    SortedLibraryList = [lib.SetReferenceModule(
+        Module) for lib in SortedLibraryList]
     return SortedLibraryList

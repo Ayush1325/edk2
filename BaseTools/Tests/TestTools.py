@@ -1,5 +1,5 @@
 from __future__ import print_function
-## @file
+# @file
 # Utility functions and classes for BaseTools unit tests
 #
 #  Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -33,6 +33,7 @@ if PythonSourceDir not in sys.path:
     #
     sys.path.append(PythonSourceDir)
 
+
 def MakeTheTestSuite(localItems):
     tests = []
     for name, item in localItems.items():
@@ -43,26 +44,30 @@ def MakeTheTestSuite(localItems):
                 tests.append(item())
     return lambda: unittest.TestSuite(tests)
 
+
 def GetBaseToolsPaths():
     if sys.platform in ('win32', 'win64'):
-        return [ os.path.join(BaseToolsDir, 'Bin', sys.platform.title()) ]
+        return [os.path.join(BaseToolsDir, 'Bin', sys.platform.title())]
     else:
         uname = os.popen('uname -sm').read().strip()
         for char in (' ', '/'):
             uname = uname.replace(char, '-')
         return [
-                os.path.join(BaseToolsDir, 'Bin', uname),
-                os.path.join(BaseToolsDir, 'BinWrappers', uname),
-                os.path.join(BaseToolsDir, 'BinWrappers', 'PosixLike')
-            ]
+            os.path.join(BaseToolsDir, 'Bin', uname),
+            os.path.join(BaseToolsDir, 'BinWrappers', uname),
+            os.path.join(BaseToolsDir, 'BinWrappers', 'PosixLike')
+        ]
+
 
 BaseToolsBinPaths = GetBaseToolsPaths()
+
 
 class BaseToolsTest(unittest.TestCase):
 
     def cleanOutDir(self, dir):
         for dirItem in os.listdir(dir):
-            if dirItem in ('.', '..'): continue
+            if dirItem in ('.', '..'):
+                continue
             dirItem = os.path.join(dir, dirItem)
             self.RemoveFileOrDir(dirItem)
 
@@ -103,12 +108,17 @@ class BaseToolsTest(unittest.TestCase):
         return bin
 
     def RunTool(self, *args, **kwd):
-        if 'toolName' in kwd: toolName = kwd['toolName']
-        else: toolName = None
-        if 'logFile' in kwd: logFile = kwd['logFile']
-        else: logFile = None
+        if 'toolName' in kwd:
+            toolName = kwd['toolName']
+        else:
+            toolName = None
+        if 'logFile' in kwd:
+            logFile = kwd['logFile']
+        else:
+            logFile = None
 
-        if toolName is None: toolName = self.toolName
+        if toolName is None:
+            toolName = self.toolName
         bin = self.FindToolBin(toolName)
         if logFile is not None:
             logFile = open(os.path.join(self.testDir, logFile), 'w')
@@ -121,7 +131,7 @@ class BaseToolsTest(unittest.TestCase):
         Proc = subprocess.Popen(
             args, executable=bin,
             stdout=popenOut, stderr=subprocess.STDOUT
-            )
+        )
 
         if logFile is None:
             Proc.stdout.read()
@@ -131,7 +141,7 @@ class BaseToolsTest(unittest.TestCase):
     def GetTmpFilePath(self, fileName):
         return os.path.join(self.testDir, fileName)
 
-    def OpenTmpFile(self, fileName, mode = 'r'):
+    def OpenTmpFile(self, fileName, mode='r'):
         return open(os.path.join(self.testDir, fileName), mode)
 
     def ReadTmpFile(self, fileName):
@@ -148,19 +158,22 @@ class BaseToolsTest(unittest.TestCase):
             with codecs.open(self.GetTmpFilePath(fileName), 'w', encoding='utf-8') as f:
                 f.write(data)
 
-    def GenRandomFileData(self, fileName, minlen = None, maxlen = None):
-        if maxlen is None: maxlen = minlen
+    def GenRandomFileData(self, fileName, minlen=None, maxlen=None):
+        if maxlen is None:
+            maxlen = minlen
         f = self.OpenTmpFile(fileName, 'w')
         f.write(self.GetRandomString(minlen, maxlen))
         f.close()
 
-    def GetRandomString(self, minlen = None, maxlen = None):
-        if minlen is None: minlen = 1024
-        if maxlen is None: maxlen = minlen
+    def GetRandomString(self, minlen=None, maxlen=None):
+        if minlen is None:
+            minlen = 1024
+        if maxlen is None:
+            maxlen = minlen
         return ''.join(
             [chr(random.randint(0, 255))
              for x in range(random.randint(minlen, maxlen))
-            ])
+             ])
 
     def setUp(self):
         self.savedEnvPath = os.environ['PATH']
@@ -181,4 +194,3 @@ class BaseToolsTest(unittest.TestCase):
 
         os.environ['PATH'] = self.savedEnvPath
         sys.path = self.savedSysPath
-

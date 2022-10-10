@@ -13,11 +13,11 @@ class VariableAttributes(object):
     EFI_VARIABLE_RUNTIME_ACCESS = 0x00000004
     VAR_CHECK_VARIABLE_PROPERTY_READ_ONLY = 0x00000001
     VarAttributesMap = {
-                     "NV":EFI_VARIABLE_NON_VOLATILE,
-                     "BS":EFI_VARIABLE_BOOTSERVICE_ACCESS,
-                     "RT":EFI_VARIABLE_RUNTIME_ACCESS,
-                     "RO":VAR_CHECK_VARIABLE_PROPERTY_READ_ONLY
-                     }
+        "NV": EFI_VARIABLE_NON_VOLATILE,
+        "BS": EFI_VARIABLE_BOOTSERVICE_ACCESS,
+        "RT": EFI_VARIABLE_RUNTIME_ACCESS,
+        "RO": VAR_CHECK_VARIABLE_PROPERTY_READ_ONLY
+    }
 
     def __init__(self):
         pass
@@ -33,8 +33,10 @@ class VariableAttributes(object):
             if attr == 'RO':
                 VarProp = VariableAttributes.VAR_CHECK_VARIABLE_PROPERTY_READ_ONLY
             else:
-                VarAttr = VarAttr | VariableAttributes.VarAttributesMap.get(attr, 0x00000000)
+                VarAttr = VarAttr | VariableAttributes.VarAttributesMap.get(
+                    attr, 0x00000000)
         return VarAttr, VarProp
+
     @staticmethod
     def ValidateVarAttributes(var_attr_str):
         if not var_attr_str:

@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to parse exception items found by ECC tool
 #
 # Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -14,6 +14,8 @@ from Ecc.Xml.XmlRoutines import *
 import Common.LongFilePathOs as os
 
 # ExceptionXml to parse Exception Node of XML file
+
+
 class ExceptionXml(object):
     def __init__(self):
         self.KeyWord = ''
@@ -26,9 +28,11 @@ class ExceptionXml(object):
         self.FilePath = os.path.normpath(XmlElement(Item, '%s/FilePath' % Key))
 
     def __str__(self):
-        return 'ErrorID = %s KeyWord = %s FilePath = %s' %(self.ErrorID, self.KeyWord, self.FilePath)
+        return 'ErrorID = %s KeyWord = %s FilePath = %s' % (self.ErrorID, self.KeyWord, self.FilePath)
 
 # ExceptionListXml to parse Exception Node List of XML file
+
+
 class ExceptionListXml(object):
     def __init__(self):
         self.List = []
@@ -56,8 +60,10 @@ class ExceptionListXml(object):
         return RtnStr
 
 # A class to check exception
+
+
 class ExceptionCheck(object):
-    def __init__(self, FilePath = None):
+    def __init__(self, FilePath=None):
         self.ExceptionList = []
         self.ExceptionListXml = ExceptionListXml()
         self.LoadExceptionListXml(FilePath)
@@ -73,11 +79,13 @@ class ExceptionCheck(object):
         else:
             return False
 
+
 ##
 #
 # This acts like the main() function for the script, unless it is 'import'ed into another
 # script.
 #
 if __name__ == '__main__':
-    El = ExceptionCheck('C:\\Hess\\Project\\BuildTool\\src\\Ecc\\exception.xml')
+    El = ExceptionCheck(
+        'C:\\Hess\\Project\\BuildTool\\src\\Ecc\\exception.xml')
     print(El.ExceptionList)

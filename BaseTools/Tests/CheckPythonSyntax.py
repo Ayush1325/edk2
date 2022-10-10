@@ -1,4 +1,4 @@
-## @file
+# @file
 #  Unit tests for checking syntax of Python source code
 #
 #  Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -15,6 +15,7 @@ import py_compile
 
 import TestTools
 
+
 class Tests(TestTools.BaseToolsTest):
 
     def setUp(self):
@@ -26,6 +27,7 @@ class Tests(TestTools.BaseToolsTest):
         except Exception as e:
             self.fail('syntax error: %s, Error is %s' % (filename, str(e)))
 
+
 def MakePythonSyntaxCheckTests():
     def GetAllPythonSourceFiles():
         pythonSourceFiles = []
@@ -33,8 +35,8 @@ def MakePythonSyntaxCheckTests():
             for filename in files:
                 if filename.lower().endswith('.py'):
                     pythonSourceFiles.append(
-                            os.path.join(root, filename)
-                        )
+                        os.path.join(root, filename)
+                    )
         return pythonSourceFiles
 
     def MakeTestName(filename):
@@ -46,15 +48,16 @@ def MakePythonSyntaxCheckTests():
 
     def MakeNewTest(filename):
         test = MakeTestName(filename)
-        newmethod = lambda self: self.SingleFileTest(filename)
+        def newmethod(self): return self.SingleFileTest(filename)
         setattr(
             Tests,
             test,
             newmethod
-            )
+        )
 
     for filename in GetAllPythonSourceFiles():
         MakeNewTest(filename)
+
 
 MakePythonSyntaxCheckTests()
 del MakePythonSyntaxCheckTests
@@ -64,5 +67,3 @@ TheTestSuite = TestTools.MakeTheTestSuite(locals())
 if __name__ == '__main__':
     allTests = TheTestSuite()
     unittest.TextTestRunner().run(allTests)
-
-

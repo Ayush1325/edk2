@@ -1,4 +1,4 @@
-## @file
+# @file
 # Create makefile for MS nmake and GNU make
 #
 # Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
@@ -10,7 +10,7 @@ from Common.LongFilePathSupport import LongFilePath, CopyLongFilePath
 from Common.BuildToolError import *
 from Common.DataType import *
 from Common.Misc import *
-from Common.StringUtils import NormPath,GetSplitList
+from Common.StringUtils import NormPath, GetSplitList
 from collections import defaultdict
 from Workspace.WorkspaceCommon import OrderedListDict
 import os.path as path
@@ -25,20 +25,22 @@ from GenPatchPcdTable.GenPatchPcdTable import parsePcdInfoFromMapFile
 from Workspace.MetaFileCommentParser import UsageList
 from .GenPcdDb import CreatePcdDatabaseCode
 from Common.caching import cached_class_function
-from AutoGen.ModuleAutoGenHelper import PlatformInfo,WorkSpaceInfo
+from AutoGen.ModuleAutoGenHelper import PlatformInfo, WorkSpaceInfo
 import json
 import tempfile
 
-## Mapping Makefile type
-gMakeTypeMap = {TAB_COMPILER_MSFT:"nmake", "GCC":"gmake"}
+# Mapping Makefile type
+gMakeTypeMap = {TAB_COMPILER_MSFT: "nmake", "GCC": "gmake"}
 #
 # Regular expression for finding Include Directories, the difference between MSFT and INTEL/GCC
 # is the former use /I , the Latter used -I to specify include directories
 #
-gBuildOptIncludePatternMsft = re.compile(r"(?:.*?)/I[ \t]*([^ ]*)", re.MULTILINE | re.DOTALL)
-gBuildOptIncludePatternOther = re.compile(r"(?:.*?)-I[ \t]*([^ ]*)", re.MULTILINE | re.DOTALL)
+gBuildOptIncludePatternMsft = re.compile(
+    r"(?:.*?)/I[ \t]*([^ ]*)", re.MULTILINE | re.DOTALL)
+gBuildOptIncludePatternOther = re.compile(
+    r"(?:.*?)-I[ \t]*([^ ]*)", re.MULTILINE | re.DOTALL)
 
-## default file name for AutoGen
+# default file name for AutoGen
 gAutoGenCodeFileName = "AutoGen.c"
 gAutoGenHeaderFileName = "AutoGen.h"
 gAutoGenStringFileName = "%(module_name)sStrDefs.h"
@@ -133,11 +135,15 @@ ${tail_comments}
 # extend lists contained in a dictionary with lists stored in another dictionary
 # if CopyToDict is not derived from DefaultDict(list) then this may raise exception
 #
+
+
 def ExtendCopyDictionaryLists(CopyToDict, CopyFromDict):
     for Key in CopyFromDict:
         CopyToDict[Key].extend(CopyFromDict[Key])
 
 # Create a directory specified by a set of path elements and return the full path
+
+
 def _MakeDir(PathList):
     RetVal = path.join(*PathList)
     CreateDirectory(RetVal)
@@ -146,6 +152,8 @@ def _MakeDir(PathList):
 #
 # Convert string to C format array
 #
+
+
 def _ConvertStringToByteArray(Value):
     Value = Value.strip()
     if not Value:
@@ -182,32 +190,35 @@ def _ConvertStringToByteArray(Value):
     Value = NewValue + '0}'
     return Value
 
-## ModuleAutoGen class
+# ModuleAutoGen class
 #
 # This class encapsules the AutoGen behaviors for the build tools. In addition to
 # the generation of AutoGen.h and AutoGen.c, it will generate *.depex file according
 # to the [depex] section in module's inf file.
 #
+
+
 class ModuleAutoGen(AutoGen):
     # call super().__init__ then call the worker function with different parameter count
     def __init__(self, Workspace, MetaFile, Target, Toolchain, Arch, *args, **kwargs):
         if not hasattr(self, "_Init"):
-            self._InitWorker(Workspace, MetaFile, Target, Toolchain, Arch, *args)
+            self._InitWorker(Workspace, MetaFile, Target,
+                             Toolchain, Arch, *args)
             self._Init = True
 
-    ## Cache the timestamps of metafiles of every module in a class attribute
+    # Cache the timestamps of metafiles of every module in a class attribute
     #
     TimeDict = {}
 
     def __new__(cls, Workspace, MetaFile, Target, Toolchain, Arch, *args, **kwargs):
-#         check if this module is employed by active platform
-        if not PlatformInfo(Workspace, args[0], Target, Toolchain, Arch,args[-1]).ValidModule(MetaFile):
-            EdkLogger.verbose("Module [%s] for [%s] is not employed by active platform\n" \
+        #         check if this module is employed by active platform
+        if not PlatformInfo(Workspace, args[0], Target, Toolchain, Arch, args[-1]).ValidModule(MetaFile):
+            EdkLogger.verbose("Module [%s] for [%s] is not employed by active platform\n"
                               % (MetaFile, Arch))
             return None
         return super(ModuleAutoGen, cls).__new__(cls, Workspace, MetaFile, Target, Toolchain, Arch, *args, **kwargs)
 
-    ## Initialize ModuleAutoGen
+    # Initialize ModuleAutoGen
     #
     #   @param      Workspace           EdkIIWorkspaceBuild object
     #   @param      ModuleFile          The path of module file
@@ -216,9 +227,11 @@ class ModuleAutoGen(AutoGen):
     #   @param      Arch                The arch the module supports
     #   @param      PlatformFile        Platform meta-file
     #
-    def _InitWorker(self, Workspace, ModuleFile, Target, Toolchain, Arch, PlatformFile,DataPipe):
-        EdkLogger.debug(EdkLogger.DEBUG_9, "AutoGen module [%s] [%s]" % (ModuleFile, Arch))
-        GlobalData.gProcessingFile = "%s [%s, %s, %s]" % (ModuleFile, Arch, Toolchain, Target)
+    def _InitWorker(self, Workspace, ModuleFile, Target, Toolchain, Arch, PlatformFile, DataPipe):
+        EdkLogger.debug(EdkLogger.DEBUG_9,
+                        "AutoGen module [%s] [%s]" % (ModuleFile, Arch))
+        GlobalData.gProcessingFile = "%s [%s, %s, %s]" % (
+            ModuleFile, Arch, Toolchain, Target)
 
         self.Workspace = Workspace
         self.WorkspaceDir = ""
@@ -241,35 +254,38 @@ class ModuleAutoGen(AutoGen):
 
         self.BuildDatabase = self.Workspace.BuildDatabase
         self.BuildRuleOrder = None
-        self.BuildTime      = 0
+        self.BuildTime = 0
 
         self._GuidComments = OrderedListDict()
         self._ProtocolComments = OrderedListDict()
         self._PpiComments = OrderedListDict()
-        self._BuildTargets            = None
-        self._IntroBuildTargetList    = None
-        self._FinalBuildTargetList    = None
-        self._FileTypes               = None
+        self._BuildTargets = None
+        self._IntroBuildTargetList = None
+        self._FinalBuildTargetList = None
+        self._FileTypes = None
 
         self.AutoGenDepSet = set()
         self.ReferenceModules = []
-        self.ConstPcd                  = {}
-        self.FileDependCache  = {}
+        self.ConstPcd = {}
+        self.FileDependCache = {}
 
     def __init_platform_info__(self):
         pinfo = self.DataPipe.Get("P_Info")
         self.WorkspaceDir = pinfo.get("WorkspaceDir")
-        self.PlatformInfo = PlatformInfo(self.Workspace,pinfo.get("ActivePlatform"),pinfo.get("Target"),pinfo.get("ToolChain"),pinfo.get("Arch"),self.DataPipe)
-    ## hash() operator of ModuleAutoGen
+        self.PlatformInfo = PlatformInfo(self.Workspace, pinfo.get("ActivePlatform"), pinfo.get(
+            "Target"), pinfo.get("ToolChain"), pinfo.get("Arch"), self.DataPipe)
+    # hash() operator of ModuleAutoGen
     #
     #  The module file path and arch string will be used to represent
     #  hash value of this object
     #
     #   @retval   int Hash value of the module file path and arch
     #
+
     @cached_class_function
     def __hash__(self):
-        return hash((self.MetaFile, self.Arch, self.ToolChain,self.BuildTarget))
+        return hash((self.MetaFile, self.Arch, self.ToolChain, self.BuildTarget))
+
     def __repr__(self):
         return "%s [%s]" % (self.MetaFile, self.Arch)
 
@@ -290,7 +306,8 @@ class ModuleAutoGen(AutoGen):
         for Pcd in self.FixedAtBuildPcds:
             if Pcd.DatumType == TAB_VOID:
                 if '.'.join((Pcd.TokenSpaceGuidCName, Pcd.TokenCName)) not in RetVal:
-                    RetVal['.'.join((Pcd.TokenSpaceGuidCName, Pcd.TokenCName))] = Pcd.DefaultValue
+                    RetVal['.'.join(
+                        (Pcd.TokenSpaceGuidCName, Pcd.TokenCName))] = Pcd.DefaultValue
         return RetVal
 
     @property
@@ -298,61 +315,61 @@ class ModuleAutoGen(AutoGen):
         ModuleNames = self.DataPipe.Get("M_Name")
         if not ModuleNames:
             return self.Name
-        return ModuleNames.get((self.Name,self.MetaFile),self.Name)
+        return ModuleNames.get((self.Name, self.MetaFile), self.Name)
 
     # Macros could be used in build_rule.txt (also Makefile)
     @cached_property
     def Macros(self):
         return OrderedDict((
-            ("WORKSPACE" ,self.WorkspaceDir),
-            ("MODULE_NAME" ,self.Name),
-            ("MODULE_NAME_GUID" ,self.UniqueBaseName),
-            ("MODULE_GUID" ,self.Guid),
-            ("MODULE_VERSION" ,self.Version),
-            ("MODULE_TYPE" ,self.ModuleType),
-            ("MODULE_FILE" ,str(self.MetaFile)),
-            ("MODULE_FILE_BASE_NAME" ,self.MetaFile.BaseName),
-            ("MODULE_RELATIVE_DIR" ,self.SourceDir),
-            ("MODULE_DIR" ,self.SourceDir),
-            ("BASE_NAME" ,self.Name),
-            ("ARCH" ,self.Arch),
-            ("TOOLCHAIN" ,self.ToolChain),
-            ("TOOLCHAIN_TAG" ,self.ToolChain),
-            ("TOOL_CHAIN_TAG" ,self.ToolChain),
-            ("TARGET" ,self.BuildTarget),
-            ("BUILD_DIR" ,self.PlatformInfo.BuildDir),
-            ("BIN_DIR" ,os.path.join(self.PlatformInfo.BuildDir, self.Arch)),
-            ("LIB_DIR" ,os.path.join(self.PlatformInfo.BuildDir, self.Arch)),
-            ("MODULE_BUILD_DIR" ,self.BuildDir),
-            ("OUTPUT_DIR" ,self.OutputDir),
-            ("DEBUG_DIR" ,self.DebugDir),
-            ("DEST_DIR_OUTPUT" ,self.OutputDir),
-            ("DEST_DIR_DEBUG" ,self.DebugDir),
-            ("PLATFORM_NAME" ,self.PlatformInfo.Name),
-            ("PLATFORM_GUID" ,self.PlatformInfo.Guid),
-            ("PLATFORM_VERSION" ,self.PlatformInfo.Version),
-            ("PLATFORM_RELATIVE_DIR" ,self.PlatformInfo.SourceDir),
-            ("PLATFORM_DIR" ,mws.join(self.WorkspaceDir, self.PlatformInfo.SourceDir)),
-            ("PLATFORM_OUTPUT_DIR" ,self.PlatformInfo.OutputDir),
-            ("FFS_OUTPUT_DIR" ,self.FfsOutputDir)
-            ))
+            ("WORKSPACE", self.WorkspaceDir),
+            ("MODULE_NAME", self.Name),
+            ("MODULE_NAME_GUID", self.UniqueBaseName),
+            ("MODULE_GUID", self.Guid),
+            ("MODULE_VERSION", self.Version),
+            ("MODULE_TYPE", self.ModuleType),
+            ("MODULE_FILE", str(self.MetaFile)),
+            ("MODULE_FILE_BASE_NAME", self.MetaFile.BaseName),
+            ("MODULE_RELATIVE_DIR", self.SourceDir),
+            ("MODULE_DIR", self.SourceDir),
+            ("BASE_NAME", self.Name),
+            ("ARCH", self.Arch),
+            ("TOOLCHAIN", self.ToolChain),
+            ("TOOLCHAIN_TAG", self.ToolChain),
+            ("TOOL_CHAIN_TAG", self.ToolChain),
+            ("TARGET", self.BuildTarget),
+            ("BUILD_DIR", self.PlatformInfo.BuildDir),
+            ("BIN_DIR", os.path.join(self.PlatformInfo.BuildDir, self.Arch)),
+            ("LIB_DIR", os.path.join(self.PlatformInfo.BuildDir, self.Arch)),
+            ("MODULE_BUILD_DIR", self.BuildDir),
+            ("OUTPUT_DIR", self.OutputDir),
+            ("DEBUG_DIR", self.DebugDir),
+            ("DEST_DIR_OUTPUT", self.OutputDir),
+            ("DEST_DIR_DEBUG", self.DebugDir),
+            ("PLATFORM_NAME", self.PlatformInfo.Name),
+            ("PLATFORM_GUID", self.PlatformInfo.Guid),
+            ("PLATFORM_VERSION", self.PlatformInfo.Version),
+            ("PLATFORM_RELATIVE_DIR", self.PlatformInfo.SourceDir),
+            ("PLATFORM_DIR", mws.join(self.WorkspaceDir, self.PlatformInfo.SourceDir)),
+            ("PLATFORM_OUTPUT_DIR", self.PlatformInfo.OutputDir),
+            ("FFS_OUTPUT_DIR", self.FfsOutputDir)
+        ))
 
-    ## Return the module build data object
+    # Return the module build data object
     @cached_property
     def Module(self):
         return self.BuildDatabase[self.MetaFile, self.Arch, self.BuildTarget, self.ToolChain]
 
-    ## Return the module name
+    # Return the module name
     @cached_property
     def Name(self):
         return self.Module.BaseName
 
-    ## Return the module DxsFile if exist
+    # Return the module DxsFile if exist
     @cached_property
     def DxsFile(self):
         return self.Module.DxsFile
 
-    ## Return the module meta-file GUID
+    # Return the module meta-file GUID
     @cached_property
     def Guid(self):
         #
@@ -367,84 +384,85 @@ class ModuleAutoGen(AutoGen):
             return os.path.basename(self.MetaFile.Path)[:36]
         return self.Module.Guid
 
-    ## Return the module version
+    # Return the module version
     @cached_property
     def Version(self):
         return self.Module.Version
 
-    ## Return the module type
+    # Return the module type
     @cached_property
     def ModuleType(self):
         return self.Module.ModuleType
 
-    ## Return the component type (for Edk.x style of module)
+    # Return the component type (for Edk.x style of module)
     @cached_property
     def ComponentType(self):
         return self.Module.ComponentType
 
-    ## Return the build type
+    # Return the build type
     @cached_property
     def BuildType(self):
         return self.Module.BuildType
 
-    ## Return the PCD_IS_DRIVER setting
+    # Return the PCD_IS_DRIVER setting
     @cached_property
     def PcdIsDriver(self):
         return self.Module.PcdIsDriver
 
-    ## Return the autogen version, i.e. module meta-file version
+    # Return the autogen version, i.e. module meta-file version
     @cached_property
     def AutoGenVersion(self):
         return self.Module.AutoGenVersion
 
-    ## Check if the module is library or not
+    # Check if the module is library or not
     @cached_property
     def IsLibrary(self):
         return bool(self.Module.LibraryClass)
 
-    ## Check if the module is binary module or not
+    # Check if the module is binary module or not
     @cached_property
     def IsBinaryModule(self):
         return self.Module.IsBinaryModule
 
-    ## Return the directory to store intermediate files of the module
+    # Return the directory to store intermediate files of the module
     @cached_property
     def BuildDir(self):
         return _MakeDir((
-                                    self.PlatformInfo.BuildDir,
-                                    self.Arch,
-                                    self.SourceDir,
-                                    self.MetaFile.BaseName
-            ))
+            self.PlatformInfo.BuildDir,
+            self.Arch,
+            self.SourceDir,
+            self.MetaFile.BaseName
+        ))
 
-    ## Return the directory to store the intermediate object files of the module
+    # Return the directory to store the intermediate object files of the module
     @cached_property
     def OutputDir(self):
         return _MakeDir((self.BuildDir, "OUTPUT"))
 
-    ## Return the directory path to store ffs file
+    # Return the directory path to store ffs file
     @cached_property
     def FfsOutputDir(self):
         if GlobalData.gFdfParser:
             return path.join(self.PlatformInfo.BuildDir, TAB_FV_DIRECTORY, "Ffs", self.Guid + self.Name)
         return ''
 
-    ## Return the directory to store auto-gened source files of the module
+    # Return the directory to store auto-gened source files of the module
     @cached_property
     def DebugDir(self):
         return _MakeDir((self.BuildDir, "DEBUG"))
 
-    ## Return the path of custom file
+    # Return the path of custom file
     @cached_property
     def CustomMakefile(self):
         RetVal = {}
         for Type in self.Module.CustomMakefile:
             MakeType = gMakeTypeMap[Type] if Type in gMakeTypeMap else 'nmake'
-            File = os.path.join(self.SourceDir, self.Module.CustomMakefile[Type])
+            File = os.path.join(
+                self.SourceDir, self.Module.CustomMakefile[Type])
             RetVal[MakeType] = File
         return RetVal
 
-    ## Return the directory of the makefile
+    # Return the directory of the makefile
     #
     #   @retval     string  The directory string of module's makefile
     #
@@ -452,7 +470,7 @@ class ModuleAutoGen(AutoGen):
     def MakeFileDir(self):
         return self.BuildDir
 
-    ## Return build command string
+    # Return build command string
     #
     #   @retval     string  Build command string
     #
@@ -460,7 +478,7 @@ class ModuleAutoGen(AutoGen):
     def BuildCommand(self):
         return self.PlatformInfo.BuildCommand
 
-    ## Get Module package and Platform package
+    # Get Module package and Platform package
     #
     #   @retval list The list of package object
     #
@@ -469,14 +487,15 @@ class ModuleAutoGen(AutoGen):
         PkagList = []
         if self.Module.Packages:
             PkagList.extend(self.Module.Packages)
-        Platform = self.BuildDatabase[self.PlatformInfo.MetaFile, self.Arch, self.BuildTarget, self.ToolChain]
+        Platform = self.BuildDatabase[self.PlatformInfo.MetaFile,
+                                      self.Arch, self.BuildTarget, self.ToolChain]
         for Package in Platform.Packages:
             if Package in PkagList:
                 continue
             PkagList.append(Package)
         return PkagList
 
-    ## Get object list of all packages the module and its dependent libraries belong to and the Platform depends on
+    # Get object list of all packages the module and its dependent libraries belong to and the Platform depends on
     #
     #   @retval     list    The list of package object
     #
@@ -491,13 +510,13 @@ class ModuleAutoGen(AutoGen):
                 PackageList.append(Package)
         return PackageList
 
-    ## Get the depex string
+    # Get the depex string
     #
     # @return : a string contain all depex expression.
     def _GetDepexExpresionString(self):
         DepexStr = ''
         DepexList = []
-        ## DPX_SOURCE IN Define section.
+        # DPX_SOURCE IN Define section.
         if self.Module.DxsFile:
             return DepexStr
         for M in [self.Module] + self.DependentLibraryList:
@@ -507,7 +526,8 @@ class ModuleAutoGen(AutoGen):
             for DepexExpression in DepexExpressionList:
                 for key in DepexExpression:
                     Arch, ModuleType = key
-                    DepexExpr = [x for x in DepexExpression[key] if not str(x).startswith('#')]
+                    DepexExpr = [x for x in DepexExpression[key]
+                                 if not str(x).startswith('#')]
                     # the type of build module is USER_DEFINED.
                     # All different DEPEX section tags would be copied into the As Built INF file
                     # and there would be separate DEPEX section tags
@@ -516,22 +536,22 @@ class ModuleAutoGen(AutoGen):
                             DepexList.append({(Arch, ModuleType): DepexExpr})
                     else:
                         if Arch.upper() == TAB_ARCH_COMMON or \
-                          (Arch.upper() == self.Arch.upper() and \
-                          ModuleType.upper() in [TAB_ARCH_COMMON, self.ModuleType.upper()]):
+                            (Arch.upper() == self.Arch.upper() and
+                           ModuleType.upper() in [TAB_ARCH_COMMON, self.ModuleType.upper()]):
                             DepexList.append({(Arch, ModuleType): DepexExpr})
 
-        #the type of build module is USER_DEFINED.
+        # the type of build module is USER_DEFINED.
         if self.ModuleType.upper() == SUP_MODULE_USER_DEFINED or self.ModuleType.upper() == SUP_MODULE_HOST_APPLICATION:
             for Depex in DepexList:
                 for key in Depex:
                     DepexStr += '[Depex.%s.%s]\n' % key
-                    DepexStr += '\n'.join('# '+ val for val in Depex[key])
+                    DepexStr += '\n'.join('# ' + val for val in Depex[key])
                     DepexStr += '\n\n'
             if not DepexStr:
                 return '[Depex.%s]\n' % self.Arch
             return DepexStr
 
-        #the type of build module not is USER_DEFINED.
+        # the type of build module not is USER_DEFINED.
         Count = 0
         for Depex in DepexList:
             Count += 1
@@ -551,7 +571,7 @@ class ModuleAutoGen(AutoGen):
             return '[Depex.%s]\n' % self.Arch
         return '[Depex.%s]\n#  ' % self.Arch + DepexStr
 
-    ## Merge dependency expression
+    # Merge dependency expression
     #
     #   @retval     list    The token list of the dependency expression after parsed
     #
@@ -573,7 +593,7 @@ class ModuleAutoGen(AutoGen):
                 if DepexList != []:
                     DepexList.append('AND')
                 DepexList.append('(')
-                #replace D with value if D is FixedAtBuild PCD
+                # replace D with value if D is FixedAtBuild PCD
                 NewList = []
                 for item in D:
                     if '.' not in item:
@@ -586,7 +606,8 @@ class ModuleAutoGen(AutoGen):
                                                 "{} used in [Depex] section should be used as FixedAtBuild type and VOID* datum type and 16 bytes in the module.".format(item))
                             NewList.append(Value)
                         except:
-                            EdkLogger.error("build", FORMAT_INVALID, "{} used in [Depex] section should be used as FixedAtBuild type and VOID* datum type in the module.".format(item))
+                            EdkLogger.error(
+                                "build", FORMAT_INVALID, "{} used in [Depex] section should be used as FixedAtBuild type and VOID* datum type in the module.".format(item))
 
                 DepexList.extend(NewList)
                 if DepexList[-1] == 'END':  # no need of a END at this time
@@ -594,14 +615,15 @@ class ModuleAutoGen(AutoGen):
                 DepexList.append(')')
                 Inherited = True
             if Inherited:
-                EdkLogger.verbose("DEPEX[%s] (+%s) = %s" % (self.Name, M.Module.BaseName, DepexList))
+                EdkLogger.verbose("DEPEX[%s] (+%s) = %s" %
+                                  (self.Name, M.Module.BaseName, DepexList))
             if 'BEFORE' in DepexList or 'AFTER' in DepexList:
                 break
             if len(DepexList) > 0:
                 EdkLogger.verbose('')
-        return {self.ModuleType:DepexList}
+        return {self.ModuleType: DepexList}
 
-    ## Merge dependency expression
+    # Merge dependency expression
     #
     #   @retval     list    The token list of the dependency expression after parsed
     #
@@ -621,17 +643,19 @@ class ModuleAutoGen(AutoGen):
                     DepexExpressionString += ' AND '
                 DepexExpressionString += '('
                 DepexExpressionString += D
-                DepexExpressionString = DepexExpressionString.rstrip('END').strip()
+                DepexExpressionString = DepexExpressionString.rstrip(
+                    'END').strip()
                 DepexExpressionString += ')'
                 Inherited = True
             if Inherited:
-                EdkLogger.verbose("DEPEX[%s] (+%s) = %s" % (self.Name, M.BaseName, DepexExpressionString))
+                EdkLogger.verbose(
+                    "DEPEX[%s] (+%s) = %s" % (self.Name, M.BaseName, DepexExpressionString))
             if 'BEFORE' in DepexExpressionString or 'AFTER' in DepexExpressionString:
                 break
         if len(DepexExpressionString) > 0:
             EdkLogger.verbose('')
 
-        return {self.ModuleType:DepexExpressionString}
+        return {self.ModuleType: DepexExpressionString}
 
     # Get the tiano core user extension, it is contain dependent library.
     # @retval: a list contain tiano core userextension.
@@ -650,14 +674,15 @@ class ModuleAutoGen(AutoGen):
                         Arch = ItemList[3]
                     if Arch.upper() == TAB_ARCH_COMMON or Arch.upper() == self.Arch.upper():
                         TianoCoreList = []
-                        TianoCoreList.extend([TAB_SECTION_START + Section + TAB_SECTION_END])
+                        TianoCoreList.extend(
+                            [TAB_SECTION_START + Section + TAB_SECTION_END])
                         TianoCoreList.extend(TianoCoreUserExtent[Section][:])
                         TianoCoreList.append('\n')
                         TianoCoreUserExtentionList.append(TianoCoreList)
 
         return TianoCoreUserExtentionList
 
-    ## Return the list of specification version required for the module
+    # Return the list of specification version required for the module
     #
     #   @retval     list    The list of specification defined in module file
     #
@@ -665,19 +690,21 @@ class ModuleAutoGen(AutoGen):
     def Specification(self):
         return self.Module.Specification
 
-    ## Tool option for the module build
+    # Tool option for the module build
     #
     #   @param      PlatformInfo    The object of PlatformBuildInfo
     #   @retval     dict            The dict containing valid options
     #
     @cached_property
     def BuildOption(self):
-        RetVal, self.BuildRuleOrder = self.PlatformInfo.ApplyBuildOption(self.Module)
+        RetVal, self.BuildRuleOrder = self.PlatformInfo.ApplyBuildOption(
+            self.Module)
         if self.BuildRuleOrder:
-            self.BuildRuleOrder = ['.%s' % Ext for Ext in self.BuildRuleOrder.split()]
+            self.BuildRuleOrder = ['.%s' %
+                                   Ext for Ext in self.BuildRuleOrder.split()]
         return RetVal
 
-    ## Get include path list from tool option for the module build
+    # Get include path list from tool option for the module build
     #
     #   @retval     list            The include path list
     #
@@ -704,7 +731,8 @@ class ModuleAutoGen(AutoGen):
             except KeyError:
                 FlagOption = ''
 
-            IncPathList = [NormPath(Path, self.Macros) for Path in BuildOptIncludeRegEx.findall(FlagOption)]
+            IncPathList = [NormPath(Path, self.Macros)
+                           for Path in BuildOptIncludeRegEx.findall(FlagOption)]
 
             #
             # EDK II modules must not reference header files outside of the packages they depend on or
@@ -713,7 +741,8 @@ class ModuleAutoGen(AutoGen):
             if GlobalData.gDisableIncludePathCheck == False:
                 for Path in IncPathList:
                     if (Path not in self.IncludePathList) and (CommonPath([Path, self.MetaFile.Dir]) != self.MetaFile.Dir):
-                        ErrMsg = "The include directory for the EDK II module in this line is invalid %s specified in %s FLAGS '%s'" % (Path, Tool, FlagOption)
+                        ErrMsg = "The include directory for the EDK II module in this line is invalid %s specified in %s FLAGS '%s'" % (
+                            Path, Tool, FlagOption)
                         EdkLogger.error("build",
                                         PARAMETER_INVALID,
                                         ExtraData=ErrMsg,
@@ -721,7 +750,7 @@ class ModuleAutoGen(AutoGen):
             RetVal += IncPathList
         return RetVal
 
-    ## Return a list of files which can be built from source
+    # Return a list of files which can be built from source
     #
     #  What kind of files can be built is determined by build rules in
     #  $(CONF_DIRECTORY)/build_rule.txt and toolchain family.
@@ -730,7 +759,8 @@ class ModuleAutoGen(AutoGen):
     def SourceFileList(self):
         RetVal = []
         ToolChainTagSet = {"", TAB_STAR, self.ToolChain}
-        ToolChainFamilySet = {"", TAB_STAR, self.ToolChainFamily, self.BuildRuleFamily}
+        ToolChainFamilySet = {"", TAB_STAR,
+                              self.ToolChainFamily, self.BuildRuleFamily}
         for F in self.Module.Sources:
             # match tool chain
             if F.TagName not in ToolChainTagSet:
@@ -740,10 +770,10 @@ class ModuleAutoGen(AutoGen):
             # match tool chain family or build rule family
             if F.ToolChainFamily not in ToolChainFamilySet:
                 EdkLogger.debug(
-                            EdkLogger.DEBUG_0,
-                            "The file [%s] must be built by tools of [%s], " \
-                            "but current toolchain family is [%s], buildrule family is [%s]" \
-                                % (str(F), F.ToolChainFamily, self.ToolChainFamily, self.BuildRuleFamily))
+                    EdkLogger.DEBUG_0,
+                    "The file [%s] must be built by tools of [%s], "
+                    "but current toolchain family is [%s], buildrule family is [%s]"
+                    % (str(F), F.ToolChainFamily, self.ToolChainFamily, self.BuildRuleFamily))
                 continue
 
             # add the file path into search path list for file including
@@ -762,7 +792,7 @@ class ModuleAutoGen(AutoGen):
         self.BuildOption
         for SingleFile in FileList:
             if self.BuildRuleOrder and SingleFile.Ext in self.BuildRuleOrder and SingleFile.Ext in self.BuildRules:
-                key = SingleFile.Path.rsplit(SingleFile.Ext,1)[0]
+                key = SingleFile.Path.rsplit(SingleFile.Ext, 1)[0]
                 if key in Order_Dict:
                     Order_Dict[key].append(SingleFile.Ext)
                 else:
@@ -780,22 +810,22 @@ class ModuleAutoGen(AutoGen):
 
         return FileList
 
-    ## Return the list of unicode files
+    # Return the list of unicode files
     @cached_property
     def UnicodeFileList(self):
-        return self.FileTypes.get(TAB_UNICODE_FILE,[])
+        return self.FileTypes.get(TAB_UNICODE_FILE, [])
 
-    ## Return the list of vfr files
+    # Return the list of vfr files
     @cached_property
     def VfrFileList(self):
         return self.FileTypes.get(TAB_VFR_FILE, [])
 
-    ## Return the list of Image Definition files
+    # Return the list of Image Definition files
     @cached_property
     def IdfFileList(self):
-        return self.FileTypes.get(TAB_IMAGE_FILE,[])
+        return self.FileTypes.get(TAB_IMAGE_FILE, [])
 
-    ## Return a list of files which can be built from binary
+    # Return a list of files which can be built from binary
     #
     #  "Build" binary files are just to copy them to build directory.
     #
@@ -816,19 +846,23 @@ class ModuleAutoGen(AutoGen):
         RetVal = {}
         BuildRuleDatabase = self.PlatformInfo.BuildRule
         for Type in BuildRuleDatabase.FileTypeList:
-            #first try getting build rule by BuildRuleFamily
-            RuleObject = BuildRuleDatabase[Type, self.BuildType, self.Arch, self.BuildRuleFamily]
+            # first try getting build rule by BuildRuleFamily
+            RuleObject = BuildRuleDatabase[Type,
+                                           self.BuildType, self.Arch, self.BuildRuleFamily]
             if not RuleObject:
                 # build type is always module type, but ...
                 if self.ModuleType != self.BuildType:
-                    RuleObject = BuildRuleDatabase[Type, self.ModuleType, self.Arch, self.BuildRuleFamily]
-            #second try getting build rule by ToolChainFamily
+                    RuleObject = BuildRuleDatabase[Type,
+                                                   self.ModuleType, self.Arch, self.BuildRuleFamily]
+            # second try getting build rule by ToolChainFamily
             if not RuleObject:
-                RuleObject = BuildRuleDatabase[Type, self.BuildType, self.Arch, self.ToolChainFamily]
+                RuleObject = BuildRuleDatabase[Type,
+                                               self.BuildType, self.Arch, self.ToolChainFamily]
                 if not RuleObject:
                     # build type is always module type, but ...
                     if self.ModuleType != self.BuildType:
-                        RuleObject = BuildRuleDatabase[Type, self.ModuleType, self.Arch, self.ToolChainFamily]
+                        RuleObject = BuildRuleDatabase[Type,
+                                                       self.ModuleType, self.Arch, self.ToolChainFamily]
             if not RuleObject:
                 continue
             RuleObject = RuleObject.Instantiate(self.Macros)
@@ -906,7 +940,8 @@ class ModuleAutoGen(AutoGen):
 
             # to avoid cyclic rule
             if FileType in RuleChain:
-                EdkLogger.error("build", ERROR_STATEMENT, "Cyclic dependency detected while generating rule for %s" % str(Source))
+                EdkLogger.error(
+                    "build", ERROR_STATEMENT, "Cyclic dependency detected while generating rule for %s" % str(Source))
 
             RuleChain.add(FileType)
             SourceList.extend(Target.Outputs)
@@ -925,10 +960,10 @@ class ModuleAutoGen(AutoGen):
             self._BuildTargets = defaultdict(set)
             self._FileTypes = defaultdict(set)
 
-        #TRICK: call SourceFileList property to apply build rule for source files
+        # TRICK: call SourceFileList property to apply build rule for source files
         self.SourceFileList
 
-        #TRICK: call _GetBinaryFileList to apply build rule for binary files
+        # TRICK: call _GetBinaryFileList to apply build rule for binary files
         self.BinaryFileList
 
         return self._BuildTargets
@@ -948,7 +983,7 @@ class ModuleAutoGen(AutoGen):
         self.Targets
         return self._FileTypes
 
-    ## Get the list of package object the module depends on and the Platform depends on
+    # Get the list of package object the module depends on and the Platform depends on
     #
     #   @retval     list    The package object list
     #
@@ -956,7 +991,7 @@ class ModuleAutoGen(AutoGen):
     def DependentPackageList(self):
         return self.PackageList
 
-    ## Return the list of auto-generated code file
+    # Return the list of auto-generated code file
     #
     #   @retval     list        The list of auto-generated file
     #
@@ -970,7 +1005,8 @@ class ModuleAutoGen(AutoGen):
         AutoGenH = TemplateString()
         StringH = TemplateString()
         StringIdf = TemplateString()
-        GenC.CreateCode(self, AutoGenC, AutoGenH, StringH, AutoGenUniIdf, UniStringBinBuffer, StringIdf, AutoGenUniIdf, IdfGenBinBuffer)
+        GenC.CreateCode(self, AutoGenC, AutoGenH, StringH, AutoGenUniIdf,
+                        UniStringBinBuffer, StringIdf, AutoGenUniIdf, IdfGenBinBuffer)
         #
         # AutoGen.c is generated if there are library classes in inf, or there are object files
         #
@@ -984,22 +1020,26 @@ class ModuleAutoGen(AutoGen):
             RetVal[AutoFile] = str(AutoGenH)
             self._ApplyBuildRule(AutoFile, TAB_UNKNOWN_FILE)
         if str(StringH) != "":
-            AutoFile = PathClass(gAutoGenStringFileName % {"module_name":self.Name}, self.DebugDir)
+            AutoFile = PathClass(gAutoGenStringFileName %
+                                 {"module_name": self.Name}, self.DebugDir)
             RetVal[AutoFile] = str(StringH)
             self._ApplyBuildRule(AutoFile, TAB_UNKNOWN_FILE)
         if UniStringBinBuffer is not None and UniStringBinBuffer.getvalue() != b"":
-            AutoFile = PathClass(gAutoGenStringFormFileName % {"module_name":self.Name}, self.OutputDir)
+            AutoFile = PathClass(gAutoGenStringFormFileName %
+                                 {"module_name": self.Name}, self.OutputDir)
             RetVal[AutoFile] = UniStringBinBuffer.getvalue()
             AutoFile.IsBinary = True
             self._ApplyBuildRule(AutoFile, TAB_UNKNOWN_FILE)
         if UniStringBinBuffer is not None:
             UniStringBinBuffer.close()
         if str(StringIdf) != "":
-            AutoFile = PathClass(gAutoGenImageDefFileName % {"module_name":self.Name}, self.DebugDir)
+            AutoFile = PathClass(gAutoGenImageDefFileName %
+                                 {"module_name": self.Name}, self.DebugDir)
             RetVal[AutoFile] = str(StringIdf)
             self._ApplyBuildRule(AutoFile, TAB_UNKNOWN_FILE)
         if IdfGenBinBuffer is not None and IdfGenBinBuffer.getvalue() != b"":
-            AutoFile = PathClass(gAutoGenIdfFileName % {"module_name":self.Name}, self.OutputDir)
+            AutoFile = PathClass(gAutoGenIdfFileName %
+                                 {"module_name": self.Name}, self.OutputDir)
             RetVal[AutoFile] = IdfGenBinBuffer.getvalue()
             AutoFile.IsBinary = True
             self._ApplyBuildRule(AutoFile, TAB_UNKNOWN_FILE)
@@ -1007,7 +1047,7 @@ class ModuleAutoGen(AutoGen):
             IdfGenBinBuffer.close()
         return RetVal
 
-    ## Return the list of library modules explicitly or implicitly used by this module
+    # Return the list of library modules explicitly or implicitly used by this module
     @cached_property
     def DependentLibraryList(self):
         # only merge library classes and PCD for non-library module
@@ -1015,7 +1055,7 @@ class ModuleAutoGen(AutoGen):
             return []
         return self.PlatformInfo.ApplyLibraryInstance(self.Module)
 
-    ## Get the list of PCDs from current module
+    # Get the list of PCDs from current module
     #
     #   @retval     list                    The list of PCD
     #
@@ -1025,6 +1065,7 @@ class ModuleAutoGen(AutoGen):
         RetVal = self.PlatformInfo.ApplyPcdSetting(self, self.Module.Pcds)
 
         return RetVal
+
     @cached_property
     def _PcdComments(self):
         ReVal = OrderedListDict()
@@ -1034,7 +1075,7 @@ class ModuleAutoGen(AutoGen):
                 ExtendCopyDictionaryLists(ReVal, Library.PcdComments)
         return ReVal
 
-    ## Get the list of PCDs from dependent libraries
+    # Get the list of PCDs from dependent libraries
     #
     #   @retval     list                    The list of PCD
     #
@@ -1053,10 +1094,11 @@ class ModuleAutoGen(AutoGen):
                     continue
                 Pcds.add(Key)
                 PcdsInLibrary[Key] = copy.copy(Library.Pcds[Key])
-            RetVal.extend(self.PlatformInfo.ApplyPcdSetting(self, PcdsInLibrary, Library=Library))
+            RetVal.extend(self.PlatformInfo.ApplyPcdSetting(
+                self, PcdsInLibrary, Library=Library))
         return RetVal
 
-    ## Get the GUID value mapping
+    # Get the GUID value mapping
     #
     #   @retval     dict    The mapping between GUID cname and its value
     #
@@ -1075,20 +1117,23 @@ class ModuleAutoGen(AutoGen):
         for Library in self.DependentLibraryList:
             RetVal.update(Library.GetGuidsUsedByPcd())
         return RetVal
-    ## Get the protocol value mapping
+    # Get the protocol value mapping
     #
     #   @retval     dict    The mapping between protocol cname and its value
     #
+
     @cached_property
     def ProtocolList(self):
         RetVal = OrderedDict(self.Module.Protocols)
         for Library in self.DependentLibraryList:
             RetVal.update(Library.Protocols)
-            ExtendCopyDictionaryLists(self._ProtocolComments, Library.ProtocolComments)
-        ExtendCopyDictionaryLists(self._ProtocolComments, self.Module.ProtocolComments)
+            ExtendCopyDictionaryLists(
+                self._ProtocolComments, Library.ProtocolComments)
+        ExtendCopyDictionaryLists(
+            self._ProtocolComments, self.Module.ProtocolComments)
         return RetVal
 
-    ## Get the PPI value mapping
+    # Get the PPI value mapping
     #
     #   @retval     dict    The mapping between PPI cname and its value
     #
@@ -1101,7 +1146,7 @@ class ModuleAutoGen(AutoGen):
         ExtendCopyDictionaryLists(self._PpiComments, self.Module.PpiComments)
         return RetVal
 
-    ## Get the list of include search path
+    # Get the list of include search path
     #
     #   @retval     list                    The list path
     #
@@ -1118,7 +1163,8 @@ class ModuleAutoGen(AutoGen):
             IncludesList = Package.Includes
             if Package._PrivateIncludes:
                 if not self.MetaFile.OriginalPath.Path.startswith(PackageDir):
-                    IncludesList = list(set(Package.Includes).difference(set(Package._PrivateIncludes)))
+                    IncludesList = list(set(Package.Includes).difference(
+                        set(Package._PrivateIncludes)))
             for Inc in IncludesList:
                 if Inc not in RetVal:
                     RetVal.append(str(Inc))
@@ -1134,8 +1180,8 @@ class ModuleAutoGen(AutoGen):
                 whitespace = False
                 for flag in flags.split(" "):
                     flag = flag.strip()
-                    if flag.startswith(("/I","-I")):
-                        if len(flag)>2:
+                    if flag.startswith(("/I", "-I")):
+                        if len(flag) > 2:
                             if os.path.exists(flag[2:]):
                                 IncPathList.append(flag[2:])
                         else:
@@ -1151,7 +1197,7 @@ class ModuleAutoGen(AutoGen):
     def IncludePathLength(self):
         return sum(len(inc)+1 for inc in self.IncludePathList)
 
-    ## Get the list of include paths from the packages
+    # Get the list of include paths from the packages
     #
     #   @IncludesList     list             The list path
     #
@@ -1163,10 +1209,11 @@ class ModuleAutoGen(AutoGen):
             IncludesList = Package.Includes
             if Package._PrivateIncludes:
                 if not self.MetaFile.Path.startswith(PackageDir):
-                    IncludesList = list(set(Package.Includes).difference(set(Package._PrivateIncludes)))
+                    IncludesList = list(set(Package.Includes).difference(
+                        set(Package._PrivateIncludes)))
         return IncludesList
 
-    ## Get HII EX PCDs which maybe used by VFR
+    # Get HII EX PCDs which maybe used by VFR
     #
     #  efivarstore used by VFR may relate with HII EX PCDs
     #  Get the variable name and GUID from efivarstore and HII EX PCD
@@ -1209,8 +1256,10 @@ class ModuleAutoGen(AutoGen):
                 Guid = gEfiVarStoreGuidPattern.search(Content, Pos)
                 if not Guid:
                     break
-                NameArray = _ConvertStringToByteArray('L"' + Name.group(1) + '"')
-                NameGuids.add((NameArray, GuidStructureStringToGuidString(Guid.group(1))))
+                NameArray = _ConvertStringToByteArray(
+                    'L"' + Name.group(1) + '"')
+                NameGuids.add(
+                    (NameArray, GuidStructureStringToGuidString(Guid.group(1))))
                 Pos = Content.find('efivarstore', Name.end())
         if not NameGuids:
             return []
@@ -1219,7 +1268,8 @@ class ModuleAutoGen(AutoGen):
             if Pcd.Type != TAB_PCDS_DYNAMIC_EX_HII:
                 continue
             for SkuInfo in Pcd.SkuInfoList.values():
-                Value = GuidValue(SkuInfo.VariableGuid, self.PlatformInfo.PackageList, self.MetaFile.Path)
+                Value = GuidValue(
+                    SkuInfo.VariableGuid, self.PlatformInfo.PackageList, self.MetaFile.Path)
                 if not Value:
                     continue
                 Name = _ConvertStringToByteArray(SkuInfo.VariableName)
@@ -1233,12 +1283,13 @@ class ModuleAutoGen(AutoGen):
     def _GenOffsetBin(self):
         VfrUniBaseName = {}
         for SourceFile in self.Module.Sources:
-            if SourceFile.Type.upper() == ".VFR" :
+            if SourceFile.Type.upper() == ".VFR":
                 #
                 # search the .map file to find the offset of vfr binary in the PE32+/TE file.
                 #
-                VfrUniBaseName[SourceFile.BaseName] = (SourceFile.BaseName + "Bin")
-            elif SourceFile.Type.upper() == ".UNI" :
+                VfrUniBaseName[SourceFile.BaseName] = (
+                    SourceFile.BaseName + "Bin")
+            elif SourceFile.Type.upper() == ".UNI":
                 #
                 # search the .map file to find the offset of Uni strings binary in the PE32+/TE file.
                 #
@@ -1248,17 +1299,19 @@ class ModuleAutoGen(AutoGen):
             return None
         MapFileName = os.path.join(self.OutputDir, self.Name + ".map")
         EfiFileName = os.path.join(self.OutputDir, self.Name + ".efi")
-        VfrUniOffsetList = GetVariableOffset(MapFileName, EfiFileName, list(VfrUniBaseName.values()))
+        VfrUniOffsetList = GetVariableOffset(
+            MapFileName, EfiFileName, list(VfrUniBaseName.values()))
         if not VfrUniOffsetList:
             return None
 
         OutputName = '%sOffset.bin' % self.Name
-        UniVfrOffsetFileName    =  os.path.join( self.OutputDir, OutputName)
+        UniVfrOffsetFileName = os.path.join(self.OutputDir, OutputName)
 
         try:
             fInputfile = open(UniVfrOffsetFileName, "wb+", 0)
         except:
-            EdkLogger.error("build", FILE_OPEN_FAILURE, "File open failed for %s" % UniVfrOffsetFileName, None)
+            EdkLogger.error("build", FILE_OPEN_FAILURE,
+                            "File open failed for %s" % UniVfrOffsetFileName, None)
 
         # Use a instance of BytesIO to cache data
         fStringIO = BytesIO()
@@ -1272,8 +1325,8 @@ class ModuleAutoGen(AutoGen):
                 #
                 UniGuid = b'\xe0\xc5\x13\x89\xf63\x86M\x9b\xf1C\xef\x89\xfc\x06f'
                 fStringIO.write(UniGuid)
-                UniValue = pack ('Q', int (Item[1], 16))
-                fStringIO.write (UniValue)
+                UniValue = pack('Q', int(Item[1], 16))
+                fStringIO.write(UniValue)
             else:
                 #
                 # VFR binary offset in image.
@@ -1282,19 +1335,19 @@ class ModuleAutoGen(AutoGen):
                 #
                 VfrGuid = b'\xb4|\xbc\xd0Gj_I\xaa\x11q\x07F\xda\x06\xa2'
                 fStringIO.write(VfrGuid)
-                VfrValue = pack ('Q', int (Item[1], 16))
-                fStringIO.write (VfrValue)
+                VfrValue = pack('Q', int(Item[1], 16))
+                fStringIO.write(VfrValue)
         #
         # write data into file.
         #
-        try :
-            fInputfile.write (fStringIO.getvalue())
+        try:
+            fInputfile.write(fStringIO.getvalue())
         except:
             EdkLogger.error("build", FILE_WRITE_FAILURE, "Write data to file %s failed, please check whether the "
-                            "file been locked or using by other applications." %UniVfrOffsetFileName, None)
+                            "file been locked or using by other applications." % UniVfrOffsetFileName, None)
 
-        fStringIO.close ()
-        fInputfile.close ()
+        fStringIO.close()
+        fInputfile.close()
         return OutputName
 
     @cached_property
@@ -1315,7 +1368,7 @@ class ModuleAutoGen(AutoGen):
 
         return retVal
 
-    ## Create AsBuilt INF file the module
+    # Create AsBuilt INF file the module
     #
     def CreateAsBuiltInf(self):
 
@@ -1334,7 +1387,7 @@ class ModuleAutoGen(AutoGen):
         if self.BinaryFileList:
             return
 
-        ### TODO: How to handles mixed source and binary modules
+        # TODO: How to handles mixed source and binary modules
 
         # Find all DynamicEx and PatchableInModule PCDs used by this module and dependent libraries
         # Also find all packages that the DynamicEx PCDs depend on
@@ -1346,12 +1399,15 @@ class ModuleAutoGen(AutoGen):
         for Pcd in self.ModulePcdList + self.LibraryPcdList:
             if Pcd.Type == TAB_PCDS_PATCHABLE_IN_MODULE:
                 PatchablePcds.append(Pcd)
-                PcdCheckList.append((Pcd.TokenCName, Pcd.TokenSpaceGuidCName, TAB_PCDS_PATCHABLE_IN_MODULE))
+                PcdCheckList.append(
+                    (Pcd.TokenCName, Pcd.TokenSpaceGuidCName, TAB_PCDS_PATCHABLE_IN_MODULE))
             elif Pcd.Type in PCD_DYNAMIC_EX_TYPE_SET:
                 if Pcd not in Pcds:
                     Pcds.append(Pcd)
-                    PcdCheckList.append((Pcd.TokenCName, Pcd.TokenSpaceGuidCName, TAB_PCDS_DYNAMIC_EX))
-                    PcdCheckList.append((Pcd.TokenCName, Pcd.TokenSpaceGuidCName, TAB_PCDS_DYNAMIC))
+                    PcdCheckList.append(
+                        (Pcd.TokenCName, Pcd.TokenSpaceGuidCName, TAB_PCDS_DYNAMIC_EX))
+                    PcdCheckList.append(
+                        (Pcd.TokenCName, Pcd.TokenSpaceGuidCName, TAB_PCDS_DYNAMIC))
                     PcdTokenSpaceList.append(Pcd.TokenSpaceGuidCName)
         GuidList = OrderedDict(self.GuidList)
         for TokenSpace in self.GetGuidsUsedByPcd:
@@ -1363,7 +1419,8 @@ class ModuleAutoGen(AutoGen):
         for Package in self.DerivedPackageList:
             if Package in Packages:
                 continue
-            BeChecked = (Package.Guids, Package.Ppis, Package.Protocols, Package.Pcds)
+            BeChecked = (Package.Guids, Package.Ppis,
+                         Package.Protocols, Package.Pcds)
             Found = False
             for Index in range(len(BeChecked)):
                 for Item in CheckList[Index]:
@@ -1380,7 +1437,7 @@ class ModuleAutoGen(AutoGen):
                 continue
             for VfrPcd in VfrPcds:
                 if ((VfrPcd.TokenCName, VfrPcd.TokenSpaceGuidCName, TAB_PCDS_DYNAMIC_EX) in Pkg.Pcds or
-                    (VfrPcd.TokenCName, VfrPcd.TokenSpaceGuidCName, TAB_PCDS_DYNAMIC) in Pkg.Pcds):
+                        (VfrPcd.TokenCName, VfrPcd.TokenSpaceGuidCName, TAB_PCDS_DYNAMIC) in Pkg.Pcds):
                     Packages.append(Pkg)
                     break
 
@@ -1390,36 +1447,36 @@ class ModuleAutoGen(AutoGen):
         MDefs = self.Module.Defines
 
         AsBuiltInfDict = {
-          'module_name'                       : self.Name,
-          'module_guid'                       : Guid,
-          'module_module_type'                : ModuleType,
-          'module_version_string'             : [MDefs['VERSION_STRING']] if 'VERSION_STRING' in MDefs else [],
-          'pcd_is_driver_string'              : [],
-          'module_uefi_specification_version' : [],
-          'module_pi_specification_version'   : [],
-          'module_entry_point'                : self.Module.ModuleEntryPointList,
-          'module_unload_image'               : self.Module.ModuleUnloadImageList,
-          'module_constructor'                : self.Module.ConstructorList,
-          'module_destructor'                 : self.Module.DestructorList,
-          'module_shadow'                     : [MDefs['SHADOW']] if 'SHADOW' in MDefs else [],
-          'module_pci_vendor_id'              : [MDefs['PCI_VENDOR_ID']] if 'PCI_VENDOR_ID' in MDefs else [],
-          'module_pci_device_id'              : [MDefs['PCI_DEVICE_ID']] if 'PCI_DEVICE_ID' in MDefs else [],
-          'module_pci_class_code'             : [MDefs['PCI_CLASS_CODE']] if 'PCI_CLASS_CODE' in MDefs else [],
-          'module_pci_revision'               : [MDefs['PCI_REVISION']] if 'PCI_REVISION' in MDefs else [],
-          'module_build_number'               : [MDefs['BUILD_NUMBER']] if 'BUILD_NUMBER' in MDefs else [],
-          'module_spec'                       : [MDefs['SPEC']] if 'SPEC' in MDefs else [],
-          'module_uefi_hii_resource_section'  : [MDefs['UEFI_HII_RESOURCE_SECTION']] if 'UEFI_HII_RESOURCE_SECTION' in MDefs else [],
-          'module_uni_file'                   : [MDefs['MODULE_UNI_FILE']] if 'MODULE_UNI_FILE' in MDefs else [],
-          'module_arch'                       : self.Arch,
-          'package_item'                      : [Package.MetaFile.File.replace('\\', '/') for Package in Packages],
-          'binary_item'                       : [],
-          'patchablepcd_item'                 : [],
-          'pcd_item'                          : [],
-          'protocol_item'                     : [],
-          'ppi_item'                          : [],
-          'guid_item'                         : [],
-          'flags_item'                        : [],
-          'libraryclasses_item'               : []
+            'module_name': self.Name,
+            'module_guid': Guid,
+            'module_module_type': ModuleType,
+            'module_version_string': [MDefs['VERSION_STRING']] if 'VERSION_STRING' in MDefs else [],
+            'pcd_is_driver_string': [],
+            'module_uefi_specification_version': [],
+            'module_pi_specification_version': [],
+            'module_entry_point': self.Module.ModuleEntryPointList,
+            'module_unload_image': self.Module.ModuleUnloadImageList,
+            'module_constructor': self.Module.ConstructorList,
+            'module_destructor': self.Module.DestructorList,
+            'module_shadow': [MDefs['SHADOW']] if 'SHADOW' in MDefs else [],
+            'module_pci_vendor_id': [MDefs['PCI_VENDOR_ID']] if 'PCI_VENDOR_ID' in MDefs else [],
+            'module_pci_device_id': [MDefs['PCI_DEVICE_ID']] if 'PCI_DEVICE_ID' in MDefs else [],
+            'module_pci_class_code': [MDefs['PCI_CLASS_CODE']] if 'PCI_CLASS_CODE' in MDefs else [],
+            'module_pci_revision': [MDefs['PCI_REVISION']] if 'PCI_REVISION' in MDefs else [],
+            'module_build_number': [MDefs['BUILD_NUMBER']] if 'BUILD_NUMBER' in MDefs else [],
+            'module_spec': [MDefs['SPEC']] if 'SPEC' in MDefs else [],
+            'module_uefi_hii_resource_section': [MDefs['UEFI_HII_RESOURCE_SECTION']] if 'UEFI_HII_RESOURCE_SECTION' in MDefs else [],
+            'module_uni_file': [MDefs['MODULE_UNI_FILE']] if 'MODULE_UNI_FILE' in MDefs else [],
+            'module_arch': self.Arch,
+            'package_item': [Package.MetaFile.File.replace('\\', '/') for Package in Packages],
+            'binary_item': [],
+            'patchablepcd_item': [],
+            'pcd_item': [],
+            'protocol_item': [],
+            'ppi_item': [],
+            'guid_item': [],
+            'flags_item': [],
+            'libraryclasses_item': []
         }
 
         if 'MODULE_UNI_FILE' in MDefs:
@@ -1436,22 +1493,27 @@ class ModuleAutoGen(AutoGen):
             AsBuiltInfDict['pcd_is_driver_string'].append(DriverType)
 
         if 'UEFI_SPECIFICATION_VERSION' in self.Specification:
-            AsBuiltInfDict['module_uefi_specification_version'].append(self.Specification['UEFI_SPECIFICATION_VERSION'])
+            AsBuiltInfDict['module_uefi_specification_version'].append(
+                self.Specification['UEFI_SPECIFICATION_VERSION'])
         if 'PI_SPECIFICATION_VERSION' in self.Specification:
-            AsBuiltInfDict['module_pi_specification_version'].append(self.Specification['PI_SPECIFICATION_VERSION'])
+            AsBuiltInfDict['module_pi_specification_version'].append(
+                self.Specification['PI_SPECIFICATION_VERSION'])
 
         OutputDir = self.OutputDir.replace('\\', '/').strip('/')
         DebugDir = self.DebugDir.replace('\\', '/').strip('/')
         for Item in self.CodaTargetList:
-            File = Item.Target.Path.replace('\\', '/').strip('/').replace(DebugDir, '').replace(OutputDir, '').strip('/')
+            File = Item.Target.Path.replace(
+                '\\', '/').strip('/').replace(DebugDir, '').replace(OutputDir, '').strip('/')
             if os.path.isabs(File):
-                File = File.replace('\\', '/').strip('/').replace(OutputDir, '').strip('/')
+                File = File.replace(
+                    '\\', '/').strip('/').replace(OutputDir, '').strip('/')
             if Item.Target.Ext.lower() == '.aml':
                 AsBuiltInfDict['binary_item'].append('ASL|' + File)
             elif Item.Target.Ext.lower() == '.acpi':
                 AsBuiltInfDict['binary_item'].append('ACPI|' + File)
             elif Item.Target.Ext.lower() == '.efi':
-                AsBuiltInfDict['binary_item'].append('PE32|' + self.Name + '.efi')
+                AsBuiltInfDict['binary_item'].append(
+                    'PE32|' + self.Name + '.efi')
             else:
                 AsBuiltInfDict['binary_item'].append('BIN|' + File)
         if not self.DepexGenerated:
@@ -1460,11 +1522,14 @@ class ModuleAutoGen(AutoGen):
                 self.DepexGenerated = True
         if self.DepexGenerated:
             if self.ModuleType in [SUP_MODULE_PEIM]:
-                AsBuiltInfDict['binary_item'].append('PEI_DEPEX|' + self.Name + '.depex')
+                AsBuiltInfDict['binary_item'].append(
+                    'PEI_DEPEX|' + self.Name + '.depex')
             elif self.ModuleType in [SUP_MODULE_DXE_DRIVER, SUP_MODULE_DXE_RUNTIME_DRIVER, SUP_MODULE_DXE_SAL_DRIVER, SUP_MODULE_UEFI_DRIVER]:
-                AsBuiltInfDict['binary_item'].append('DXE_DEPEX|' + self.Name + '.depex')
+                AsBuiltInfDict['binary_item'].append(
+                    'DXE_DEPEX|' + self.Name + '.depex')
             elif self.ModuleType in [SUP_MODULE_DXE_SMM_DRIVER]:
-                AsBuiltInfDict['binary_item'].append('SMM_DEPEX|' + self.Name + '.depex')
+                AsBuiltInfDict['binary_item'].append(
+                    'SMM_DEPEX|' + self.Name + '.depex')
 
         Bin = self._GenOffsetBin()
         if Bin:
@@ -1478,10 +1543,12 @@ class ModuleAutoGen(AutoGen):
         StartPos = 0
         for Index in range(len(HeaderComments)):
             if HeaderComments[Index].find('@BinaryHeader') != -1:
-                HeaderComments[Index] = HeaderComments[Index].replace('@BinaryHeader', '@file')
+                HeaderComments[Index] = HeaderComments[Index].replace(
+                    '@BinaryHeader', '@file')
                 StartPos = Index
                 break
-        AsBuiltInfDict['header_comments'] = '\n'.join(HeaderComments[StartPos:]).replace(':#', '://')
+        AsBuiltInfDict['header_comments'] = '\n'.join(
+            HeaderComments[StartPos:]).replace(':#', '://')
         AsBuiltInfDict['tail_comments'] = '\n'.join(self.Module.TailComments)
 
         GenList = [
@@ -1491,13 +1558,14 @@ class ModuleAutoGen(AutoGen):
         ]
         for Item in GenList:
             for CName in Item[0]:
-                Comments = '\n  '.join(Item[1][CName]) if CName in Item[1] else ''
+                Comments = '\n  '.join(
+                    Item[1][CName]) if CName in Item[1] else ''
                 Entry = Comments + '\n  ' + CName if Comments else CName
                 AsBuiltInfDict[Item[2]].append(Entry)
         PatchList = parsePcdInfoFromMapFile(
-                            os.path.join(self.OutputDir, self.Name + '.map'),
-                            os.path.join(self.OutputDir, self.Name + '.efi')
-                        )
+            os.path.join(self.OutputDir, self.Name + '.map'),
+            os.path.join(self.OutputDir, self.Name + '.efi')
+        )
         if PatchList:
             for Pcd in PatchablePcds:
                 TokenCName = Pcd.TokenCName
@@ -1530,7 +1598,8 @@ class ModuleAutoGen(AutoGen):
                 else:
                     if Pcd.MaxDatumSize is None or Pcd.MaxDatumSize == '':
                         EdkLogger.error("build", AUTOGEN_ERROR,
-                                        "Unknown [MaxDatumSize] of PCD [%s.%s]" % (Pcd.TokenSpaceGuidCName, TokenCName)
+                                        "Unknown [MaxDatumSize] of PCD [%s.%s]" % (
+                                            Pcd.TokenSpaceGuidCName, TokenCName)
                                         )
                     ArraySize = int(Pcd.MaxDatumSize, 0)
                     PcdValue = Pcd.DefaultValue
@@ -1545,9 +1614,11 @@ class ModuleAutoGen(AutoGen):
                             if Unicode:
                                 CharVal = ord(PcdValue[Index])
                                 NewValue = NewValue + '0x%02x' % (CharVal & 0x00FF) + ', ' \
-                                        + '0x%02x' % (CharVal >> 8) + ', '
+                                    + '0x%02x' % (CharVal >> 8) + ', '
                             else:
-                                NewValue = NewValue + '0x%02x' % (ord(PcdValue[Index]) % 0x100) + ', '
+                                NewValue = NewValue + \
+                                    '0x%02x' % (
+                                        ord(PcdValue[Index]) % 0x100) + ', '
                         Padding = '0x00, '
                         if Unicode:
                             Padding = Padding * 2
@@ -1555,28 +1626,34 @@ class ModuleAutoGen(AutoGen):
                         if ArraySize < (len(PcdValue) + 1):
                             if Pcd.MaxSizeUserSet:
                                 EdkLogger.error("build", AUTOGEN_ERROR,
-                                            "The maximum size of VOID* type PCD '%s.%s' is less than its actual size occupied." % (Pcd.TokenSpaceGuidCName, TokenCName)
-                                            )
+                                                "The maximum size of VOID* type PCD '%s.%s' is less than its actual size occupied." % (
+                                                    Pcd.TokenSpaceGuidCName, TokenCName)
+                                                )
                             else:
                                 ArraySize = len(PcdValue) + 1
                         if ArraySize > len(PcdValue) + 1:
-                            NewValue = NewValue + Padding * (ArraySize - len(PcdValue) - 1)
+                            NewValue = NewValue + Padding * \
+                                (ArraySize - len(PcdValue) - 1)
                         PcdValue = NewValue + Padding.strip().rstrip(',') + '}'
                     elif len(PcdValue.split(',')) <= ArraySize:
-                        PcdValue = PcdValue.rstrip('}') + ', 0x00' * (ArraySize - len(PcdValue.split(',')))
+                        PcdValue = PcdValue.rstrip(
+                            '}') + ', 0x00' * (ArraySize - len(PcdValue.split(',')))
                         PcdValue += '}'
                     else:
                         if Pcd.MaxSizeUserSet:
                             EdkLogger.error("build", AUTOGEN_ERROR,
-                                        "The maximum size of VOID* type PCD '%s.%s' is less than its actual size occupied." % (Pcd.TokenSpaceGuidCName, TokenCName)
-                                        )
+                                            "The maximum size of VOID* type PCD '%s.%s' is less than its actual size occupied." % (
+                                                Pcd.TokenSpaceGuidCName, TokenCName)
+                                            )
                         else:
                             ArraySize = len(PcdValue) + 1
                 PcdItem = '%s.%s|%s|0x%X' % \
-                    (Pcd.TokenSpaceGuidCName, TokenCName, PcdValue, PatchPcd[1])
+                    (Pcd.TokenSpaceGuidCName,
+                     TokenCName, PcdValue, PatchPcd[1])
                 PcdComments = ''
                 if (Pcd.TokenSpaceGuidCName, Pcd.TokenCName) in self._PcdComments:
-                    PcdComments = '\n  '.join(self._PcdComments[Pcd.TokenSpaceGuidCName, Pcd.TokenCName])
+                    PcdComments = '\n  '.join(
+                        self._PcdComments[Pcd.TokenSpaceGuidCName, Pcd.TokenCName])
                 if PcdComments:
                     PcdItem = PcdComments + '\n  ' + PcdItem
                 AsBuiltInfDict['patchablepcd_item'].append(PcdItem)
@@ -1592,10 +1669,12 @@ class ModuleAutoGen(AutoGen):
             if Pcd.Type == TAB_PCDS_DYNAMIC_EX_HII:
                 for SkuName in Pcd.SkuInfoList:
                     SkuInfo = Pcd.SkuInfoList[SkuName]
-                    HiiInfo = '## %s|%s|%s' % (SkuInfo.VariableName, SkuInfo.VariableGuid, SkuInfo.VariableOffset)
+                    HiiInfo = '## %s|%s|%s' % (
+                        SkuInfo.VariableName, SkuInfo.VariableGuid, SkuInfo.VariableOffset)
                     break
             if (Pcd.TokenSpaceGuidCName, Pcd.TokenCName) in self._PcdComments:
-                PcdCommentList = self._PcdComments[Pcd.TokenSpaceGuidCName, Pcd.TokenCName][:]
+                PcdCommentList = self._PcdComments[Pcd.TokenSpaceGuidCName,
+                                                   Pcd.TokenCName][:]
             if HiiInfo:
                 UsageIndex = -1
                 UsageStr = ''
@@ -1606,7 +1685,8 @@ class ModuleAutoGen(AutoGen):
                             UsageIndex = Index
                             break
                 if UsageIndex != -1:
-                    PcdCommentList[UsageIndex] = '## %s %s %s' % (UsageStr, HiiInfo, PcdCommentList[UsageIndex].replace(UsageStr, ''))
+                    PcdCommentList[UsageIndex] = '## %s %s %s' % (
+                        UsageStr, HiiInfo, PcdCommentList[UsageIndex].replace(UsageStr, ''))
                 else:
                     PcdCommentList.append('## UNDEFINED ' + HiiInfo)
             PcdComments = '\n  '.join(PcdCommentList)
@@ -1616,11 +1696,13 @@ class ModuleAutoGen(AutoGen):
             AsBuiltInfDict['pcd_item'].append(PcdEntry)
         for Item in self.BuildOption:
             if 'FLAGS' in self.BuildOption[Item]:
-                AsBuiltInfDict['flags_item'].append('%s:%s_%s_%s_%s_FLAGS = %s' % (self.ToolChainFamily, self.BuildTarget, self.ToolChain, self.Arch, Item, self.BuildOption[Item]['FLAGS'].strip()))
+                AsBuiltInfDict['flags_item'].append('%s:%s_%s_%s_%s_FLAGS = %s' % (
+                    self.ToolChainFamily, self.BuildTarget, self.ToolChain, self.Arch, Item, self.BuildOption[Item]['FLAGS'].strip()))
 
         # Generated LibraryClasses section in comments.
         for Library in self.LibraryAutoGenList:
-            AsBuiltInfDict['libraryclasses_item'].append(Library.MetaFile.File.replace('\\', '/'))
+            AsBuiltInfDict['libraryclasses_item'].append(
+                Library.MetaFile.File.replace('\\', '/'))
 
         # Generated UserExtensions TianoCore section.
         # All tianocore user extensions are copied.
@@ -1639,7 +1721,8 @@ class ModuleAutoGen(AutoGen):
         AsBuiltInf = TemplateString()
         AsBuiltInf.Append(gAsBuiltInfHeaderString.Replace(AsBuiltInfDict))
 
-        SaveFileOnChange(os.path.join(self.OutputDir, self.Name + '.inf'), str(AsBuiltInf), False)
+        SaveFileOnChange(os.path.join(
+            self.OutputDir, self.Name + '.inf'), str(AsBuiltInf), False)
 
         self.IsAsBuiltInfCreated = True
 
@@ -1654,7 +1737,8 @@ class ModuleAutoGen(AutoGen):
         try:
             CopyFileOnChange(File, destination_dir)
         except:
-            EdkLogger.quiet("[cache warning]: fail to copy file:%s to folder:%s" % (File, destination_dir))
+            EdkLogger.quiet("[cache warning]: fail to copy file:%s to folder:%s" % (
+                File, destination_dir))
             return
 
     def CopyModuleToCache(self):
@@ -1664,42 +1748,52 @@ class ModuleAutoGen(AutoGen):
         PreMakeHashStr = None
         MakeTimeStamp = 0
         PreMakeTimeStamp = 0
-        Files = [f for f in os.listdir(LongFilePath(self.BuildDir)) if path.isfile(LongFilePath(path.join(self.BuildDir, f)))]
+        Files = [f for f in os.listdir(LongFilePath(self.BuildDir)) if path.isfile(
+            LongFilePath(path.join(self.BuildDir, f)))]
         for File in Files:
             if ".MakeHashFileList." in File:
-                #find lastest file through time stamp
-                FileTimeStamp = os.stat(LongFilePath(path.join(self.BuildDir, File)))[8]
+                # find lastest file through time stamp
+                FileTimeStamp = os.stat(LongFilePath(
+                    path.join(self.BuildDir, File)))[8]
                 if FileTimeStamp > MakeTimeStamp:
                     MakeTimeStamp = FileTimeStamp
                     MakeHashStr = File.split('.')[-1]
                     if len(MakeHashStr) != 32:
-                        EdkLogger.quiet("[cache error]: wrong MakeHashFileList file:%s" % (File))
+                        EdkLogger.quiet(
+                            "[cache error]: wrong MakeHashFileList file:%s" % (File))
             if ".PreMakeHashFileList." in File:
-                FileTimeStamp = os.stat(LongFilePath(path.join(self.BuildDir, File)))[8]
+                FileTimeStamp = os.stat(LongFilePath(
+                    path.join(self.BuildDir, File)))[8]
                 if FileTimeStamp > PreMakeTimeStamp:
                     PreMakeTimeStamp = FileTimeStamp
                     PreMakeHashStr = File.split('.')[-1]
                     if len(PreMakeHashStr) != 32:
-                        EdkLogger.quiet("[cache error]: wrong PreMakeHashFileList file:%s" % (File))
+                        EdkLogger.quiet(
+                            "[cache error]: wrong PreMakeHashFileList file:%s" % (File))
 
         if not MakeHashStr:
-            EdkLogger.quiet("[cache error]: No MakeHashFileList file for module:%s[%s]" % (self.MetaFile.Path, self.Arch))
+            EdkLogger.quiet("[cache error]: No MakeHashFileList file for module:%s[%s]" % (
+                self.MetaFile.Path, self.Arch))
             return
         if not PreMakeHashStr:
-            EdkLogger.quiet("[cache error]: No PreMakeHashFileList file for module:%s[%s]" % (self.MetaFile.Path, self.Arch))
+            EdkLogger.quiet("[cache error]: No PreMakeHashFileList file for module:%s[%s]" % (
+                self.MetaFile.Path, self.Arch))
             return
 
         # Create Cache destination dirs
-        FileDir = path.join(GlobalData.gBinCacheDest, self.PlatformInfo.OutputDir, self.BuildTarget + "_" + self.ToolChain, self.Arch, self.SourceDir, self.MetaFile.BaseName)
-        FfsDir = path.join(GlobalData.gBinCacheDest, self.PlatformInfo.OutputDir, self.BuildTarget + "_" + self.ToolChain, TAB_FV_DIRECTORY, "Ffs", self.Guid + self.Name)
+        FileDir = path.join(GlobalData.gBinCacheDest, self.PlatformInfo.OutputDir, self.BuildTarget +
+                            "_" + self.ToolChain, self.Arch, self.SourceDir, self.MetaFile.BaseName)
+        FfsDir = path.join(GlobalData.gBinCacheDest, self.PlatformInfo.OutputDir, self.BuildTarget +
+                           "_" + self.ToolChain, TAB_FV_DIRECTORY, "Ffs", self.Guid + self.Name)
         CacheFileDir = path.join(FileDir, MakeHashStr)
         CacheFfsDir = path.join(FfsDir, MakeHashStr)
-        CreateDirectory (CacheFileDir)
-        CreateDirectory (CacheFfsDir)
+        CreateDirectory(CacheFileDir)
+        CreateDirectory(CacheFfsDir)
 
         # Create ModuleHashPair file to support multiple version cache together
         ModuleHashPair = path.join(FileDir, self.Name + ".ModuleHashPair")
-        ModuleHashPairList = [] # tuple list: [tuple(PreMakefileHash, MakeHash)]
+        # tuple list: [tuple(PreMakefileHash, MakeHash)]
+        ModuleHashPairList = []
         if os.path.exists(ModuleHashPair):
             with open(ModuleHashPair, 'r') as f:
                 ModuleHashPairList = json.load(f)
@@ -1710,44 +1804,46 @@ class ModuleAutoGen(AutoGen):
 
         # Copy files to Cache destination dirs
         if not self.OutputFile:
-            Ma = self.BuildDatabase[self.MetaFile, self.Arch, self.BuildTarget, self.ToolChain]
+            Ma = self.BuildDatabase[self.MetaFile,
+                                    self.Arch, self.BuildTarget, self.ToolChain]
             self.OutputFile = Ma.Binaries
         for File in self.OutputFile:
             if File.startswith(os.path.abspath(self.FfsOutputDir)+os.sep):
                 self.CacheCopyFile(CacheFfsDir, self.FfsOutputDir, File)
             else:
-                if  self.Name + ".autogen.hash." in File or \
-                    self.Name + ".autogen.hashchain." in File or \
-                    self.Name + ".hash." in File or \
-                    self.Name + ".hashchain." in File or \
-                    self.Name + ".PreMakeHashFileList." in File or \
-                    self.Name + ".MakeHashFileList." in File:
+                if self.Name + ".autogen.hash." in File or \
+                        self.Name + ".autogen.hashchain." in File or \
+                        self.Name + ".hash." in File or \
+                        self.Name + ".hashchain." in File or \
+                        self.Name + ".PreMakeHashFileList." in File or \
+                        self.Name + ".MakeHashFileList." in File:
                     self.CacheCopyFile(FileDir, self.BuildDir, File)
                 else:
                     self.CacheCopyFile(CacheFileDir, self.BuildDir, File)
-    ## Create makefile for the module and its dependent libraries
+    # Create makefile for the module and its dependent libraries
     #
     #   @param      CreateLibraryMakeFile   Flag indicating if or not the makefiles of
     #                                       dependent libraries will be created
     #
+
     @cached_class_function
-    def CreateMakeFile(self, CreateLibraryMakeFile=True, GenFfsList = []):
+    def CreateMakeFile(self, CreateLibraryMakeFile=True, GenFfsList=[]):
 
         # nest this function inside it's only caller.
         def CreateTimeStamp():
             FileSet = {self.MetaFile.Path}
 
             for SourceFile in self.Module.Sources:
-                FileSet.add (SourceFile.Path)
+                FileSet.add(SourceFile.Path)
 
             for Lib in self.DependentLibraryList:
-                FileSet.add (Lib.MetaFile.Path)
+                FileSet.add(Lib.MetaFile.Path)
 
             for f in self.AutoGenDepSet:
-                FileSet.add (f.Path)
+                FileSet.add(f.Path)
 
-            if os.path.exists (self.TimeStampPath):
-                os.remove (self.TimeStampPath)
+            if os.path.exists(self.TimeStampPath):
+                os.remove(self.TimeStampPath)
 
             SaveFileOnChange(self.TimeStampPath, "\n".join(FileSet), False)
 
@@ -1789,11 +1885,12 @@ class ModuleAutoGen(AutoGen):
             SrcPath = File.Path
             DstPath = os.path.join(self.OutputDir, os.path.basename(SrcPath))
             CopyLongFilePath(SrcPath, DstPath)
-    ## Create autogen code for the module and its dependent libraries
+    # Create autogen code for the module and its dependent libraries
     #
     #   @param      CreateLibraryCodeFile   Flag indicating if or not the code of
     #                                       dependent libraries will be created
     #
+
     def CreateCodeFile(self, CreateLibraryCodeFile=True):
 
         if self.IsCodeFileCreated:
@@ -1822,14 +1919,14 @@ class ModuleAutoGen(AutoGen):
             else:
                 IgoredAutoGenList.append(str(File))
 
-
         for ModuleType in self.DepexList:
             # Ignore empty [depex] section or [depex] section for SUP_MODULE_USER_DEFINED module
             if len(self.DepexList[ModuleType]) == 0 or ModuleType == SUP_MODULE_USER_DEFINED or ModuleType == SUP_MODULE_HOST_APPLICATION:
                 continue
 
-            Dpx = GenDepex.DependencyExpression(self.DepexList[ModuleType], ModuleType, True)
-            DpxFile = gAutoGenDepexFileName % {"module_name" : self.Name}
+            Dpx = GenDepex.DependencyExpression(
+                self.DepexList[ModuleType], ModuleType, True)
+            DpxFile = gAutoGenDepexFileName % {"module_name": self.Name}
 
             if len(Dpx.PostfixNotation) != 0:
                 self.DepexGenerated = True
@@ -1853,20 +1950,20 @@ class ModuleAutoGen(AutoGen):
 
         return AutoGenList
 
-    ## Summarize the ModuleAutoGen objects of all libraries used by this module
+    # Summarize the ModuleAutoGen objects of all libraries used by this module
     @cached_property
     def LibraryAutoGenList(self):
         RetVal = []
         for Library in self.DependentLibraryList:
             La = ModuleAutoGen(
-                        self.Workspace,
-                        Library.MetaFile,
-                        self.BuildTarget,
-                        self.ToolChain,
-                        self.Arch,
-                        self.PlatformInfo.MetaFile,
-                        self.DataPipe
-                        )
+                self.Workspace,
+                Library.MetaFile,
+                self.BuildTarget,
+                self.ToolChain,
+                self.Arch,
+                self.PlatformInfo.MetaFile,
+                self.DataPipe
+            )
             La.IsLibrary = True
             if La not in RetVal:
                 RetVal.append(La)
@@ -1888,10 +1985,11 @@ class ModuleAutoGen(AutoGen):
         # Add Makefile
         abspath = path.join(self.BuildDir, self.Name + ".makefile")
         try:
-            with open(LongFilePath(abspath),"r") as fd:
+            with open(LongFilePath(abspath), "r") as fd:
                 lines = fd.readlines()
         except Exception as e:
-            EdkLogger.error("build",FILE_NOT_FOUND, "%s doesn't exist" % abspath, ExtraData=str(e), RaiseError=False)
+            EdkLogger.error("build", FILE_NOT_FOUND, "%s doesn't exist" %
+                            abspath, ExtraData=str(e), RaiseError=False)
         if lines:
             DependencyFileSet.update(lines)
 
@@ -1901,20 +1999,24 @@ class ModuleAutoGen(AutoGen):
         m = hashlib.md5()
         for File in sorted(DependencyFileSet, key=lambda x: str(x)):
             if not path.exists(LongFilePath(str(File))):
-                EdkLogger.quiet("[cache warning]: header file %s is missing for module: %s[%s]" % (File, self.MetaFile.Path, self.Arch))
+                EdkLogger.quiet("[cache warning]: header file %s is missing for module: %s[%s]" % (
+                    File, self.MetaFile.Path, self.Arch))
                 continue
             with open(LongFilePath(str(File)), 'rb') as f:
                 Content = f.read()
             m.update(Content)
             FileList.append((str(File), hashlib.md5(Content).hexdigest()))
 
-        HashChainFile = path.join(self.BuildDir, self.Name + ".autogen.hashchain." + m.hexdigest())
-        GlobalData.gCMakeHashFile[(self.MetaFile.Path, self.Arch)] = HashChainFile
+        HashChainFile = path.join(
+            self.BuildDir, self.Name + ".autogen.hashchain." + m.hexdigest())
+        GlobalData.gCMakeHashFile[(
+            self.MetaFile.Path, self.Arch)] = HashChainFile
         try:
             with open(LongFilePath(HashChainFile), 'w') as f:
                 json.dump(FileList, f, indent=2)
         except:
-            EdkLogger.quiet("[cache warning]: fail to save hashchain file:%s" % HashChainFile)
+            EdkLogger.quiet(
+                "[cache warning]: fail to save hashchain file:%s" % HashChainFile)
             return False
 
     def GenModuleHash(self):
@@ -1939,16 +2041,17 @@ class ModuleAutoGen(AutoGen):
         abspath = path.join(self.BuildDir, "deps.txt")
         rt = None
         try:
-            with open(LongFilePath(abspath),"r") as fd:
+            with open(LongFilePath(abspath), "r") as fd:
                 lines = fd.readlines()
                 if lines:
-                    rt = set([item.lstrip().strip("\n") for item in lines if item.strip("\n").endswith(".h")])
+                    rt = set([item.lstrip().strip("\n")
+                             for item in lines if item.strip("\n").endswith(".h")])
         except Exception as e:
-            EdkLogger.error("build",FILE_NOT_FOUND, "%s doesn't exist" % abspath, ExtraData=str(e), RaiseError=False)
+            EdkLogger.error("build", FILE_NOT_FOUND, "%s doesn't exist" %
+                            abspath, ExtraData=str(e), RaiseError=False)
 
         if rt:
             DependencyFileSet.update(rt)
-
 
         # Caculate all above dependency files hash
         # Initialze hash object
@@ -1961,20 +2064,24 @@ class ModuleAutoGen(AutoGen):
             if BuildDirStr in path.abspath(File).lower():
                 continue
             if not path.exists(LongFilePath(File)):
-                EdkLogger.quiet("[cache warning]: header file %s is missing for module: %s[%s]" % (File, self.MetaFile.Path, self.Arch))
+                EdkLogger.quiet("[cache warning]: header file %s is missing for module: %s[%s]" % (
+                    File, self.MetaFile.Path, self.Arch))
                 continue
             with open(LongFilePath(File), 'rb') as f:
                 Content = f.read()
             m.update(Content)
             FileList.append((File, hashlib.md5(Content).hexdigest()))
 
-        HashChainFile = path.join(self.BuildDir, self.Name + ".hashchain." + m.hexdigest())
-        GlobalData.gModuleHashFile[(self.MetaFile.Path, self.Arch)] = HashChainFile
+        HashChainFile = path.join(
+            self.BuildDir, self.Name + ".hashchain." + m.hexdigest())
+        GlobalData.gModuleHashFile[(
+            self.MetaFile.Path, self.Arch)] = HashChainFile
         try:
             with open(LongFilePath(HashChainFile), 'w') as f:
                 json.dump(FileList, f, indent=2)
         except:
-            EdkLogger.quiet("[cache warning]: fail to save hashchain file:%s" % HashChainFile)
+            EdkLogger.quiet(
+                "[cache warning]: fail to save hashchain file:%s" % HashChainFile)
             return False
 
     def GenPreMakefileHashList(self):
@@ -1998,56 +2105,68 @@ class ModuleAutoGen(AutoGen):
             FileList.append(HashFile)
             m.update(HashFile.encode('utf-8'))
         else:
-            EdkLogger.quiet("[cache warning]: No Platform HashFile: %s" % HashFile)
+            EdkLogger.quiet(
+                "[cache warning]: No Platform HashFile: %s" % HashFile)
 
         # Add Package level hash
         if self.DependentPackageList:
             for Pkg in sorted(self.DependentPackageList, key=lambda x: x.PackageName):
                 if not (Pkg.PackageName, Pkg.Arch) in GlobalData.gPackageHashFile:
-                    EdkLogger.quiet("[cache warning]:No Package %s for module %s[%s]" % (Pkg.PackageName, self.MetaFile.Path, self.Arch))
+                    EdkLogger.quiet("[cache warning]:No Package %s for module %s[%s]" % (
+                        Pkg.PackageName, self.MetaFile.Path, self.Arch))
                     continue
-                HashFile = GlobalData.gPackageHashFile[(Pkg.PackageName, Pkg.Arch)]
+                HashFile = GlobalData.gPackageHashFile[(
+                    Pkg.PackageName, Pkg.Arch)]
                 if path.exists(LongFilePath(HashFile)):
                     FileList.append(HashFile)
                     m.update(HashFile.encode('utf-8'))
                 else:
-                    EdkLogger.quiet("[cache warning]:No Package HashFile: %s" % HashFile)
+                    EdkLogger.quiet(
+                        "[cache warning]:No Package HashFile: %s" % HashFile)
 
         # Add Module self
         # GenPreMakefileHashList needed in both --binary-destination
         # and --hash. And --hash might save ModuleHashFile in remote dict
         # during multiprocessing.
         if (self.MetaFile.Path, self.Arch) in GlobalData.gModuleHashFile:
-            HashFile = GlobalData.gModuleHashFile[(self.MetaFile.Path, self.Arch)]
+            HashFile = GlobalData.gModuleHashFile[(
+                self.MetaFile.Path, self.Arch)]
         else:
-            EdkLogger.quiet("[cache error]:No ModuleHashFile for module: %s[%s]" % (self.MetaFile.Path, self.Arch))
+            EdkLogger.quiet("[cache error]:No ModuleHashFile for module: %s[%s]" % (
+                self.MetaFile.Path, self.Arch))
         if path.exists(LongFilePath(HashFile)):
             FileList.append(HashFile)
             m.update(HashFile.encode('utf-8'))
         else:
-            EdkLogger.quiet("[cache warning]:No Module HashFile: %s" % HashFile)
+            EdkLogger.quiet(
+                "[cache warning]:No Module HashFile: %s" % HashFile)
 
         # Add Library hash
         if self.LibraryAutoGenList:
             for Lib in sorted(self.LibraryAutoGenList, key=lambda x: x.MetaFile.Path):
 
                 if (Lib.MetaFile.Path, Lib.Arch) in GlobalData.gModuleHashFile:
-                    HashFile = GlobalData.gModuleHashFile[(Lib.MetaFile.Path, Lib.Arch)]
+                    HashFile = GlobalData.gModuleHashFile[(
+                        Lib.MetaFile.Path, Lib.Arch)]
                 else:
-                    EdkLogger.quiet("[cache error]:No ModuleHashFile for lib: %s[%s]" % (Lib.MetaFile.Path, Lib.Arch))
+                    EdkLogger.quiet("[cache error]:No ModuleHashFile for lib: %s[%s]" % (
+                        Lib.MetaFile.Path, Lib.Arch))
                 if path.exists(LongFilePath(HashFile)):
                     FileList.append(HashFile)
                     m.update(HashFile.encode('utf-8'))
                 else:
-                    EdkLogger.quiet("[cache warning]:No Lib HashFile: %s" % HashFile)
+                    EdkLogger.quiet(
+                        "[cache warning]:No Lib HashFile: %s" % HashFile)
 
         # Save PreMakeHashFileList
-        FilePath = path.join(self.BuildDir, self.Name + ".PreMakeHashFileList." + m.hexdigest())
+        FilePath = path.join(self.BuildDir, self.Name +
+                             ".PreMakeHashFileList." + m.hexdigest())
         try:
             with open(LongFilePath(FilePath), 'w') as f:
                 json.dump(FileList, f, indent=0)
         except:
-            EdkLogger.quiet("[cache warning]: fail to save PreMake HashFileList: %s" % FilePath)
+            EdkLogger.quiet(
+                "[cache warning]: fail to save PreMake HashFileList: %s" % FilePath)
 
     def GenMakefileHashList(self):
         # GenMakefileHashList only need in --binary-destination which will
@@ -2065,39 +2184,48 @@ class ModuleAutoGen(AutoGen):
             FileList.append(HashFile)
             m.update(HashFile.encode('utf-8'))
         else:
-            EdkLogger.quiet("[cache warning]:No AutoGen HashFile: %s" % HashFile)
+            EdkLogger.quiet(
+                "[cache warning]:No AutoGen HashFile: %s" % HashFile)
 
         # Add Module self
         if (self.MetaFile.Path, self.Arch) in GlobalData.gModuleHashFile:
-            HashFile = GlobalData.gModuleHashFile[(self.MetaFile.Path, self.Arch)]
+            HashFile = GlobalData.gModuleHashFile[(
+                self.MetaFile.Path, self.Arch)]
         else:
-            EdkLogger.quiet("[cache error]:No ModuleHashFile for module: %s[%s]" % (self.MetaFile.Path, self.Arch))
+            EdkLogger.quiet("[cache error]:No ModuleHashFile for module: %s[%s]" % (
+                self.MetaFile.Path, self.Arch))
         if path.exists(LongFilePath(HashFile)):
             FileList.append(HashFile)
             m.update(HashFile.encode('utf-8'))
         else:
-            EdkLogger.quiet("[cache warning]:No Module HashFile: %s" % HashFile)
+            EdkLogger.quiet(
+                "[cache warning]:No Module HashFile: %s" % HashFile)
 
         # Add Library hash
         if self.LibraryAutoGenList:
             for Lib in sorted(self.LibraryAutoGenList, key=lambda x: x.MetaFile.Path):
                 if (Lib.MetaFile.Path, Lib.Arch) in GlobalData.gModuleHashFile:
-                    HashFile = GlobalData.gModuleHashFile[(Lib.MetaFile.Path, Lib.Arch)]
+                    HashFile = GlobalData.gModuleHashFile[(
+                        Lib.MetaFile.Path, Lib.Arch)]
                 else:
-                    EdkLogger.quiet("[cache error]:No ModuleHashFile for lib: %s[%s]" % (Lib.MetaFile.Path, Lib.Arch))
+                    EdkLogger.quiet("[cache error]:No ModuleHashFile for lib: %s[%s]" % (
+                        Lib.MetaFile.Path, Lib.Arch))
                 if path.exists(LongFilePath(HashFile)):
                     FileList.append(HashFile)
                     m.update(HashFile.encode('utf-8'))
                 else:
-                    EdkLogger.quiet("[cache warning]:No Lib HashFile: %s" % HashFile)
+                    EdkLogger.quiet(
+                        "[cache warning]:No Lib HashFile: %s" % HashFile)
 
         # Save MakeHashFileList
-        FilePath = path.join(self.BuildDir, self.Name + ".MakeHashFileList." + m.hexdigest())
+        FilePath = path.join(self.BuildDir, self.Name +
+                             ".MakeHashFileList." + m.hexdigest())
         try:
             with open(LongFilePath(FilePath), 'w') as f:
                 json.dump(FileList, f, indent=0)
         except:
-            EdkLogger.quiet("[cache warning]: fail to save Make HashFileList: %s" % FilePath)
+            EdkLogger.quiet(
+                "[cache warning]: fail to save Make HashFileList: %s" % FilePath)
 
     def CheckHashChainFile(self, HashChainFile):
         # Assume the HashChainFile basename format is the 'x.hashchain.16BytesHexStr'
@@ -2105,19 +2233,21 @@ class ModuleAutoGen(AutoGen):
         # all hashchain files content
         HashStr = HashChainFile.split('.')[-1]
         if len(HashStr) != 32:
-            EdkLogger.quiet("[cache error]: wrong format HashChainFile:%s" % (File))
+            EdkLogger.quiet(
+                "[cache error]: wrong format HashChainFile:%s" % (File))
             return False
 
         try:
             with open(LongFilePath(HashChainFile), 'r') as f:
                 HashChainList = json.load(f)
         except:
-            EdkLogger.quiet("[cache error]: fail to load HashChainFile: %s" % HashChainFile)
+            EdkLogger.quiet(
+                "[cache error]: fail to load HashChainFile: %s" % HashChainFile)
             return False
 
         # Print the different file info
         # print(HashChainFile)
-        for idx, (SrcFile, SrcHash) in enumerate (HashChainList):
+        for idx, (SrcFile, SrcHash) in enumerate(HashChainList):
             if SrcFile in GlobalData.gFileHashDict:
                 DestHash = GlobalData.gFileHashDict[SrcFile]
             else:
@@ -2129,15 +2259,17 @@ class ModuleAutoGen(AutoGen):
                 except IOError as X:
                     # cache miss if SrcFile is removed in new version code
                     GlobalData.gFileHashDict[SrcFile] = 0
-                    EdkLogger.quiet("[cache insight]: first cache miss file in %s is %s" % (HashChainFile, SrcFile))
+                    EdkLogger.quiet("[cache insight]: first cache miss file in %s is %s" % (
+                        HashChainFile, SrcFile))
                     return False
             if SrcHash != DestHash:
-                EdkLogger.quiet("[cache insight]: first cache miss file in %s is %s" % (HashChainFile, SrcFile))
+                EdkLogger.quiet("[cache insight]: first cache miss file in %s is %s" % (
+                    HashChainFile, SrcFile))
                 return False
 
         return True
 
-    ## Decide whether we can skip the left autogen and make process
+    # Decide whether we can skip the left autogen and make process
     def CanSkipbyMakeCache(self):
         # For --binary-source only
         # CanSkipbyMakeCache consume below dicts:
@@ -2155,44 +2287,57 @@ class ModuleAutoGen(AutoGen):
 
         # If Module is binary, which has special build rule, do not skip by cache.
         if self.IsBinaryModule:
-            print("[cache miss]: MakeCache: Skip BinaryModule:", self.MetaFile.Path, self.Arch)
-            GlobalData.gModuleMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
+            print("[cache miss]: MakeCache: Skip BinaryModule:",
+                  self.MetaFile.Path, self.Arch)
+            GlobalData.gModuleMakeCacheStatus[(
+                self.MetaFile.Path, self.Arch)] = False
             return False
 
         # see .inc as binary file, do not skip by hash
         for f_ext in self.SourceFileList:
             if '.inc' in str(f_ext):
-                print("[cache miss]: MakeCache: Skip '.inc' File:", self.MetaFile.Path, self.Arch)
-                GlobalData.gModuleMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
+                print("[cache miss]: MakeCache: Skip '.inc' File:",
+                      self.MetaFile.Path, self.Arch)
+                GlobalData.gModuleMakeCacheStatus[(
+                    self.MetaFile.Path, self.Arch)] = False
                 return False
 
-        ModuleCacheDir = path.join(GlobalData.gBinCacheSource, self.PlatformInfo.OutputDir, self.BuildTarget + "_" + self.ToolChain, self.Arch, self.SourceDir, self.MetaFile.BaseName)
-        FfsDir = path.join(GlobalData.gBinCacheSource, self.PlatformInfo.OutputDir, self.BuildTarget + "_" + self.ToolChain, TAB_FV_DIRECTORY, "Ffs", self.Guid + self.Name)
+        ModuleCacheDir = path.join(GlobalData.gBinCacheSource, self.PlatformInfo.OutputDir,
+                                   self.BuildTarget + "_" + self.ToolChain, self.Arch, self.SourceDir, self.MetaFile.BaseName)
+        FfsDir = path.join(GlobalData.gBinCacheSource, self.PlatformInfo.OutputDir,
+                           self.BuildTarget + "_" + self.ToolChain, TAB_FV_DIRECTORY, "Ffs", self.Guid + self.Name)
 
-        ModuleHashPairList = [] # tuple list: [tuple(PreMakefileHash, MakeHash)]
-        ModuleHashPair = path.join(ModuleCacheDir, self.Name + ".ModuleHashPair")
+        # tuple list: [tuple(PreMakefileHash, MakeHash)]
+        ModuleHashPairList = []
+        ModuleHashPair = path.join(
+            ModuleCacheDir, self.Name + ".ModuleHashPair")
         try:
             with open(LongFilePath(ModuleHashPair), 'r') as f:
                 ModuleHashPairList = json.load(f)
         except:
             # ModuleHashPair might not exist for new added module
-            GlobalData.gModuleMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
-            EdkLogger.quiet("[cache warning]: fail to load ModuleHashPair file: %s" % ModuleHashPair)
+            GlobalData.gModuleMakeCacheStatus[(
+                self.MetaFile.Path, self.Arch)] = False
+            EdkLogger.quiet(
+                "[cache warning]: fail to load ModuleHashPair file: %s" % ModuleHashPair)
             print("[cache miss]: MakeCache:", self.MetaFile.Path, self.Arch)
             return False
 
         # Check the PreMakeHash in ModuleHashPairList one by one
-        for idx, (PreMakefileHash, MakeHash) in enumerate (ModuleHashPairList):
+        for idx, (PreMakefileHash, MakeHash) in enumerate(ModuleHashPairList):
             SourceHashDir = path.join(ModuleCacheDir, MakeHash)
             SourceFfsHashDir = path.join(FfsDir, MakeHash)
-            PreMakeHashFileList_FilePah = path.join(ModuleCacheDir, self.Name + ".PreMakeHashFileList." + PreMakefileHash)
-            MakeHashFileList_FilePah = path.join(ModuleCacheDir, self.Name + ".MakeHashFileList." + MakeHash)
+            PreMakeHashFileList_FilePah = path.join(
+                ModuleCacheDir, self.Name + ".PreMakeHashFileList." + PreMakefileHash)
+            MakeHashFileList_FilePah = path.join(
+                ModuleCacheDir, self.Name + ".MakeHashFileList." + MakeHash)
 
             try:
                 with open(LongFilePath(MakeHashFileList_FilePah), 'r') as f:
                     MakeHashFileList = json.load(f)
             except:
-                EdkLogger.quiet("[cache error]: fail to load MakeHashFileList file: %s" % MakeHashFileList_FilePah)
+                EdkLogger.quiet(
+                    "[cache error]: fail to load MakeHashFileList file: %s" % MakeHashFileList_FilePah)
                 continue
 
             HashMiss = False
@@ -2206,13 +2351,16 @@ class ModuleAutoGen(AutoGen):
                 elif HashChainStatus == True:
                     continue
                 # Convert to path start with cache source dir
-                RelativePath = os.path.relpath(HashChainFile, self.WorkspaceDir)
-                NewFilePath = os.path.join(GlobalData.gBinCacheSource, RelativePath)
+                RelativePath = os.path.relpath(
+                    HashChainFile, self.WorkspaceDir)
+                NewFilePath = os.path.join(
+                    GlobalData.gBinCacheSource, RelativePath)
                 if self.CheckHashChainFile(NewFilePath):
                     GlobalData.gHashChainStatus[HashChainFile] = True
                     # Save the module self HashFile for GenPreMakefileHashList later usage
                     if self.Name + ".hashchain." in HashChainFile:
-                        GlobalData.gModuleHashFile[(self.MetaFile.Path, self.Arch)] = HashChainFile
+                        GlobalData.gModuleHashFile[(
+                            self.MetaFile.Path, self.Arch)] = HashChainFile
                 else:
                     GlobalData.gHashChainStatus[HashChainFile] = False
                     HashMiss = True
@@ -2230,20 +2378,23 @@ class ModuleAutoGen(AutoGen):
                 for root, dir, files in os.walk(SourceFfsHashDir):
                     for f in files:
                         File = path.join(root, f)
-                        self.CacheCopyFile(self.FfsOutputDir, SourceFfsHashDir, File)
+                        self.CacheCopyFile(
+                            self.FfsOutputDir, SourceFfsHashDir, File)
 
             if self.Name == "PcdPeim" or self.Name == "PcdDxe":
                 CreatePcdDatabaseCode(self, TemplateString(), TemplateString())
 
             print("[cache hit]: MakeCache:", self.MetaFile.Path, self.Arch)
-            GlobalData.gModuleMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = True
+            GlobalData.gModuleMakeCacheStatus[(
+                self.MetaFile.Path, self.Arch)] = True
             return True
 
         print("[cache miss]: MakeCache:", self.MetaFile.Path, self.Arch)
-        GlobalData.gModuleMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
+        GlobalData.gModuleMakeCacheStatus[(
+            self.MetaFile.Path, self.Arch)] = False
         return False
 
-    ## Decide whether we can skip the left autogen and make process
+    # Decide whether we can skip the left autogen and make process
     def CanSkipbyPreMakeCache(self):
         # CanSkipbyPreMakeCache consume below dicts:
         #     gModulePreMakeCacheStatus
@@ -2261,20 +2412,25 @@ class ModuleAutoGen(AutoGen):
 
         # If Module is binary, which has special build rule, do not skip by cache.
         if self.IsBinaryModule:
-            print("[cache miss]: PreMakeCache: Skip BinaryModule:", self.MetaFile.Path, self.Arch)
-            GlobalData.gModulePreMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
+            print("[cache miss]: PreMakeCache: Skip BinaryModule:",
+                  self.MetaFile.Path, self.Arch)
+            GlobalData.gModulePreMakeCacheStatus[(
+                self.MetaFile.Path, self.Arch)] = False
             return False
 
         # see .inc as binary file, do not skip by hash
         for f_ext in self.SourceFileList:
             if '.inc' in str(f_ext):
-                print("[cache miss]: PreMakeCache: Skip '.inc' File:", self.MetaFile.Path, self.Arch)
-                GlobalData.gModulePreMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
+                print("[cache miss]: PreMakeCache: Skip '.inc' File:",
+                      self.MetaFile.Path, self.Arch)
+                GlobalData.gModulePreMakeCacheStatus[(
+                    self.MetaFile.Path, self.Arch)] = False
                 return False
 
         # For --hash only in the incremental build
         if not GlobalData.gBinCacheSource:
-            Files = [path.join(self.BuildDir, f) for f in os.listdir(self.BuildDir) if path.isfile(path.join(self.BuildDir, f))]
+            Files = [path.join(self.BuildDir, f) for f in os.listdir(
+                self.BuildDir) if path.isfile(path.join(self.BuildDir, f))]
             PreMakeHashFileList_FilePah = None
             MakeTimeStamp = 0
             # Find latest PreMakeHashFileList file in self.BuildDir folder
@@ -2285,16 +2441,20 @@ class ModuleAutoGen(AutoGen):
                         MakeTimeStamp = FileTimeStamp
                         PreMakeHashFileList_FilePah = File
             if not PreMakeHashFileList_FilePah:
-                GlobalData.gModulePreMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
+                GlobalData.gModulePreMakeCacheStatus[(
+                    self.MetaFile.Path, self.Arch)] = False
                 return False
 
             try:
                 with open(LongFilePath(PreMakeHashFileList_FilePah), 'r') as f:
                     PreMakeHashFileList = json.load(f)
             except:
-                EdkLogger.quiet("[cache error]: fail to load PreMakeHashFileList file: %s" % PreMakeHashFileList_FilePah)
-                print("[cache miss]: PreMakeCache:", self.MetaFile.Path, self.Arch)
-                GlobalData.gModulePreMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
+                EdkLogger.quiet(
+                    "[cache error]: fail to load PreMakeHashFileList file: %s" % PreMakeHashFileList_FilePah)
+                print("[cache miss]: PreMakeCache:",
+                      self.MetaFile.Path, self.Arch)
+                GlobalData.gModulePreMakeCacheStatus[(
+                    self.MetaFile.Path, self.Arch)] = False
                 return False
 
             HashMiss = False
@@ -2311,48 +2471,62 @@ class ModuleAutoGen(AutoGen):
                     GlobalData.gHashChainStatus[HashChainFile] = True
                     # Save the module self HashFile for GenPreMakefileHashList later usage
                     if self.Name + ".hashchain." in HashChainFile:
-                        GlobalData.gModuleHashFile[(self.MetaFile.Path, self.Arch)] = HashChainFile
+                        GlobalData.gModuleHashFile[(
+                            self.MetaFile.Path, self.Arch)] = HashChainFile
                 else:
                     GlobalData.gHashChainStatus[HashChainFile] = False
                     HashMiss = True
                     break
 
             if HashMiss:
-                print("[cache miss]: PreMakeCache:", self.MetaFile.Path, self.Arch)
-                GlobalData.gModulePreMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
+                print("[cache miss]: PreMakeCache:",
+                      self.MetaFile.Path, self.Arch)
+                GlobalData.gModulePreMakeCacheStatus[(
+                    self.MetaFile.Path, self.Arch)] = False
                 return False
             else:
-                print("[cache hit]: PreMakeCache:", self.MetaFile.Path, self.Arch)
-                GlobalData.gModulePreMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = True
+                print("[cache hit]: PreMakeCache:",
+                      self.MetaFile.Path, self.Arch)
+                GlobalData.gModulePreMakeCacheStatus[(
+                    self.MetaFile.Path, self.Arch)] = True
                 return True
 
-        ModuleCacheDir = path.join(GlobalData.gBinCacheSource, self.PlatformInfo.OutputDir, self.BuildTarget + "_" + self.ToolChain, self.Arch, self.SourceDir, self.MetaFile.BaseName)
-        FfsDir = path.join(GlobalData.gBinCacheSource, self.PlatformInfo.OutputDir, self.BuildTarget + "_" + self.ToolChain, TAB_FV_DIRECTORY, "Ffs", self.Guid + self.Name)
+        ModuleCacheDir = path.join(GlobalData.gBinCacheSource, self.PlatformInfo.OutputDir,
+                                   self.BuildTarget + "_" + self.ToolChain, self.Arch, self.SourceDir, self.MetaFile.BaseName)
+        FfsDir = path.join(GlobalData.gBinCacheSource, self.PlatformInfo.OutputDir,
+                           self.BuildTarget + "_" + self.ToolChain, TAB_FV_DIRECTORY, "Ffs", self.Guid + self.Name)
 
-        ModuleHashPairList = [] # tuple list: [tuple(PreMakefileHash, MakeHash)]
-        ModuleHashPair = path.join(ModuleCacheDir, self.Name + ".ModuleHashPair")
+        # tuple list: [tuple(PreMakefileHash, MakeHash)]
+        ModuleHashPairList = []
+        ModuleHashPair = path.join(
+            ModuleCacheDir, self.Name + ".ModuleHashPair")
         try:
             with open(LongFilePath(ModuleHashPair), 'r') as f:
                 ModuleHashPairList = json.load(f)
         except:
             # ModuleHashPair might not exist for new added module
-            GlobalData.gModulePreMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
-            EdkLogger.quiet("[cache warning]: fail to load ModuleHashPair file: %s" % ModuleHashPair)
+            GlobalData.gModulePreMakeCacheStatus[(
+                self.MetaFile.Path, self.Arch)] = False
+            EdkLogger.quiet(
+                "[cache warning]: fail to load ModuleHashPair file: %s" % ModuleHashPair)
             print("[cache miss]: PreMakeCache:", self.MetaFile.Path, self.Arch)
             return False
 
         # Check the PreMakeHash in ModuleHashPairList one by one
-        for idx, (PreMakefileHash, MakeHash) in enumerate (ModuleHashPairList):
+        for idx, (PreMakefileHash, MakeHash) in enumerate(ModuleHashPairList):
             SourceHashDir = path.join(ModuleCacheDir, MakeHash)
             SourceFfsHashDir = path.join(FfsDir, MakeHash)
-            PreMakeHashFileList_FilePah = path.join(ModuleCacheDir, self.Name + ".PreMakeHashFileList." + PreMakefileHash)
-            MakeHashFileList_FilePah = path.join(ModuleCacheDir, self.Name + ".MakeHashFileList." + MakeHash)
+            PreMakeHashFileList_FilePah = path.join(
+                ModuleCacheDir, self.Name + ".PreMakeHashFileList." + PreMakefileHash)
+            MakeHashFileList_FilePah = path.join(
+                ModuleCacheDir, self.Name + ".MakeHashFileList." + MakeHash)
 
             try:
                 with open(LongFilePath(PreMakeHashFileList_FilePah), 'r') as f:
                     PreMakeHashFileList = json.load(f)
             except:
-                EdkLogger.quiet("[cache error]: fail to load PreMakeHashFileList file: %s" % PreMakeHashFileList_FilePah)
+                EdkLogger.quiet(
+                    "[cache error]: fail to load PreMakeHashFileList file: %s" % PreMakeHashFileList_FilePah)
                 continue
 
             HashMiss = False
@@ -2366,8 +2540,10 @@ class ModuleAutoGen(AutoGen):
                 elif HashChainStatus == True:
                     continue
                 # Convert to path start with cache source dir
-                RelativePath = os.path.relpath(HashChainFile, self.WorkspaceDir)
-                NewFilePath = os.path.join(GlobalData.gBinCacheSource, RelativePath)
+                RelativePath = os.path.relpath(
+                    HashChainFile, self.WorkspaceDir)
+                NewFilePath = os.path.join(
+                    GlobalData.gBinCacheSource, RelativePath)
                 if self.CheckHashChainFile(NewFilePath):
                     GlobalData.gHashChainStatus[HashChainFile] = True
                 else:
@@ -2387,20 +2563,23 @@ class ModuleAutoGen(AutoGen):
                 for root, dir, files in os.walk(SourceFfsHashDir):
                     for f in files:
                         File = path.join(root, f)
-                        self.CacheCopyFile(self.FfsOutputDir, SourceFfsHashDir, File)
+                        self.CacheCopyFile(
+                            self.FfsOutputDir, SourceFfsHashDir, File)
 
             if self.Name == "PcdPeim" or self.Name == "PcdDxe":
                 CreatePcdDatabaseCode(self, TemplateString(), TemplateString())
 
             print("[cache hit]: PreMakeCache:", self.MetaFile.Path, self.Arch)
-            GlobalData.gModulePreMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = True
+            GlobalData.gModulePreMakeCacheStatus[(
+                self.MetaFile.Path, self.Arch)] = True
             return True
 
         print("[cache miss]: PreMakeCache:", self.MetaFile.Path, self.Arch)
-        GlobalData.gModulePreMakeCacheStatus[(self.MetaFile.Path, self.Arch)] = False
+        GlobalData.gModulePreMakeCacheStatus[(
+            self.MetaFile.Path, self.Arch)] = False
         return False
 
-    ## Decide whether we can skip the Module build
+    # Decide whether we can skip the Module build
     def CanSkipbyCache(self, gHitSet):
         # Hashing feature is off
         if not GlobalData.gBinCacheSource:
@@ -2411,7 +2590,7 @@ class ModuleAutoGen(AutoGen):
 
         return False
 
-    ## Decide whether we can skip the ModuleAutoGen process
+    # Decide whether we can skip the ModuleAutoGen process
     #  If any source file is newer than the module than we cannot skip
     #
     def CanSkip(self):
@@ -2422,19 +2601,19 @@ class ModuleAutoGen(AutoGen):
             return True
         if not os.path.exists(self.TimeStampPath):
             return False
-        #last creation time of the module
+        # last creation time of the module
         DstTimeStamp = os.stat(self.TimeStampPath)[8]
 
         SrcTimeStamp = self.Workspace._SrcTimeStamp
         if SrcTimeStamp > DstTimeStamp:
             return False
 
-        with open(self.TimeStampPath,'r') as f:
+        with open(self.TimeStampPath, 'r') as f:
             for source in f:
                 source = source.rstrip('\n')
                 if not os.path.exists(source):
                     return False
-                if source not in ModuleAutoGen.TimeDict :
+                if source not in ModuleAutoGen.TimeDict:
                     ModuleAutoGen.TimeDict[source] = os.stat(source)[8]
                 if ModuleAutoGen.TimeDict[source] > DstTimeStamp:
                     return False

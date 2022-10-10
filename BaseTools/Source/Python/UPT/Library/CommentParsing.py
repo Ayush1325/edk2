@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to define comment parsing interface
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -44,7 +44,7 @@ from Logger.ToolError import FORMAT_INVALID
 from Logger.ToolError import FORMAT_NOT_SUPPORTED
 from Logger import StringTable as ST
 
-## ParseHeaderCommentSection
+# ParseHeaderCommentSection
 #
 # Parse Header comment section lines, extract Abstract, Description, Copyright
 # , License lines
@@ -52,7 +52,9 @@ from Logger import StringTable as ST
 # @param CommentList:   List of (Comment, LineNumber)
 # @param FileName:      FileName of the comment
 #
-def ParseHeaderCommentSection(CommentList, FileName = None, IsBinaryHeader = False):
+
+
+def ParseHeaderCommentSection(CommentList, FileName=None, IsBinaryHeader=False):
     Abstract = ''
     Description = ''
     Copyright = ''
@@ -79,7 +81,8 @@ def ParseHeaderCommentSection(CommentList, FileName = None, IsBinaryHeader = Fal
         LineNo = Item[1]
 
         if not Line.startswith(TAB_COMMENT_SPLIT) and Line:
-            Logger.Error("\nUPT", FORMAT_INVALID, ST.ERR_INVALID_COMMENT_FORMAT, FileName, Item[1])
+            Logger.Error("\nUPT", FORMAT_INVALID,
+                         ST.ERR_INVALID_COMMENT_FORMAT, FileName, Item[1])
         Comment = CleanString2(Line)[1]
         Comment = Comment.strip()
         #
@@ -87,7 +90,7 @@ def ParseHeaderCommentSection(CommentList, FileName = None, IsBinaryHeader = Fal
         # indication of different block; or in the position that Abstract should be, also keep it
         # as it indicates that no abstract
         #
-        if not Comment and HeaderCommentStage not in [HEADER_COMMENT_LICENSE, \
+        if not Comment and HeaderCommentStage not in [HEADER_COMMENT_LICENSE,
                                                       HEADER_COMMENT_DESCRIPTION, HEADER_COMMENT_ABSTRACT]:
             continue
 
@@ -105,7 +108,8 @@ def ParseHeaderCommentSection(CommentList, FileName = None, IsBinaryHeader = Fal
                     HeaderCommentStage = HEADER_COMMENT_DESCRIPTION
                 elif _IsCopyrightLine(Comment):
                     Result, ErrMsg = _ValidateCopyright(Comment)
-                    ValidateCopyright(Result, ST.WRN_INVALID_COPYRIGHT, FileName, LineNo, ErrMsg)
+                    ValidateCopyright(
+                        Result, ST.WRN_INVALID_COPYRIGHT, FileName, LineNo, ErrMsg)
                     Copyright += Comment + EndOfLine
                     HeaderCommentStage = HEADER_COMMENT_COPYRIGHT
                 else:
@@ -117,7 +121,8 @@ def ParseHeaderCommentSection(CommentList, FileName = None, IsBinaryHeader = Fal
                 #
                 if _IsCopyrightLine(Comment):
                     Result, ErrMsg = _ValidateCopyright(Comment)
-                    ValidateCopyright(Result, ST.WRN_INVALID_COPYRIGHT, FileName, LineNo, ErrMsg)
+                    ValidateCopyright(
+                        Result, ST.WRN_INVALID_COPYRIGHT, FileName, LineNo, ErrMsg)
                     Copyright += Comment + EndOfLine
                     HeaderCommentStage = HEADER_COMMENT_COPYRIGHT
                 else:
@@ -125,7 +130,8 @@ def ParseHeaderCommentSection(CommentList, FileName = None, IsBinaryHeader = Fal
             elif HeaderCommentStage == HEADER_COMMENT_COPYRIGHT:
                 if _IsCopyrightLine(Comment):
                     Result, ErrMsg = _ValidateCopyright(Comment)
-                    ValidateCopyright(Result, ST.WRN_INVALID_COPYRIGHT, FileName, LineNo, ErrMsg)
+                    ValidateCopyright(
+                        Result, ST.WRN_INVALID_COPYRIGHT, FileName, LineNo, ErrMsg)
                     Copyright += Comment + EndOfLine
                 else:
                     #
@@ -144,14 +150,16 @@ def ParseHeaderCommentSection(CommentList, FileName = None, IsBinaryHeader = Fal
 
     return Abstract.strip(), Description.strip(), Copyright.strip(), License.strip()
 
-## _IsCopyrightLine
+# _IsCopyrightLine
 # check whether current line is copyright line, the criteria is whether there is case insensitive keyword "Copyright"
 # followed by zero or more white space characters followed by a "(" character
 #
 # @param LineContent:  the line need to be checked
 # @return: True if current line is copyright line, False else
 #
-def _IsCopyrightLine (LineContent):
+
+
+def _IsCopyrightLine(LineContent):
     LineContent = LineContent.upper()
     Result = False
 
@@ -161,13 +169,15 @@ def _IsCopyrightLine (LineContent):
 
     return Result
 
-## ParseGenericComment
+# ParseGenericComment
 #
 # @param GenericComment: Generic comment list, element of
 #                        (CommentLine, LineNum)
 # @param ContainerFile:  Input value for filename of Dec file
 #
-def ParseGenericComment (GenericComment, ContainerFile=None, SkipTag=None):
+
+
+def ParseGenericComment(GenericComment, ContainerFile=None, SkipTag=None):
     if ContainerFile:
         pass
     HelpTxt = None
@@ -188,13 +198,15 @@ def ParseGenericComment (GenericComment, ContainerFile=None, SkipTag=None):
 
     return HelpTxt
 
-## ParsePcdErrorCode
+# ParsePcdErrorCode
 #
 # @param Value: original ErrorCode value
 # @param ContainerFile: Input value for filename of Dec file
 # @param LineNum: Line Num
 #
-def ParsePcdErrorCode (Value = None, ContainerFile = None, LineNum = None):
+
+
+def ParsePcdErrorCode(Value=None, ContainerFile=None, LineNum=None):
     try:
         if Value.strip().startswith((TAB_HEX_START, TAB_CAPHEX_START)):
             Base = 16
@@ -203,28 +215,30 @@ def ParsePcdErrorCode (Value = None, ContainerFile = None, LineNum = None):
         ErrorCode = int(Value, Base)
         if ErrorCode > PCD_ERR_CODE_MAX_SIZE or ErrorCode < 0:
             Logger.Error('Parser',
-                        FORMAT_NOT_SUPPORTED,
-                        "The format %s of ErrorCode is not valid, should be UNIT32 type or long type" % Value,
-                        File = ContainerFile,
-                        Line = LineNum)
+                         FORMAT_NOT_SUPPORTED,
+                         "The format %s of ErrorCode is not valid, should be UNIT32 type or long type" % Value,
+                         File=ContainerFile,
+                         Line=LineNum)
         ErrorCode = '0x%x' % ErrorCode
         return ErrorCode
     except ValueError as XStr:
         if XStr:
             pass
         Logger.Error('Parser',
-                    FORMAT_NOT_SUPPORTED,
-                    "The format %s of ErrorCode is not valid, should be UNIT32 type or long type" % Value,
-                    File = ContainerFile,
-                    Line = LineNum)
+                     FORMAT_NOT_SUPPORTED,
+                     "The format %s of ErrorCode is not valid, should be UNIT32 type or long type" % Value,
+                     File=ContainerFile,
+                     Line=LineNum)
 
-## ParseDecPcdGenericComment
+# ParseDecPcdGenericComment
 #
 # @param GenericComment: Generic comment list, element of (CommentLine,
 #                         LineNum)
 # @param ContainerFile:  Input value for filename of Dec file
 #
-def ParseDecPcdGenericComment (GenericComment, ContainerFile, TokenSpaceGuidCName, CName, MacroReplaceDict):
+
+
+def ParseDecPcdGenericComment(GenericComment, ContainerFile, TokenSpaceGuidCName, CName, MacroReplaceDict):
     HelpStr = ''
     PromptStr = ''
     PcdErr = None
@@ -239,19 +253,20 @@ def ParseDecPcdGenericComment (GenericComment, ContainerFile, TokenSpaceGuidCNam
         # To replace Macro
         #
         MACRO_PATTERN = '[\t\s]*\$\([A-Z][_A-Z0-9]*\)'
-        MatchedStrs =  re.findall(MACRO_PATTERN, Comment)
+        MatchedStrs = re.findall(MACRO_PATTERN, Comment)
         for MatchedStr in MatchedStrs:
             if MatchedStr:
                 Macro = MatchedStr.strip().lstrip('$(').rstrip(')').strip()
                 if Macro in MacroReplaceDict:
-                    Comment = Comment.replace(MatchedStr, MacroReplaceDict[Macro])
+                    Comment = Comment.replace(
+                        MatchedStr, MacroReplaceDict[Macro])
         if Comment.startswith(TAB_PCD_VALIDRANGE):
             if ValidValueNum > 0 or ExpressionNum > 0:
                 Logger.Error('Parser',
                              FORMAT_NOT_SUPPORTED,
                              ST.WRN_MULTI_PCD_RANGES,
-                             File = ContainerFile,
-                             Line = LineNum)
+                             File=ContainerFile,
+                             Line=LineNum)
             else:
                 PcdErr = PcdErrorObject()
                 PcdErr.SetTokenSpaceGuidCName(TokenSpaceGuidCName)
@@ -264,30 +279,32 @@ def ParseDecPcdGenericComment (GenericComment, ContainerFile, TokenSpaceGuidCNam
             if Valid:
                 ValueList = ValidRange.split(TAB_VALUE_SPLIT)
                 if len(ValueList) > 1:
-                    PcdErr.SetValidValueRange((TAB_VALUE_SPLIT.join(ValueList[1:])).strip())
-                    PcdErr.SetErrorNumber(ParsePcdErrorCode(ValueList[0], ContainerFile, LineNum))
+                    PcdErr.SetValidValueRange(
+                        (TAB_VALUE_SPLIT.join(ValueList[1:])).strip())
+                    PcdErr.SetErrorNumber(ParsePcdErrorCode(
+                        ValueList[0], ContainerFile, LineNum))
                 else:
                     PcdErr.SetValidValueRange(ValidRange)
                 PcdErrList.append(PcdErr)
             else:
                 Logger.Error("Parser",
-                         FORMAT_NOT_SUPPORTED,
-                         Cause,
-                         ContainerFile,
-                         LineNum)
+                             FORMAT_NOT_SUPPORTED,
+                             Cause,
+                             ContainerFile,
+                             LineNum)
         elif Comment.startswith(TAB_PCD_VALIDLIST):
             if ValidRangeNum > 0 or ExpressionNum > 0:
                 Logger.Error('Parser',
                              FORMAT_NOT_SUPPORTED,
                              ST.WRN_MULTI_PCD_RANGES,
-                             File = ContainerFile,
-                             Line = LineNum)
+                             File=ContainerFile,
+                             Line=LineNum)
             elif ValidValueNum > 0:
                 Logger.Error('Parser',
                              FORMAT_NOT_SUPPORTED,
                              ST.WRN_MULTI_PCD_VALIDVALUE,
-                             File = ContainerFile,
-                             Line = LineNum)
+                             File=ContainerFile,
+                             Line=LineNum)
             else:
                 PcdErr = PcdErrorObject()
                 PcdErr.SetTokenSpaceGuidCName(TokenSpaceGuidCName)
@@ -295,30 +312,34 @@ def ParseDecPcdGenericComment (GenericComment, ContainerFile, TokenSpaceGuidCNam
                 PcdErr.SetFileLine(Comment)
                 PcdErr.SetLineNum(LineNum)
                 ValidValueNum += 1
-                ValidValueExpr = Comment.replace(TAB_PCD_VALIDLIST, "", 1).strip()
+                ValidValueExpr = Comment.replace(
+                    TAB_PCD_VALIDLIST, "", 1).strip()
             Valid, Cause = _CheckListExpression(ValidValueExpr)
             if Valid:
-                ValidValue = Comment.replace(TAB_PCD_VALIDLIST, "", 1).replace(TAB_COMMA_SPLIT, TAB_SPACE_SPLIT)
+                ValidValue = Comment.replace(TAB_PCD_VALIDLIST, "", 1).replace(
+                    TAB_COMMA_SPLIT, TAB_SPACE_SPLIT)
                 ValueList = ValidValue.split(TAB_VALUE_SPLIT)
                 if len(ValueList) > 1:
-                    PcdErr.SetValidValue((TAB_VALUE_SPLIT.join(ValueList[1:])).strip())
-                    PcdErr.SetErrorNumber(ParsePcdErrorCode(ValueList[0], ContainerFile, LineNum))
+                    PcdErr.SetValidValue(
+                        (TAB_VALUE_SPLIT.join(ValueList[1:])).strip())
+                    PcdErr.SetErrorNumber(ParsePcdErrorCode(
+                        ValueList[0], ContainerFile, LineNum))
                 else:
                     PcdErr.SetValidValue(ValidValue)
                 PcdErrList.append(PcdErr)
             else:
                 Logger.Error("Parser",
-                         FORMAT_NOT_SUPPORTED,
-                         Cause,
-                         ContainerFile,
-                         LineNum)
+                             FORMAT_NOT_SUPPORTED,
+                             Cause,
+                             ContainerFile,
+                             LineNum)
         elif Comment.startswith(TAB_PCD_EXPRESSION):
             if ValidRangeNum > 0 or ValidValueNum > 0:
                 Logger.Error('Parser',
                              FORMAT_NOT_SUPPORTED,
                              ST.WRN_MULTI_PCD_RANGES,
-                             File = ContainerFile,
-                             Line = LineNum)
+                             File=ContainerFile,
+                             Line=LineNum)
             else:
                 PcdErr = PcdErrorObject()
                 PcdErr.SetTokenSpaceGuidCName(TokenSpaceGuidCName)
@@ -331,24 +352,26 @@ def ParseDecPcdGenericComment (GenericComment, ContainerFile, TokenSpaceGuidCNam
             if Valid:
                 ValueList = Expression.split(TAB_VALUE_SPLIT)
                 if len(ValueList) > 1:
-                    PcdErr.SetExpression((TAB_VALUE_SPLIT.join(ValueList[1:])).strip())
-                    PcdErr.SetErrorNumber(ParsePcdErrorCode(ValueList[0], ContainerFile, LineNum))
+                    PcdErr.SetExpression(
+                        (TAB_VALUE_SPLIT.join(ValueList[1:])).strip())
+                    PcdErr.SetErrorNumber(ParsePcdErrorCode(
+                        ValueList[0], ContainerFile, LineNum))
                 else:
                     PcdErr.SetExpression(Expression)
                 PcdErrList.append(PcdErr)
             else:
                 Logger.Error("Parser",
-                         FORMAT_NOT_SUPPORTED,
-                         Cause,
-                         ContainerFile,
-                         LineNum)
+                             FORMAT_NOT_SUPPORTED,
+                             Cause,
+                             ContainerFile,
+                             LineNum)
         elif Comment.startswith(TAB_PCD_PROMPT):
             if PromptStr:
                 Logger.Error('Parser',
                              FORMAT_NOT_SUPPORTED,
                              ST.WRN_MULTI_PCD_PROMPT,
-                             File = ContainerFile,
-                             Line = LineNum)
+                             File=ContainerFile,
+                             Line=LineNum)
             PromptStr = Comment.replace(TAB_PCD_PROMPT, "", 1).strip()
         else:
             if Comment:
@@ -363,14 +386,16 @@ def ParseDecPcdGenericComment (GenericComment, ContainerFile, TokenSpaceGuidCNam
 
     return HelpStr, PcdErrList, PromptStr
 
-## ParseDecPcdTailComment
+# ParseDecPcdTailComment
 #
 # @param TailCommentList:    Tail comment list of Pcd, item of format (Comment, LineNum)
 # @param ContainerFile:      Input value for filename of Dec file
 # @retVal SupModuleList:  The supported module type list detected
 # @retVal HelpStr:  The generic help text string detected
 #
-def ParseDecPcdTailComment (TailCommentList, ContainerFile):
+
+
+def ParseDecPcdTailComment(TailCommentList, ContainerFile):
     assert(len(TailCommentList) == 1)
     TailComment = TailCommentList[0][0]
     LineNum = TailCommentList[0][1]
@@ -399,7 +424,7 @@ def ParseDecPcdTailComment (TailCommentList, ContainerFile):
         elif Mod not in SUP_MODULE_LIST:
             Logger.Error("UPT",
                          FORMAT_INVALID,
-                         ST.WRN_INVALID_MODULE_TYPE%Mod,
+                         ST.WRN_INVALID_MODULE_TYPE % Mod,
                          ContainerFile,
                          LineNum)
         else:
@@ -407,10 +432,12 @@ def ParseDecPcdTailComment (TailCommentList, ContainerFile):
 
     return SupModuleList, HelpStr
 
-## _CheckListExpression
+# _CheckListExpression
 #
 # @param Expression: Pcd value list expression
 #
+
+
 def _CheckListExpression(Expression):
     ListExpr = ''
     if TAB_VALUE_SPLIT in Expression:
@@ -420,10 +447,12 @@ def _CheckListExpression(Expression):
 
     return IsValidListExpr(ListExpr)
 
-## _CheckExpression
+# _CheckExpression
 #
 # @param Expression: Pcd value expression
 #
+
+
 def _CheckExpression(Expression):
     Expr = ''
     if TAB_VALUE_SPLIT in Expression:
@@ -432,10 +461,12 @@ def _CheckExpression(Expression):
         Expr = Expression
     return IsValidLogicalExpr(Expr, True)
 
-## _CheckRangeExpression
+# _CheckRangeExpression
 #
 # @param Expression:    Pcd range expression
 #
+
+
 def _CheckRangeExpression(Expression):
     RangeExpr = ''
     if TAB_VALUE_SPLIT in Expression:
@@ -445,21 +476,25 @@ def _CheckRangeExpression(Expression):
 
     return IsValidRangeExpr(RangeExpr)
 
-## ValidateCopyright
+# ValidateCopyright
 #
 #
 #
+
+
 def ValidateCopyright(Result, ErrType, FileName, LineNo, ErrMsg):
     if not Result:
         Logger.Warn("\nUPT", ErrType, FileName, LineNo, ErrMsg)
 
-## _ValidateCopyright
+# _ValidateCopyright
 #
 # @param Line:    Line that contains copyright information, # stripped
 #
 # @retval Result: True if line is conformed to Spec format, False else
 # @retval ErrMsg: the detailed error description
 #
+
+
 def _ValidateCopyright(Line):
     if Line:
         pass
@@ -468,14 +503,16 @@ def _ValidateCopyright(Line):
 
     return Result, ErrMsg
 
-def GenerateTokenList (Comment):
+
+def GenerateTokenList(Comment):
     #
     # Tokenize Comment using '#' and ' ' as token separators
     #
     ReplacedComment = None
     while Comment != ReplacedComment:
         ReplacedComment = Comment
-        Comment = Comment.replace('##', '#').replace('  ', ' ').replace(' ', '#').strip('# ')
+        Comment = Comment.replace('##', '#').replace(
+            '  ', ' ').replace(' ', '#').strip('# ')
     return Comment.split('#')
 
 
@@ -485,7 +522,7 @@ def GenerateTokenList (Comment):
 # RemoveTokens  - A list of tokens to remove from help text
 # ParseVariable - True for parsing [Guids].  Otherwise False
 #
-def ParseComment (Comment, UsageTokens, TypeTokens, RemoveTokens, ParseVariable):
+def ParseComment(Comment, UsageTokens, TypeTokens, RemoveTokens, ParseVariable):
     #
     # Initialize return values
     #
@@ -503,7 +540,7 @@ def ParseComment (Comment, UsageTokens, TypeTokens, RemoveTokens, ParseVariable)
         #
         List = Comment.split(':', 1)
         if len(List) > 1:
-            SubList = GenerateTokenList (List[0].strip())
+            SubList = GenerateTokenList(List[0].strip())
             if len(SubList) in [1, 2] and SubList[-1] == 'Variable':
                 if List[1].strip().find('L"') == 0:
                     Comment = List[0].strip() + ':' + List[1].strip()
@@ -524,7 +561,7 @@ def ParseComment (Comment, UsageTokens, TypeTokens, RemoveTokens, ParseVariable)
                 String = Comment[Start:]
                 End = String[2:].find('"')
         if End >= 0:
-            SubList = GenerateTokenList (Comment[:Start])
+            SubList = GenerateTokenList(Comment[:Start])
             if len(SubList) < 2:
                 Comment = Comment[:Start] + String[End + 3:]
                 String = String[:End + 3]
@@ -540,7 +577,7 @@ def ParseComment (Comment, UsageTokens, TypeTokens, RemoveTokens, ParseVariable)
     #
     # Tokenize Comment using '#' and ' ' as token separators
     #
-    List = GenerateTokenList (Comment)
+    List = GenerateTokenList(Comment)
 
     #
     # Search first two tokens for Usage and Type and remove any matching tokens

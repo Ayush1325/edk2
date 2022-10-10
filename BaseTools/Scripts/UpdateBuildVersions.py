@@ -1,4 +1,4 @@
-## @file
+# @file
 # Update build revisions of the tools when performing a developer build
 #
 # This script will modife the C/Include/Common/BuildVersion.h file and the two
@@ -27,7 +27,8 @@ SYS_ENV_ERR = "ERROR : %s system environment variable must be set prior to runni
 
 __execname__ = "UpdateBuildVersions.py"
 SVN_REVISION = "$LastChangedRevision: 3 $"
-SVN_REVISION = SVN_REVISION.replace("$LastChangedRevision:", "").replace("$", "").strip()
+SVN_REVISION = SVN_REVISION.replace(
+    "$LastChangedRevision:", "").replace("$", "").strip()
 __copyright__ = "Copyright (c) 2014, Intel Corporation. All rights reserved."
 VERSION_NUMBER = "0.7.0"
 __version__ = "Version %s.%s" % (VERSION_NUMBER, SVN_REVISION)
@@ -74,13 +75,16 @@ def ShellCommandResults(CmdLine, Opt):
 
     returnValue = 0
     try:
-        subprocess.check_call(args=shlex.split(CmdLine), stderr=subprocess.STDOUT, stdout=file_list)
+        subprocess.check_call(args=shlex.split(CmdLine),
+                              stderr=subprocess.STDOUT, stdout=file_list)
     except subprocess.CalledProcessError as err_val:
         file_list.close()
         if not Opt.silent:
-            sys.stderr.write("ERROR : %d : %s\n" % (err_val.returncode, err_val.__str__()))
+            sys.stderr.write("ERROR : %d : %s\n" %
+                             (err_val.returncode, err_val.__str__()))
             if os.path.exists(filename):
-                sys.stderr.write("      : Partial results may be in this file: %s\n" % filename)
+                sys.stderr.write(
+                    "      : Partial results may be in this file: %s\n" % filename)
             sys.stderr.flush()
         returnValue = err_val.returncode
 
@@ -91,7 +95,8 @@ def ShellCommandResults(CmdLine, Opt):
             sys.stderr.write("I/O ERROR : %s : %s\n" % (str(errno), strerror))
             sys.stderr.write("ERROR : this command failed : %s\n" % CmdLine)
             if os.path.exists(filename):
-                sys.stderr.write("      : Partial results may be in this file: %s\n" % filename)
+                sys.stderr.write(
+                    "      : Partial results may be in this file: %s\n" % filename)
             sys.stderr.flush()
         returnValue = errno
 
@@ -102,16 +107,19 @@ def ShellCommandResults(CmdLine, Opt):
             sys.stderr.write("OS ERROR : %s : %s\n" % (str(errno), strerror))
             sys.stderr.write("ERROR : this command failed : %s\n" % CmdLine)
             if os.path.exists(filename):
-                sys.stderr.write("      : Partial results may be in this file: %s\n" % filename)
+                sys.stderr.write(
+                    "      : Partial results may be in this file: %s\n" % filename)
             sys.stderr.flush()
         returnValue = errno
 
     except KeyboardInterrupt:
         file_list.close()
         if not Opt.silent:
-            sys.stderr.write("ERROR : Command terminated by user : %s\n" % CmdLine)
+            sys.stderr.write(
+                "ERROR : Command terminated by user : %s\n" % CmdLine)
             if os.path.exists(filename):
-                sys.stderr.write("      : Partial results may be in this file: %s\n" % filename)
+                sys.stderr.write(
+                    "      : Partial results may be in this file: %s\n" % filename)
             sys.stderr.flush()
         returnValue = 1
 
@@ -136,14 +144,15 @@ def ShellCommandResults(CmdLine, Opt):
 def UpdateBuildVersionPython(Rev, UserModified, opts):
     """ This routine will update the BuildVersion.h files in the C source tree """
     for SubDir in ["Common", "UPT"]:
-        PyPath = os.path.join(os.environ['BASE_TOOLS_PATH'], "Source", "Python", SubDir)
+        PyPath = os.path.join(
+            os.environ['BASE_TOOLS_PATH'], "Source", "Python", SubDir)
         BuildVersionPy = os.path.join(PyPath, "BuildVersion.py")
         fd_ = open(os.path.normpath(BuildVersionPy), 'r')
         contents = fd_.readlines()
         fd_.close()
         if opts.HAVE_SVN is False:
             BuildVersionOrig = os.path.join(PyPath, "orig_BuildVersion.py")
-            fd_ = open (BuildVersionOrig, 'w')
+            fd_ = open(BuildVersionOrig, 'w')
             for line in contents:
                 fd_.write(line)
             fd_.flush()
@@ -166,7 +175,8 @@ def UpdateBuildVersionPython(Rev, UserModified, opts):
 
 def UpdateBuildVersionH(Rev, UserModified, opts):
     """ This routine will update the BuildVersion.h files in the C source tree """
-    CPath = os.path.join(os.environ['BASE_TOOLS_PATH'], "Source", "C", "Include", "Common")
+    CPath = os.path.join(
+        os.environ['BASE_TOOLS_PATH'], "Source", "C", "Include", "Common")
     BuildVersionH = os.path.join(CPath, "BuildVersion.h")
     fd_ = open(os.path.normpath(BuildVersionH), 'r')
     contents = fd_.readlines()
@@ -185,7 +195,7 @@ def UpdateBuildVersionH(Rev, UserModified, opts):
             new_line = "#define __BUILD_VERSION \"Developer Build based on Revision: %s\"" % Rev
             if UserModified:
                 new_line = "#define __BUILD_VERSION \"Developer Build based on Revision: %s with Modified Sources\"" % \
-                            Rev
+                    Rev
             new_content.append(new_line)
             continue
         new_content.append(line)
@@ -222,7 +232,8 @@ def RevertCmd(Filename, Opt):
 
     except KeyboardInterrupt:
         if not Opt.silent:
-            sys.stderr.write("ERROR : Command terminated by user : %s\n" % CmdLine)
+            sys.stderr.write(
+                "ERROR : Command terminated by user : %s\n" % CmdLine)
             sys.stderr.flush()
 
     if Opt.verbose:
@@ -236,7 +247,8 @@ def GetSvnRevision(opts):
     Modified = False
 
     if opts.HAVE_SVN is False:
-        sys.stderr.write("WARNING: the svn command-line tool is not available.\n")
+        sys.stderr.write(
+            "WARNING: the svn command-line tool is not available.\n")
         return (Revision, Modified)
 
     SrcPath = os.path.join(os.environ['BASE_TOOLS_PATH'], "Source")
@@ -323,7 +335,8 @@ def CheckOriginals(Opts):
     Returns 0 if this succeeds, or 1 if the copy function fails. It will also return 0 if the orig_BuildVersion.* file
     does not exist.
     """
-    CPath = os.path.join(os.environ['BASE_TOOLS_PATH'], "Source", "C", "Include", "Common")
+    CPath = os.path.join(
+        os.environ['BASE_TOOLS_PATH'], "Source", "C", "Include", "Common")
     BuildVersionH = os.path.join(CPath, "BuildVersion.h")
     OrigBuildVersionH = os.path.join(CPath, "orig_BuildVersion.h")
     if not os.path.exists(OrigBuildVersionH):
@@ -331,7 +344,8 @@ def CheckOriginals(Opts):
     if CopyOrig(OrigBuildVersionH, BuildVersionH, Opts):
         return 1
     for SubDir in ["Common", "UPT"]:
-        PyPath = os.path.join(os.environ['BASE_TOOLS_PATH'], "Source", "Python", SubDir)
+        PyPath = os.path.join(
+            os.environ['BASE_TOOLS_PATH'], "Source", "Python", SubDir)
         BuildVersionPy = os.path.join(PyPath, "BuildVersion.h")
         OrigBuildVersionPy = os.path.join(PyPath, "orig_BuildVersion.h")
         if not os.path.exists(OrigBuildVersionPy):
@@ -351,11 +365,14 @@ def RevertBuildVersionFiles(opts):
             return 1
         return 0
     # SVN is available
-    BuildVersionH = os.path.join(os.environ['BASE_TOOLS_PATH'], "Source", "C", "Include", "Common", "BuildVersion.h")
+    BuildVersionH = os.path.join(
+        os.environ['BASE_TOOLS_PATH'], "Source", "C", "Include", "Common", "BuildVersion.h")
     RevertCmd(BuildVersionH, opts)
     for SubDir in ["Common", "UPT"]:
-        BuildVersionPy = os.path.join(os.environ['BASE_TOOLS_PATH'], "Source", "Python", SubDir, "BuildVersion.py")
+        BuildVersionPy = os.path.join(
+            os.environ['BASE_TOOLS_PATH'], "Source", "Python", SubDir, "BuildVersion.py")
         RevertCmd(BuildVersionPy, opts)
+
 
 def UpdateRevisionFiles():
     """ Main routine that will update the BuildVersion.py and BuildVersion.h files."""
@@ -368,9 +385,9 @@ def UpdateRevisionFiles():
         sys.stderr.write(SYS_ENV_ERR % 'BASE_TOOLS_PATH')
         return 1
     if not os.path.exists(os.environ['BASE_TOOLS_PATH']):
-        sys.stderr.write("Unable to locate the %s directory." % os.environ['BASE_TOOLS_PATH'])
+        sys.stderr.write("Unable to locate the %s directory." %
+                         os.environ['BASE_TOOLS_PATH'])
         return 1
-
 
     options.HAVE_SVN = CheckSvn(options)
     if options.TEST_SVN:
@@ -384,7 +401,8 @@ def UpdateRevisionFiles():
         RevertBuildVersionFiles(options)
         Revision, Modified = GetSvnRevision(options)
         if options.verbose:
-            sys.stdout.write("Revision: %s is Modified: %s\n" % (Revision, Modified))
+            sys.stdout.write("Revision: %s is Modified: %s\n" %
+                             (Revision, Modified))
             sys.stdout.flush()
         UpdateBuildVersionH(Revision, Modified, options)
         UpdateBuildVersionPython(Revision, Modified, options)
@@ -394,5 +412,3 @@ def UpdateRevisionFiles():
 
 if __name__ == "__main__":
     sys.exit(UpdateRevisionFiles())
-
-

@@ -1668,11 +1668,11 @@ class EfiDevicePath:
                 node, extra = self._ctype_read_ex(type_str, ptr, hdr.Length)
                 if 'VENDOR_DEVICE_PATH' in type(node).__name__:
                     guid_type = self.guid_override_dict.get(
-                                        GuidNames.to_uuid(node.Guid), None)
+                        GuidNames.to_uuid(node.Guid), None)
                     if guid_type:
                         # use the ctype associated with the GUID
                         node, extra = self._ctype_read_ex(
-                                                guid_type, ptr, hdr.Length)
+                            guid_type, ptr, hdr.Length)
 
                 instance.append((type(node).__name__, hdr.Type,
                                 hdr.SubType, hdr.Length, node, extra))

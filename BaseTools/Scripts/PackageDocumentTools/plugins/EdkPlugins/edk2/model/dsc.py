@@ -1,4 +1,4 @@
-## @file
+# @file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
 #
@@ -6,8 +6,10 @@
 #
 
 from plugins.EdkPlugins.basemodel import ini
-import re, os
+import re
+import os
 from plugins.EdkPlugins.basemodel.message import *
+
 
 class DSCFile(ini.BaseINIFile):
     def GetSectionInstance(self, parent, name, isCombined=False):
@@ -15,6 +17,7 @@ class DSCFile(ini.BaseINIFile):
 
     def GetComponents(self):
         return self.GetSectionObjectsByName('Components')
+
 
 class DSCSection(ini.BaseINISection):
     def GetSectionINIObject(self, parent):
@@ -53,9 +56,11 @@ class DSCSection(ini.BaseINISection):
             return 'common'
         return arr[2]
 
+
 class DSCSectionObject(ini.BaseINISectionObject):
     def GetArch(self):
         return self.GetParent().GetArch()
+
 
 class DSCPcdObject(DSCSectionObject):
 
@@ -65,8 +70,8 @@ class DSCPcdObject(DSCSectionObject):
 
     def Parse(self):
         line = self.GetLineByOffset(self._start).strip().split('#')[0]
-        self._name   = line.split('|')[0]
-        self._value  = line.split('|')[1]
+        self._name = line.split('|')[0]
+        self._value = line.split('|')[1]
         return True
 
     def GetPcdName(self):
@@ -77,6 +82,7 @@ class DSCPcdObject(DSCSectionObject):
 
     def GetPcdValue(self):
         return self._value
+
 
 class DSCLibraryClassObject(DSCSectionObject):
     def __init__(self, parent):
@@ -96,13 +102,14 @@ class DSCLibraryClassObject(DSCSectionObject):
     def GetModuleType(self):
         return self.GetParent().GetModuleType()
 
+
 class DSCComponentObject(DSCSectionObject):
 
     def __init__(self, parent):
         ini.BaseINISectionObject.__init__(self, parent)
-        self._OveridePcds      = {}
+        self._OveridePcds = {}
         self._OverideLibraries = {}
-        self._Filename         = ''
+        self._Filename = ''
 
     def __del__(self):
         self._OverideLibraries.clear()
@@ -140,7 +147,7 @@ class DSCComponentObject(DSCSectionObject):
             # The end line is '}' and could be ignored
             #
             curr = self._start + 1
-            end  = self._end - 1
+            end = self._end - 1
             OverideName = ''
             while (curr <= end):
                 line = self.GetLineByOffset(curr).strip()
@@ -176,7 +183,8 @@ class DSCComponentObject(DSCSectionObject):
         if hasLib:
             lines.append('    <LibraryClasses>\n')
             for libKey in self._OverideLibraries.keys():
-                lines.append('      %s|%s\n' % (libKey, self._OverideLibraries[libKey]))
+                lines.append('      %s|%s\n' %
+                             (libKey, self._OverideLibraries[libKey]))
 
         if hasPcd:
             for key in self._OveridePcds.keys():
@@ -192,4 +200,3 @@ class DSCComponentObject(DSCSectionObject):
             lines.append('  }\n')
 
         return lines
-

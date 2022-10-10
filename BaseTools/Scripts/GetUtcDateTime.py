@@ -1,4 +1,4 @@
-## @file
+# @file
 #  Get current UTC date and time information and output as ascii code.
 #
 #  Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
@@ -6,10 +6,11 @@
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 
-VersionNumber = '0.1'
-import sys
-import datetime
 import argparse
+import datetime
+import sys
+VersionNumber = '0.1'
+
 
 def Main():
     PARSER = argparse.ArgumentParser(
@@ -26,19 +27,20 @@ def Main():
 
     ARGS = PARSER.parse_args()
     if len(sys.argv) == 1:
-        print ("ERROR: At least one argument is required!\n")
+        print("ERROR: At least one argument is required!\n")
         PARSER.print_help()
 
     today = datetime.datetime.utcnow()
     if ARGS.year:
         ReversedNumber = str(today.year)[::-1]
-        print (''.join(hex(ord(HexString))[2:] for HexString in ReversedNumber))
+        print(''.join(hex(ord(HexString))[2:] for HexString in ReversedNumber))
     if ARGS.date:
         ReversedNumber = str(today.strftime("%m%d"))[::-1]
-        print (''.join(hex(ord(HexString))[2:] for HexString in ReversedNumber))
+        print(''.join(hex(ord(HexString))[2:] for HexString in ReversedNumber))
     if ARGS.time:
         ReversedNumber = str(today.strftime("%H%M"))[::-1]
-        print (''.join(hex(ord(HexString))[2:] for HexString in ReversedNumber))
+        print(''.join(hex(ord(HexString))[2:] for HexString in ReversedNumber))
+
 
 if __name__ == '__main__':
     Main()

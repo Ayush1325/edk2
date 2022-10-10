@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to be the main entrance of EOT tool
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -9,7 +9,9 @@
 # Import Modules
 #
 from __future__ import absolute_import
-import Common.LongFilePathOs as os, time, glob
+import Common.LongFilePathOs as os
+import time
+import glob
 import Common.EdkLogger as EdkLogger
 import Eot.EotGlobalData as EotGlobalData
 from optparse import OptionParser
@@ -36,6 +38,7 @@ from GenFds.AprioriSection import DXE_APRIORI_GUID, PEI_APRIORI_GUID
 gGuidStringFormat = "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X"
 gIndention = -4
 
+
 class Image(array):
     _HEADER_ = struct.Struct("")
     _HEADER_SIZE_ = _HEADER_.size
@@ -52,7 +55,7 @@ class Image(array):
         self._LEN_ = None
         self._OFF_ = None
 
-        self._SubImages = sdict() # {offset: Image()}
+        self._SubImages = sdict()  # {offset: Image()}
 
         array.__init__(self)
 
@@ -66,7 +69,7 @@ class Image(array):
         return Len
 
     def _Unpack(self):
-        self.extend(self._BUF_[self._OFF_ : self._OFF_ + self._LEN_])
+        self.extend(self._BUF_[self._OFF_: self._OFF_ + self._LEN_])
         return len(self)
 
     def _Pack(self, PadByte=0xFF):
@@ -106,18 +109,20 @@ class Image(array):
 
     Data = property(_GetData, _SetData)
 
-## CompressedImage() class
+# CompressedImage() class
 #
 #  A class for Compressed Image
 #
+
+
 class CompressedImage(Image):
     # UncompressedLength = 4-byte
     # CompressionType = 1-byte
     _HEADER_ = struct.Struct("1I 1B")
     _HEADER_SIZE_ = _HEADER_.size
 
-    _ORIG_SIZE_     = struct.Struct("1I")
-    _CMPRS_TYPE_    = struct.Struct("4x 1B")
+    _ORIG_SIZE_ = struct.Struct("1I")
+    _CMPRS_TYPE_ = struct.Struct("4x 1B")
 
     def __init__(self, CompressedData=None, CompressionType=None, UncompressedLength=None):
         Image.__init__(self)
@@ -130,7 +135,8 @@ class CompressedImage(Image):
 
     def __str__(self):
         global gIndention
-        S = "algorithm=%s uncompressed=%x" % (self.CompressionType, self.UncompressedLength)
+        S = "algorithm=%s uncompressed=%x" % (
+            self.CompressionType, self.UncompressedLength)
         for Sec in self.Sections:
             S += '\n' + str(Sec)
 
@@ -175,10 +181,12 @@ class CompressedImage(Image):
     CompressionType = property(_GetCompressionType, _SetCompressionType)
     Sections = property(_GetSections)
 
-## Ui() class
+# Ui() class
 #
 #  A class for Ui
 #
+
+
 class Ui(Image):
     _HEADER_ = struct.Struct("")
     _HEADER_SIZE_ = 0
@@ -192,7 +200,7 @@ class Ui(Image):
     def _Unpack(self):
         # keep header in this Image object
         self.empty()
-        self.extend(self._BUF_[self._OFF_ : self._OFF_ + self._LEN_])
+        self.extend(self._BUF_[self._OFF_: self._OFF_ + self._LEN_])
         return len(self)
 
     def _GetUiString(self):
@@ -200,42 +208,44 @@ class Ui(Image):
 
     String = property(_GetUiString)
 
-## Depex() class
+# Depex() class
 #
 #  A class for Depex
 #
+
+
 class Depex(Image):
     _HEADER_ = struct.Struct("")
     _HEADER_SIZE_ = 0
 
-    _GUID_          = struct.Struct("1I2H8B")
-    _OPCODE_        = struct.Struct("1B")
+    _GUID_ = struct.Struct("1I2H8B")
+    _OPCODE_ = struct.Struct("1B")
 
     _OPCODE_STRING_ = {
-        0x00    :   "BEFORE",
-        0x01    :   "AFTER",
-        0x02    :   "PUSH",
-        0x03    :   "AND",
-        0x04    :   "OR",
-        0x05    :   "NOT",
-        0x06    :   "TRUE",
-        0x07    :   "FALSE",
-        0x08    :   "END",
-        0x09    :   "SOR"
+        0x00:   "BEFORE",
+        0x01:   "AFTER",
+        0x02:   "PUSH",
+        0x03:   "AND",
+        0x04:   "OR",
+        0x05:   "NOT",
+        0x06:   "TRUE",
+        0x07:   "FALSE",
+        0x08:   "END",
+        0x09:   "SOR"
     }
 
     _NEXT_ = {
-        -1      :   _OPCODE_,   # first one in depex must be an opcdoe
-        0x00    :   _GUID_,     #"BEFORE",
-        0x01    :   _GUID_,     #"AFTER",
-        0x02    :   _GUID_,     #"PUSH",
-        0x03    :   _OPCODE_,   #"AND",
-        0x04    :   _OPCODE_,   #"OR",
-        0x05    :   _OPCODE_,   #"NOT",
-        0x06    :   _OPCODE_,   #"TRUE",
-        0x07    :   _OPCODE_,   #"FALSE",
-        0x08    :   None,       #"END",
-        0x09    :   _OPCODE_,   #"SOR"
+        -1:   _OPCODE_,   # first one in depex must be an opcdoe
+        0x00:   _GUID_,  # "BEFORE",
+        0x01:   _GUID_,  # "AFTER",
+        0x02:   _GUID_,  # "PUSH",
+        0x03:   _OPCODE_,  # "AND",
+        0x04:   _OPCODE_,  # "OR",
+        0x05:   _OPCODE_,  # "NOT",
+        0x06:   _OPCODE_,  # "TRUE",
+        0x07:   _OPCODE_,  # "FALSE",
+        0x08:   None,  # "END",
+        0x09:   _OPCODE_,  # "SOR"
     }
 
     def __init__(self):
@@ -260,7 +270,7 @@ class Depex(Image):
     def _Unpack(self):
         # keep header in this Image object
         self.empty()
-        self.extend(self._BUF_[self._OFF_ : self._OFF_ + self._LEN_])
+        self.extend(self._BUF_[self._OFF_: self._OFF_ + self._LEN_])
         return len(self)
 
     def _GetExpression(self):
@@ -289,6 +299,8 @@ class Depex(Image):
 #
 #  A class for Firmware Volume
 #
+
+
 class FirmwareVolume(Image):
     # Read FvLength, Attributes, HeaderLength, Checksum
     _HEADER_ = struct.Struct("16x 1I2H8B 1Q 4x 1I 1H 1H")
@@ -351,11 +363,15 @@ class FirmwareVolume(Image):
                     DepexList.append(Guid)
                 continue
             elif Item == 0x03 or Item == 0x04:
-                DepexStack.append(eval(str(DepexStack.pop()) + ' ' + Depex._OPCODE_STRING_[Item].lower() + ' ' + str(DepexStack.pop())))
-                DepexList.append(str(DepexList.pop()) + ' ' + Depex._OPCODE_STRING_[Item].upper() + ' ' + str(DepexList.pop()))
+                DepexStack.append(eval(str(DepexStack.pop(
+                )) + ' ' + Depex._OPCODE_STRING_[Item].lower() + ' ' + str(DepexStack.pop())))
+                DepexList.append(str(DepexList.pop(
+                )) + ' ' + Depex._OPCODE_STRING_[Item].upper() + ' ' + str(DepexList.pop()))
             elif Item == 0x05:
-                DepexStack.append(eval(Depex._OPCODE_STRING_[Item].lower() + ' ' + str(DepexStack.pop())))
-                DepexList.append(Depex._OPCODE_STRING_[Item].lower() + ' ' + str(DepexList.pop()))
+                DepexStack.append(
+                    eval(Depex._OPCODE_STRING_[Item].lower() + ' ' + str(DepexStack.pop())))
+                DepexList.append(Depex._OPCODE_STRING_[
+                                 Item].lower() + ' ' + str(DepexList.pop()))
             elif Item == 0x06:
                 DepexStack.append(True)
                 DepexList.append('TRUE')
@@ -405,12 +421,14 @@ class FirmwareVolume(Image):
 
         # Parse SEC_CORE first
         if FfsSecCoreGuid is not None:
-            self.OrderedFfsDict[FfsSecCoreGuid] = self.UnDispatchedFfsDict.pop(FfsSecCoreGuid)
+            self.OrderedFfsDict[FfsSecCoreGuid] = self.UnDispatchedFfsDict.pop(
+                FfsSecCoreGuid)
             self.LoadPpi(Db, FfsSecCoreGuid)
 
         # Parse PEI first
         if FfsPeiCoreGuid is not None:
-            self.OrderedFfsDict[FfsPeiCoreGuid] = self.UnDispatchedFfsDict.pop(FfsPeiCoreGuid)
+            self.OrderedFfsDict[FfsPeiCoreGuid] = self.UnDispatchedFfsDict.pop(
+                FfsPeiCoreGuid)
             self.LoadPpi(Db, FfsPeiCoreGuid)
             if FfsPeiPrioriGuid is not None:
                 # Load PEIM described in priori file
@@ -421,18 +439,21 @@ class FirmwareVolume(Image):
                         GuidStruct = struct.Struct('1I2H8B')
                         Start = 4
                         while len(Section) > Start:
-                            Guid = GuidStruct.unpack_from(Section[Start : Start + 16])
+                            Guid = GuidStruct.unpack_from(
+                                Section[Start: Start + 16])
                             GuidString = gGuidStringFormat % Guid
                             Start = Start + 16
                             if GuidString in self.UnDispatchedFfsDict:
-                                self.OrderedFfsDict[GuidString] = self.UnDispatchedFfsDict.pop(GuidString)
+                                self.OrderedFfsDict[GuidString] = self.UnDispatchedFfsDict.pop(
+                                    GuidString)
                                 self.LoadPpi(Db, GuidString)
 
         self.DisPatchPei(Db)
 
         # Parse DXE then
         if FfsDxeCoreGuid is not None:
-            self.OrderedFfsDict[FfsDxeCoreGuid] = self.UnDispatchedFfsDict.pop(FfsDxeCoreGuid)
+            self.OrderedFfsDict[FfsDxeCoreGuid] = self.UnDispatchedFfsDict.pop(
+                FfsDxeCoreGuid)
             self.LoadProtocol(Db, FfsDxeCoreGuid)
             if FfsDxePrioriGuid is not None:
                 # Load PEIM described in priori file
@@ -443,11 +464,13 @@ class FirmwareVolume(Image):
                         GuidStruct = struct.Struct('1I2H8B')
                         Start = 4
                         while len(Section) > Start:
-                            Guid = GuidStruct.unpack_from(Section[Start : Start + 16])
+                            Guid = GuidStruct.unpack_from(
+                                Section[Start: Start + 16])
                             GuidString = gGuidStringFormat % Guid
                             Start = Start + 16
                             if GuidString in self.UnDispatchedFfsDict:
-                                self.OrderedFfsDict[GuidString] = self.UnDispatchedFfsDict.pop(GuidString)
+                                self.OrderedFfsDict[GuidString] = self.UnDispatchedFfsDict.pop(
+                                    GuidString)
                                 self.LoadProtocol(Db, GuidString)
 
         self.DisPatchDxe(Db)
@@ -503,21 +526,24 @@ class FirmwareVolume(Image):
                     # Find Depex
                     if Section.Type == 0x13:
                         IsFoundDepex = True
-                        CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(Section._SubImages[4], 'Protocol')
+                        CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(
+                            Section._SubImages[4], 'Protocol')
                         break
                     if Section.Type == 0x01:
                         CompressSections = Section._SubImages[4]
                         for CompressSection in CompressSections.Sections:
                             if CompressSection.Type == 0x13:
                                 IsFoundDepex = True
-                                CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(CompressSection._SubImages[4], 'Protocol')
+                                CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(
+                                    CompressSection._SubImages[4], 'Protocol')
                                 break
                             if CompressSection.Type == 0x02:
                                 NewSections = CompressSection._SubImages[4]
                                 for NewSection in NewSections.Sections:
                                     if NewSection.Type == 0x13:
                                         IsFoundDepex = True
-                                        CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(NewSection._SubImages[4], 'Protocol')
+                                        CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(
+                                            NewSection._SubImages[4], 'Protocol')
                                         break
 
                 # Not find Depex
@@ -532,7 +558,8 @@ class FirmwareVolume(Image):
                     NewFfs = self.UnDispatchedFfsDict.pop(FfsID)
                     NewFfs.Depex = DepexString
                     if FileDepex is not None:
-                        ScheduleList.insert(FileDepex[1], FfsID, NewFfs, FileDepex[0])
+                        ScheduleList.insert(
+                            FileDepex[1], FfsID, NewFfs, FileDepex[0])
                     else:
                         ScheduleList[FfsID] = NewFfs
                 else:
@@ -565,19 +592,22 @@ class FirmwareVolume(Image):
                 # Get Depex
                 for Section in Ffs.Sections.values():
                     if Section.Type == 0x1B:
-                        CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(Section._SubImages[4], 'Ppi')
+                        CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(
+                            Section._SubImages[4], 'Ppi')
                         break
                     if Section.Type == 0x01:
                         CompressSections = Section._SubImages[4]
                         for CompressSection in CompressSections.Sections:
                             if CompressSection.Type == 0x1B:
-                                CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(CompressSection._SubImages[4], 'Ppi')
+                                CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(
+                                    CompressSection._SubImages[4], 'Ppi')
                                 break
                             if CompressSection.Type == 0x02:
                                 NewSections = CompressSection._SubImages[4]
                                 for NewSection in NewSections.Sections:
                                     if NewSection.Type == 0x1B:
-                                        CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(NewSection._SubImages[4], 'Ppi')
+                                        CouldBeLoaded, DepexString, FileDepex = self.ParseDepex(
+                                            NewSection._SubImages[4], 'Ppi')
                                         break
 
                 # Append New Ffs
@@ -593,13 +623,14 @@ class FirmwareVolume(Image):
         if IsInstalled:
             self.DisPatchPei(Db)
 
-
     def __str__(self):
         global gIndention
         gIndention += 4
         FvInfo = '\n' + ' ' * gIndention
-        FvInfo += "[FV:%s] file_system=%s size=%x checksum=%s\n" % (self.Name, self.FileSystemGuid, self.Size, self.Checksum)
-        FfsInfo = "\n".join([str(self.FfsDict[FfsId]) for FfsId in self.FfsDict])
+        FvInfo += "[FV:%s] file_system=%s size=%x checksum=%s\n" % (
+            self.Name, self.FileSystemGuid, self.Size, self.Checksum)
+        FfsInfo = "\n".join([str(self.FfsDict[FfsId])
+                            for FfsId in self.FfsDict])
         gIndention -= 4
         return FvInfo + FfsInfo
 
@@ -617,18 +648,20 @@ class FirmwareVolume(Image):
             FfsObj.frombuffer(self, FfsStartAddress)
             FfsId = repr(FfsObj)
             if ((self.Attributes & 0x00000800) != 0 and len(FfsObj) == 0xFFFFFF) \
-                or ((self.Attributes & 0x00000800) == 0 and len(FfsObj) == 0):
+                    or ((self.Attributes & 0x00000800) == 0 and len(FfsObj) == 0):
                 if LastFfsObj is not None:
-                    LastFfsObj.FreeSpace = EndOfFv - LastFfsObj._OFF_ - len(LastFfsObj)
+                    LastFfsObj.FreeSpace = EndOfFv - \
+                        LastFfsObj._OFF_ - len(LastFfsObj)
             else:
                 if FfsId in self.FfsDict:
                     EdkLogger.error("FV", 0, "Duplicate GUID in FFS",
-                                    ExtraData="\t%s @ %s\n\t%s @ %s" \
+                                    ExtraData="\t%s @ %s\n\t%s @ %s"
                                     % (FfsObj.Guid, FfsObj.Offset,
                                        self.FfsDict[FfsId].Guid, self.FfsDict[FfsId].Offset))
                 self.FfsDict[FfsId] = FfsObj
                 if LastFfsObj is not None:
-                    LastFfsObj.FreeSpace = FfsStartAddress - LastFfsObj._OFF_ - len(LastFfsObj)
+                    LastFfsObj.FreeSpace = FfsStartAddress - \
+                        LastFfsObj._OFF_ - len(LastFfsObj)
 
             FfsStartAddress += len(FfsObj)
             #
@@ -659,21 +692,23 @@ class FirmwareVolume(Image):
     HeaderSize = property(_GetHeaderLength)
     FileSystemGuid = property(_GetFileSystemGuid)
 
-## GuidDefinedImage() class
+# GuidDefinedImage() class
 #
 #  A class for GUID Defined Image
 #
+
+
 class GuidDefinedImage(Image):
     _HEADER_ = struct.Struct("1I2H8B 1H 1H")
     _HEADER_SIZE_ = _HEADER_.size
 
-    _GUID_          = struct.Struct("1I2H8B")
-    _DATA_OFFSET_   = struct.Struct("16x 1H")
-    _ATTR_          = struct.Struct("18x 1H")
+    _GUID_ = struct.Struct("1I2H8B")
+    _DATA_OFFSET_ = struct.Struct("16x 1H")
+    _ATTR_ = struct.Struct("18x 1H")
 
-    CRC32_GUID          = "FC1BCDB0-7D31-49AA-936A-A4600D9DD083"
+    CRC32_GUID = "FC1BCDB0-7D31-49AA-936A-A4600D9DD083"
     TIANO_COMPRESS_GUID = 'A31280AD-481E-41B6-95E8-127F4C984779'
-    LZMA_COMPRESS_GUID  = 'EE4E5898-3914-4259-9D6E-DC7BD79403CF'
+    LZMA_COMPRESS_GUID = 'EE4E5898-3914-4259-9D6E-DC7BD79403CF'
 
     def __init__(self, SectionDefinitionGuid=None, DataOffset=None, Attributes=None, Data=None):
         Image.__init__(self)
@@ -695,7 +730,7 @@ class GuidDefinedImage(Image):
     def _Unpack(self):
         # keep header in this Image object
         self.empty()
-        self.extend(self._BUF_[self._OFF_ : self._OFF_ + self._LEN_])
+        self.extend(self._BUF_[self._OFF_: self._OFF_ + self._LEN_])
         return len(self)
 
     def _SetAttribute(self, Attribute):
@@ -781,35 +816,37 @@ class GuidDefinedImage(Image):
     DataOffset = property(_GetDataOffset, _SetDataOffset)
     Sections = property(_GetSections)
 
-## Section() class
+# Section() class
 #
 #  A class for Section
 #
+
+
 class Section(Image):
     _TypeName = {
-        0x00    :   "<unknown>",
-        0x01    :   "COMPRESSION",
-        0x02    :   "GUID_DEFINED",
-        0x10    :   "PE32",
-        0x11    :   "PIC",
-        0x12    :   "TE",
-        0x13    :   "DXE_DEPEX",
-        0x14    :   "VERSION",
-        0x15    :   "USER_INTERFACE",
-        0x16    :   "COMPATIBILITY16",
-        0x17    :   "FIRMWARE_VOLUME_IMAGE",
-        0x18    :   "FREEFORM_SUBTYPE_GUID",
-        0x19    :   "RAW",
-        0x1B    :   "PEI_DEPEX"
+        0x00:   "<unknown>",
+        0x01:   "COMPRESSION",
+        0x02:   "GUID_DEFINED",
+        0x10:   "PE32",
+        0x11:   "PIC",
+        0x12:   "TE",
+        0x13:   "DXE_DEPEX",
+        0x14:   "VERSION",
+        0x15:   "USER_INTERFACE",
+        0x16:   "COMPATIBILITY16",
+        0x17:   "FIRMWARE_VOLUME_IMAGE",
+        0x18:   "FREEFORM_SUBTYPE_GUID",
+        0x19:   "RAW",
+        0x1B:   "PEI_DEPEX"
     }
 
     _SectionSubImages = {
-        0x01    :   CompressedImage,
-        0x02    :   GuidDefinedImage,
-        0x17    :   FirmwareVolume,
-        0x13    :   Depex,
-        0x1B    :   Depex,
-        0x15    :   Ui
+        0x01:   CompressedImage,
+        0x02:   GuidDefinedImage,
+        0x17:   FirmwareVolume,
+        0x13:   Depex,
+        0x1B:   Depex,
+        0x15:   Ui
     }
 
     # Size = 3-byte
@@ -819,8 +856,8 @@ class Section(Image):
 
     # SubTypeGuid
     # _FREE_FORM_SUBTYPE_GUID_HEADER_ = struct.Struct("1I2H8B")
-    _SIZE_          = struct.Struct("3B")
-    _TYPE_          = struct.Struct("3x 1B")
+    _SIZE_ = struct.Struct("3B")
+    _TYPE_ = struct.Struct("3x 1B")
 
     def __init__(self, Type=None, Size=None):
         Image.__init__(self)
@@ -835,9 +872,11 @@ class Section(Image):
         gIndention += 4
         SectionInfo = ' ' * gIndention
         if self.Type in self._TypeName:
-            SectionInfo += "[SECTION:%s] offset=%x size=%x" % (self._TypeName[self.Type], self._OFF_, self.Size)
+            SectionInfo += "[SECTION:%s] offset=%x size=%x" % (
+                self._TypeName[self.Type], self._OFF_, self.Size)
         else:
-            SectionInfo += "[SECTION:%x<unknown>] offset=%x size=%x " % (self.Type, self._OFF_, self.Size)
+            SectionInfo += "[SECTION:%x<unknown>] offset=%x size=%x " % (
+                self.Type, self._OFF_, self.Size)
         for Offset in self._SubImages.keys():
             SectionInfo += ", " + str(self._SubImages[Offset])
         gIndention -= 4
@@ -851,10 +890,11 @@ class Section(Image):
 
         if Type not in self._SectionSubImages:
             # no need to extract sub-image, keep all in this Image object
-            self.extend(self._BUF_[self._OFF_ : self._OFF_ + Size])
+            self.extend(self._BUF_[self._OFF_: self._OFF_ + Size])
         else:
             # keep header in this Image object
-            self.extend(self._BUF_[self._OFF_ : self._OFF_ + self._HEADER_SIZE_])
+            self.extend(
+                self._BUF_[self._OFF_: self._OFF_ + self._HEADER_SIZE_])
             #
             # use new Image object to represent payload, which may be another kind
             # of image such as PE32
@@ -862,7 +902,8 @@ class Section(Image):
             PayloadOffset = self._HEADER_SIZE_
             PayloadLen = self.Size - self._HEADER_SIZE_
             Payload = self._SectionSubImages[self.Type]()
-            Payload.frombuffer(self._BUF_, self._OFF_ + self._HEADER_SIZE_, PayloadLen)
+            Payload.frombuffer(self._BUF_, self._OFF_ +
+                               self._HEADER_SIZE_, PayloadLen)
             self._SubImages[PayloadOffset] = Payload
 
         return Size
@@ -907,51 +948,53 @@ class Section(Image):
     Size = property(_GetSize, _SetSize)
     Alignment = property(_GetAlignment, _SetAlignment)
 
-## Ffs() class
+# Ffs() class
 #
 #  A class for Ffs Section
 #
+
+
 class Ffs(Image):
     _FfsFormat = "24B%(payload_size)sB"
     # skip IntegrityCheck
     _HEADER_ = struct.Struct("1I2H8B 2x 1B 1B 3B 1B")
     _HEADER_SIZE_ = _HEADER_.size
 
-    _NAME_      = struct.Struct("1I2H8B")
+    _NAME_ = struct.Struct("1I2H8B")
     _INT_CHECK_ = struct.Struct("16x 1H")
-    _TYPE_      = struct.Struct("18x 1B")
-    _ATTR_      = struct.Struct("19x 1B")
-    _SIZE_      = struct.Struct("20x 3B")
-    _STATE_     = struct.Struct("23x 1B")
+    _TYPE_ = struct.Struct("18x 1B")
+    _ATTR_ = struct.Struct("19x 1B")
+    _SIZE_ = struct.Struct("20x 3B")
+    _STATE_ = struct.Struct("23x 1B")
 
-    FFS_ATTRIB_FIXED              = 0x04
-    FFS_ATTRIB_DATA_ALIGNMENT     = 0x38
-    FFS_ATTRIB_CHECKSUM           = 0x40
+    FFS_ATTRIB_FIXED = 0x04
+    FFS_ATTRIB_DATA_ALIGNMENT = 0x38
+    FFS_ATTRIB_CHECKSUM = 0x40
 
     _TypeName = {
-        0x00    :   "<unknown>",
-        0x01    :   "RAW",
-        0x02    :   "FREEFORM",
-        0x03    :   "SECURITY_CORE",
-        0x04    :   "PEI_CORE",
-        0x05    :   "DXE_CORE",
-        0x06    :   "PEIM",
-        0x07    :   "DRIVER",
-        0x08    :   "COMBINED_PEIM_DRIVER",
-        0x09    :   "APPLICATION",
-        0x0A    :   "SMM",
-        0x0B    :   "FIRMWARE_VOLUME_IMAGE",
-        0x0C    :   "COMBINED_SMM_DXE",
-        0x0D    :   "SMM_CORE",
-        0x0E    :   "MM_STANDALONE",
-        0x0F    :   "MM_CORE_STANDALONE",
-        0xc0    :   "OEM_MIN",
-        0xdf    :   "OEM_MAX",
-        0xe0    :   "DEBUG_MIN",
-        0xef    :   "DEBUG_MAX",
-        0xf0    :   "FFS_MIN",
-        0xff    :   "FFS_MAX",
-        0xf0    :   "FFS_PAD",
+        0x00:   "<unknown>",
+        0x01:   "RAW",
+        0x02:   "FREEFORM",
+        0x03:   "SECURITY_CORE",
+        0x04:   "PEI_CORE",
+        0x05:   "DXE_CORE",
+        0x06:   "PEIM",
+        0x07:   "DRIVER",
+        0x08:   "COMBINED_PEIM_DRIVER",
+        0x09:   "APPLICATION",
+        0x0A:   "SMM",
+        0x0B:   "FIRMWARE_VOLUME_IMAGE",
+        0x0C:   "COMBINED_SMM_DXE",
+        0x0D:   "SMM_CORE",
+        0x0E:   "MM_STANDALONE",
+        0x0F:   "MM_CORE_STANDALONE",
+        0xc0:   "OEM_MIN",
+        0xdf:   "OEM_MAX",
+        0xe0:   "DEBUG_MIN",
+        0xef:   "DEBUG_MAX",
+        0xf0:   "FFS_MIN",
+        0xff:   "FFS_MAX",
+        0xf0:   "FFS_PAD",
     }
 
     def __init__(self):
@@ -968,9 +1011,11 @@ class Ffs(Image):
         gIndention += 4
         Indention = ' ' * gIndention
         FfsInfo = Indention
-        FfsInfo +=  "[FFS:%s] offset=%x size=%x guid=%s free_space=%x alignment=%s\n" % \
-                    (Ffs._TypeName[self.Type], self._OFF_, self.Size, self.Guid, self.FreeSpace, self.Alignment)
-        SectionInfo = '\n'.join([str(self.Sections[Offset]) for Offset in self.Sections.keys()])
+        FfsInfo += "[FFS:%s] offset=%x size=%x guid=%s free_space=%x alignment=%s\n" % \
+            (Ffs._TypeName[self.Type], self._OFF_, self.Size,
+             self.Guid, self.FreeSpace, self.Alignment)
+        SectionInfo = '\n'.join([str(self.Sections[Offset])
+                                for Offset in self.Sections.keys()])
         gIndention -= 4
         return FfsInfo + SectionInfo + "\n"
 
@@ -984,7 +1029,7 @@ class Ffs(Image):
         Size1, Size2, Size3 = self._SIZE_.unpack_from(self._BUF_, self._OFF_)
         Size = Size1 + (Size2 << 8) + (Size3 << 16)
         self.empty()
-        self.extend(self._BUF_[self._OFF_ : self._OFF_ + Size])
+        self.extend(self._BUF_[self._OFF_: self._OFF_ + Size])
 
         # Pad FFS may use the same GUID. We need to avoid it.
         if self.Type == 0xf0:
@@ -1001,8 +1046,8 @@ class Ffs(Image):
                 SectionObj.frombuffer(self, SectionStartAddress)
                 #f = open(repr(SectionObj), 'wb')
                 #SectionObj.Size = 0
-                #SectionObj.tofile(f)
-                #f.close()
+                # SectionObj.tofile(f)
+                # f.close()
                 self.Sections[SectionStartAddress] = SectionObj
                 SectionStartAddress += len(SectionObj)
                 SectionStartAddress = (SectionStartAddress + 3) & (~3)
@@ -1076,7 +1121,7 @@ class Ffs(Image):
     State = property(_GetState, _SetState)
 
 
-## MultipleFv() class
+# MultipleFv() class
 #
 #  A class for Multiple FV
 #
@@ -1101,18 +1146,20 @@ class MultipleFv(FirmwareVolume):
             self.BasicInfo.append([Fv.Name, Fv.FileSystemGuid, Fv.Size])
             self.FfsDict.update(Fv.FfsDict)
 
-## Class Eot
+# Class Eot
 #
 # This class is used to define Eot main entrance
 #
 # @param object:          Inherited from object class
 #
+
+
 class Eot(object):
-    ## The constructor
+    # The constructor
     #
     #   @param  self:      The object pointer
     #
-    def __init__(self, CommandLineOption=True, IsInit=True, SourceFileList=None, \
+    def __init__(self, CommandLineOption=True, IsInit=True, SourceFileList=None,
                  IncludeDirList=None, DecFileList=None, GuidList=None, LogFile=None,
                  FvFileList="", MapFileList="", Report='Report.html', Dispatch=None):
         # Version and Copyright
@@ -1136,10 +1183,13 @@ class Eot(object):
             if "EDK_SOURCE" not in os.environ:
                 pass
             else:
-                EotGlobalData.gEDK_SOURCE = os.path.normpath(os.getenv("EDK_SOURCE"))
+                EotGlobalData.gEDK_SOURCE = os.path.normpath(
+                    os.getenv("EDK_SOURCE"))
         else:
-            EotGlobalData.gEFI_SOURCE = os.path.normpath(os.getenv("EFI_SOURCE"))
-            EotGlobalData.gEDK_SOURCE = os.path.join(EotGlobalData.gEFI_SOURCE, 'Edk')
+            EotGlobalData.gEFI_SOURCE = os.path.normpath(
+                os.getenv("EFI_SOURCE"))
+            EotGlobalData.gEDK_SOURCE = os.path.join(
+                EotGlobalData.gEFI_SOURCE, 'Edk')
 
         if "WORKSPACE" not in os.environ:
             EdkLogger.error("EOT", BuildToolError.ATTRIBUTE_NOT_AVAILABLE, "Environment variable not found",
@@ -1159,16 +1209,19 @@ class Eot(object):
             for FvFile in GetSplitValueList(self.FvFileList, ' '):
                 FvFile = os.path.normpath(FvFile)
                 if not os.path.isfile(FvFile):
-                    EdkLogger.error("Eot", EdkLogger.EOT_ERROR, "Can not find file %s " % FvFile)
+                    EdkLogger.error("Eot", EdkLogger.EOT_ERROR,
+                                    "Can not find file %s " % FvFile)
                 EotGlobalData.gFV_FILE.append(FvFile)
         else:
-            EdkLogger.error("Eot", EdkLogger.EOT_ERROR, "The fv file list of target platform was not specified")
+            EdkLogger.error("Eot", EdkLogger.EOT_ERROR,
+                            "The fv file list of target platform was not specified")
 
         if self.MapFileList:
             for MapFile in GetSplitValueList(self.MapFileList, ' '):
                 MapFile = os.path.normpath(MapFile)
                 if not os.path.isfile(MapFile):
-                    EdkLogger.error("Eot", EdkLogger.EOT_ERROR, "Can not find file %s " % MapFile)
+                    EdkLogger.error("Eot", EdkLogger.EOT_ERROR,
+                                    "Can not find file %s " % MapFile)
                 EotGlobalData.gMAP_FILE.append(MapFile)
 
         # Generate source file list
@@ -1214,7 +1267,7 @@ class Eot(object):
         # Close Database
         EotGlobalData.gDb.Close()
 
-    ## ParseDecFile() method
+    # ParseDecFile() method
     #
     #  parse DEC file and get all GUID names with GUID values as {GuidName : GuidValue}
     #  The Dict is stored in EotGlobalData.gGuidDict
@@ -1227,17 +1280,18 @@ class Eot(object):
             path = os.path.normpath(DecFileList)
             lfr = open(path, 'rb')
             for line in lfr:
-                path = os.path.normpath(os.path.join(EotGlobalData.gWORKSPACE, line.strip()))
+                path = os.path.normpath(os.path.join(
+                    EotGlobalData.gWORKSPACE, line.strip()))
                 if os.path.exists(path):
                     dfr = open(path, 'rb')
                     for line in dfr:
                         line = CleanString(line)
                         list = line.split('=')
                         if len(list) == 2:
-                            EotGlobalData.gGuidDict[list[0].strip()] = GuidStructureStringToGuidString(list[1].strip())
+                            EotGlobalData.gGuidDict[list[0].strip(
+                            )] = GuidStructureStringToGuidString(list[1].strip())
 
-
-    ## ParseGuidList() method
+    # ParseGuidList() method
     #
     #  Parse Guid list and get all GUID names with GUID values as {GuidName : GuidValue}
     #  The Dict is stored in EotGlobalData.gGuidDict
@@ -1245,6 +1299,7 @@ class Eot(object):
     #  @param self: The object pointer
     #  @param GuidList: A list of all GUID and its value
     #
+
     def ParseGuidList(self, GuidList):
         Path = os.path.join(EotGlobalData.gWORKSPACE, GuidList)
         if os.path.isfile(Path):
@@ -1253,7 +1308,7 @@ class Eot(object):
                     (GuidName, GuidValue) = Line.split()
                     EotGlobalData.gGuidDict[GuidName] = GuidValue
 
-    ## ConvertLogFile() method
+    # ConvertLogFile() method
     #
     #  Parse a real running log file to get real dispatch order
     #  The result is saved to old file name + '.new'
@@ -1273,11 +1328,11 @@ class Eot(object):
                 line = line.replace('.efi', '')
                 index = line.find("Loading PEIM at ")
                 if index > -1:
-                    newline.append(line[index + 55 : ])
+                    newline.append(line[index + 55:])
                     continue
                 index = line.find("Loading driver at ")
                 if index > -1:
-                    newline.append(line[index + 57 : ])
+                    newline.append(line[index + 57:])
                     continue
 
         for line in newline:
@@ -1288,7 +1343,7 @@ class Eot(object):
         if lfw:
             lfw.close()
 
-    ## GenerateSourceFileList() method
+    # GenerateSourceFileList() method
     #
     #  Generate a list of all source files
     #  1. Search the file list one by one
@@ -1314,8 +1369,9 @@ class Eot(object):
         if SourceFileList:
             sfl = open(SourceFileList, 'r')
             for line in sfl:
-                line = os.path.normpath(os.path.join(EotGlobalData.gWORKSPACE, line.strip()))
-                if line[-2:].upper() == '.C' or  line[-2:].upper() == '.H':
+                line = os.path.normpath(os.path.join(
+                    EotGlobalData.gWORKSPACE, line.strip()))
+                if line[-2:].upper() == '.C' or line[-2:].upper() == '.H':
                     if line not in mCurrentSourceFileList:
                         mCurrentSourceFileList.append(line)
                         mSourceFileList.append(line)
@@ -1324,7 +1380,8 @@ class Eot(object):
                     if mCurrentInfFile != '':
                         mFileList[mCurrentInfFile] = mCurrentSourceFileList
                         mCurrentSourceFileList = []
-                    mCurrentInfFile = os.path.normpath(os.path.join(EotGlobalData.gWORKSPACE, line))
+                    mCurrentInfFile = os.path.normpath(
+                        os.path.join(EotGlobalData.gWORKSPACE, line))
                     EotGlobalData.gOP_INF.write('%s\n' % mCurrentInfFile)
             if mCurrentInfFile not in mFileList:
                 mFileList[mCurrentInfFile] = mCurrentSourceFileList
@@ -1335,13 +1392,15 @@ class Eot(object):
             for line in ifl:
                 if not line.strip():
                     continue
-                newline = os.path.normpath(os.path.join(EotGlobalData.gWORKSPACE, line.strip()))
+                newline = os.path.normpath(os.path.join(
+                    EotGlobalData.gWORKSPACE, line.strip()))
                 for Root, Dirs, Files in os.walk(str(newline)):
                     for File in Files:
                         FullPath = os.path.normpath(os.path.join(Root, File))
                         if FullPath not in mSourceFileList and File[-2:].upper() == '.H':
                             mSourceFileList.append(FullPath)
-                            EotGlobalData.gOP_SOURCE_FILES.write('%s\n' % FullPath)
+                            EotGlobalData.gOP_SOURCE_FILES.write(
+                                '%s\n' % FullPath)
                         if FullPath not in mDecFileList and File.upper().find('.DEC') > -1:
                             mDecFileList.append(FullPath)
 
@@ -1351,7 +1410,7 @@ class Eot(object):
         EotGlobalData.gINF_FILES = mFileList
         EotGlobalData.gOP_INF.close()
 
-    ## GenerateReport() method
+    # GenerateReport() method
     #
     #  Generate final HTML report
     #
@@ -1362,7 +1421,7 @@ class Eot(object):
         Rep = Report(self.Report, EotGlobalData.gFV, self.Dispatch)
         Rep.GenerateReport()
 
-    ## LoadMapInfo() method
+    # LoadMapInfo() method
     #
     #  Load map files and parse them
     #
@@ -1373,7 +1432,7 @@ class Eot(object):
             EdkLogger.quiet("Parsing Map file ... ")
             EotGlobalData.gMap = ParseMapFile(EotGlobalData.gMAP_FILE)
 
-    ## LoadFvInfo() method
+    # LoadFvInfo() method
     #
     #  Load FV binary files and parse them
     #
@@ -1385,9 +1444,10 @@ class Eot(object):
         EotGlobalData.gFV.Dispatch(EotGlobalData.gDb)
 
         for Protocol in EotGlobalData.gProtocolList:
-            EotGlobalData.gOP_UN_MATCHED_IN_LIBRARY_CALLING.write('%s\n' %Protocol)
+            EotGlobalData.gOP_UN_MATCHED_IN_LIBRARY_CALLING.write(
+                '%s\n' % Protocol)
 
-    ## GenerateReportDatabase() method
+    # GenerateReportDatabase() method
     #
     #  Generate data for the information needed by report
     #  1. Update name, macro and value of all found PPI/PROTOCOL GUID
@@ -1396,7 +1456,8 @@ class Eot(object):
     #  @param self: The object pointer
     #
     def GenerateReportDatabase(self):
-        EdkLogger.quiet("Generating the cross-reference table of GUID for Ppi/Protocol ... ")
+        EdkLogger.quiet(
+            "Generating the cross-reference table of GUID for Ppi/Protocol ... ")
 
         # Update Protocol/Ppi Guid
         SqlCommand = """select DISTINCT GuidName from Report"""
@@ -1410,12 +1471,13 @@ class Eot(object):
             # Find guid value defined in Dec file
             if GuidName in EotGlobalData.gGuidDict:
                 GuidValue = EotGlobalData.gGuidDict[GuidName]
-                SqlCommand = """update Report set GuidMacro = '%s', GuidValue = '%s' where GuidName = '%s'""" %(GuidMacro, GuidValue, GuidName)
+                SqlCommand = """update Report set GuidMacro = '%s', GuidValue = '%s' where GuidName = '%s'""" % (
+                    GuidMacro, GuidValue, GuidName)
                 EotGlobalData.gDb.TblReport.Exec(SqlCommand)
                 continue
 
             # Search defined Macros for guid name
-            SqlCommand ="""select DISTINCT Value, Modifier from Query where Name like '%s'""" % GuidName
+            SqlCommand = """select DISTINCT Value, Modifier from Query where Name like '%s'""" % GuidName
             GuidMacroSet = EotGlobalData.gDb.TblReport.Exec(SqlCommand)
             # Ignore NULL result
             if not GuidMacroSet:
@@ -1424,14 +1486,18 @@ class Eot(object):
             if not GuidMacro:
                 continue
             # Find Guid value of Guid Macro
-            SqlCommand ="""select DISTINCT Value from Query2 where Value like '%%%s%%' and Model = %s""" % (GuidMacro, MODEL_IDENTIFIER_MACRO_DEFINE)
+            SqlCommand = """select DISTINCT Value from Query2 where Value like '%%%s%%' and Model = %s""" % (
+                GuidMacro, MODEL_IDENTIFIER_MACRO_DEFINE)
             GuidValueSet = EotGlobalData.gDb.TblReport.Exec(SqlCommand)
             if GuidValueSet != []:
                 GuidValue = GuidValueSet[0][0]
-                GuidValue = GuidValue[GuidValue.find(GuidMacro) + len(GuidMacro) :]
-                GuidValue = GuidValue.lower().replace('\\', '').replace('\r', '').replace('\n', '').replace('l', '').strip()
+                GuidValue = GuidValue[GuidValue.find(
+                    GuidMacro) + len(GuidMacro):]
+                GuidValue = GuidValue.lower().replace('\\', '').replace(
+                    '\r', '').replace('\n', '').replace('l', '').strip()
                 GuidValue = GuidStructureStringToGuidString(GuidValue)
-                SqlCommand = """update Report set GuidMacro = '%s', GuidValue = '%s' where GuidName = '%s'""" %(GuidMacro, GuidValue, GuidName)
+                SqlCommand = """update Report set GuidMacro = '%s', GuidValue = '%s' where GuidName = '%s'""" % (
+                    GuidMacro, GuidValue, GuidName)
                 EotGlobalData.gDb.TblReport.Exec(SqlCommand)
                 continue
 
@@ -1444,7 +1510,7 @@ class Eot(object):
             if Record[1] == 'Protocol':
                 EotGlobalData.gProtocolList[Record[0].lower()] = -2
 
-    ## GenerateQueryTable() method
+    # GenerateQueryTable() method
     #
     #  Generate two tables improve query performance
     #
@@ -1462,7 +1528,7 @@ class Eot(object):
                             % (Identifier[0], MODEL_IDENTIFIER_MACRO_DEFINE)
             EotGlobalData.gDb.TblReport.Exec(SqlCommand)
 
-    ## ParseExecutionOrder() method
+    # ParseExecutionOrder() method
     #
     #  Get final execution order
     #  1. Search all PPI
@@ -1474,7 +1540,7 @@ class Eot(object):
         EdkLogger.quiet("Searching Ppi/Protocol ... ")
         for Identifier in EotGlobalData.gIdentifierTableList:
             ModuleID, ModuleName, ModuleGuid, SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, Enabled = \
-            -1, '', '', -1, '', '', '', '', '', '', '', '', 0
+                -1, '', '', -1, '', '', '', '', '', '', '', '', 0
 
             SourceFileID = Identifier[0].replace('Identifier', '')
             SourceFileFullPath = Identifier[1]
@@ -1485,85 +1551,108 @@ class Eot(object):
             SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
                             where (Name like '%%%s%%' or Name like '%%%s%%' or Name like '%%%s%%') and Model = %s""" \
                             % (Identifier, '.InstallPpi', '->InstallPpi', 'PeiInstallPpi', MODEL_IDENTIFIER_FUNCTION_CALLING)
-            SearchPpi(SqlCommand, Identifier, SourceFileID, SourceFileFullPath, ItemMode)
+            SearchPpi(SqlCommand, Identifier, SourceFileID,
+                      SourceFileFullPath, ItemMode)
 
             ItemMode = 'Produced'
             SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
                             where (Name like '%%%s%%' or Name like '%%%s%%') and Model = %s""" \
                             % (Identifier, '.ReInstallPpi', '->ReInstallPpi', MODEL_IDENTIFIER_FUNCTION_CALLING)
-            SearchPpi(SqlCommand, Identifier, SourceFileID, SourceFileFullPath, ItemMode, 2)
+            SearchPpi(SqlCommand, Identifier, SourceFileID,
+                      SourceFileFullPath, ItemMode, 2)
 
-            SearchPpiCallFunction(Identifier, SourceFileID, SourceFileFullPath, ItemMode)
+            SearchPpiCallFunction(Identifier, SourceFileID,
+                                  SourceFileFullPath, ItemMode)
 
             ItemMode = 'Consumed'
             SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
                             where (Name like '%%%s%%' or Name like '%%%s%%') and Model = %s""" \
                             % (Identifier, '.LocatePpi', '->LocatePpi', MODEL_IDENTIFIER_FUNCTION_CALLING)
-            SearchPpi(SqlCommand, Identifier, SourceFileID, SourceFileFullPath, ItemMode)
+            SearchPpi(SqlCommand, Identifier, SourceFileID,
+                      SourceFileFullPath, ItemMode)
 
-            SearchFunctionCalling(Identifier, SourceFileID, SourceFileFullPath, 'Ppi', ItemMode)
+            SearchFunctionCalling(Identifier, SourceFileID,
+                                  SourceFileFullPath, 'Ppi', ItemMode)
 
             ItemMode = 'Callback'
             SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
                             where (Name like '%%%s%%' or Name like '%%%s%%') and Model = %s""" \
                             % (Identifier, '.NotifyPpi', '->NotifyPpi', MODEL_IDENTIFIER_FUNCTION_CALLING)
-            SearchPpi(SqlCommand, Identifier, SourceFileID, SourceFileFullPath, ItemMode)
+            SearchPpi(SqlCommand, Identifier, SourceFileID,
+                      SourceFileFullPath, ItemMode)
 
             # Find Protocols
             ItemMode = 'Produced'
             SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
                             where (Name like '%%%s%%' or Name like '%%%s%%' or Name like '%%%s%%' or Name like '%%%s%%') and Model = %s""" \
                             % (Identifier, '.InstallProtocolInterface', '.ReInstallProtocolInterface', '->InstallProtocolInterface', '->ReInstallProtocolInterface', MODEL_IDENTIFIER_FUNCTION_CALLING)
-            SearchProtocols(SqlCommand, Identifier, SourceFileID, SourceFileFullPath, ItemMode, 1)
+            SearchProtocols(SqlCommand, Identifier, SourceFileID,
+                            SourceFileFullPath, ItemMode, 1)
 
             SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
                             where (Name like '%%%s%%' or Name like '%%%s%%') and Model = %s""" \
                             % (Identifier, '.InstallMultipleProtocolInterfaces', '->InstallMultipleProtocolInterfaces', MODEL_IDENTIFIER_FUNCTION_CALLING)
-            SearchProtocols(SqlCommand, Identifier, SourceFileID, SourceFileFullPath, ItemMode, 2)
+            SearchProtocols(SqlCommand, Identifier, SourceFileID,
+                            SourceFileFullPath, ItemMode, 2)
 
-            SearchFunctionCalling(Identifier, SourceFileID, SourceFileFullPath, 'Protocol', ItemMode)
+            SearchFunctionCalling(Identifier, SourceFileID,
+                                  SourceFileFullPath, 'Protocol', ItemMode)
 
             ItemMode = 'Consumed'
             SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
                             where (Name like '%%%s%%' or Name like '%%%s%%') and Model = %s""" \
                             % (Identifier, '.LocateProtocol', '->LocateProtocol', MODEL_IDENTIFIER_FUNCTION_CALLING)
-            SearchProtocols(SqlCommand, Identifier, SourceFileID, SourceFileFullPath, ItemMode, 0)
+            SearchProtocols(SqlCommand, Identifier, SourceFileID,
+                            SourceFileFullPath, ItemMode, 0)
 
             SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
                             where (Name like '%%%s%%' or Name like '%%%s%%') and Model = %s""" \
                             % (Identifier, '.HandleProtocol', '->HandleProtocol', MODEL_IDENTIFIER_FUNCTION_CALLING)
-            SearchProtocols(SqlCommand, Identifier, SourceFileID, SourceFileFullPath, ItemMode, 1)
+            SearchProtocols(SqlCommand, Identifier, SourceFileID,
+                            SourceFileFullPath, ItemMode, 1)
 
-            SearchFunctionCalling(Identifier, SourceFileID, SourceFileFullPath, 'Protocol', ItemMode)
+            SearchFunctionCalling(Identifier, SourceFileID,
+                                  SourceFileFullPath, 'Protocol', ItemMode)
 
             ItemMode = 'Callback'
             SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
                             where (Name like '%%%s%%' or Name like '%%%s%%') and Model = %s""" \
                             % (Identifier, '.RegisterProtocolNotify', '->RegisterProtocolNotify', MODEL_IDENTIFIER_FUNCTION_CALLING)
-            SearchProtocols(SqlCommand, Identifier, SourceFileID, SourceFileFullPath, ItemMode, 0)
+            SearchProtocols(SqlCommand, Identifier, SourceFileID,
+                            SourceFileFullPath, ItemMode, 0)
 
-            SearchFunctionCalling(Identifier, SourceFileID, SourceFileFullPath, 'Protocol', ItemMode)
+            SearchFunctionCalling(Identifier, SourceFileID,
+                                  SourceFileFullPath, 'Protocol', ItemMode)
 
         # Hard Code
-        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi', 'Produced', 'gEfiSecPlatformInformationPpiGuid', '', '', '', 0)
-        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi', 'Produced', 'gEfiNtLoadAsDllPpiGuid', '', '', '', 0)
-        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi', 'Produced', 'gNtPeiLoadFileGuid', '', '', '', 0)
-        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi', 'Produced', 'gPeiNtAutoScanPpiGuid', '', '', '', 0)
-        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi', 'Produced', 'gNtFwhPpiGuid', '', '', '', 0)
-        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi', 'Produced', 'gPeiNtThunkPpiGuid', '', '', '', 0)
-        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi', 'Produced', 'gPeiPlatformTypePpiGuid', '', '', '', 0)
-        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi', 'Produced', 'gPeiFrequencySelectionCpuPpiGuid', '', '', '', 0)
-        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi', 'Produced', 'gPeiCachePpiGuid', '', '', '', 0)
+        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi',
+                                           'Produced', 'gEfiSecPlatformInformationPpiGuid', '', '', '', 0)
+        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '',
+                                           'Ppi', 'Produced', 'gEfiNtLoadAsDllPpiGuid', '', '', '', 0)
+        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '',
+                                           'Ppi', 'Produced', 'gNtPeiLoadFileGuid', '', '', '', 0)
+        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '',
+                                           'Ppi', 'Produced', 'gPeiNtAutoScanPpiGuid', '', '', '', 0)
+        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '',
+                                           '', 'Ppi', 'Produced', 'gNtFwhPpiGuid', '', '', '', 0)
+        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '',
+                                           'Ppi', 'Produced', 'gPeiNtThunkPpiGuid', '', '', '', 0)
+        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '',
+                                           'Ppi', 'Produced', 'gPeiPlatformTypePpiGuid', '', '', '', 0)
+        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '', 'Ppi',
+                                           'Produced', 'gPeiFrequencySelectionCpuPpiGuid', '', '', '', 0)
+        EotGlobalData.gDb.TblReport.Insert(-2, '', '', -1, '', '',
+                                           'Ppi', 'Produced', 'gPeiCachePpiGuid', '', '', '', 0)
 
         EotGlobalData.gDb.Conn.commit()
 
-
-    ## BuildDatabase() methoc
+    # BuildDatabase() methoc
     #
     #  Build the database for target
     #
     #  @param self: The object pointer
     #
+
     def BuildDatabase(self):
         # Clean report table
         EotGlobalData.gDb.TblReport.Drop()
@@ -1576,9 +1665,10 @@ class Eot(object):
             c.CreateCCodeDB(EotGlobalData.gSOURCE_FILES)
             EdkLogger.quiet("Building database for source code done!")
 
-        EotGlobalData.gIdentifierTableList = GetTableList((MODEL_FILE_C, MODEL_FILE_H), 'Identifier', EotGlobalData.gDb)
+        EotGlobalData.gIdentifierTableList = GetTableList(
+            (MODEL_FILE_C, MODEL_FILE_H), 'Identifier', EotGlobalData.gDb)
 
-    ## BuildMetaDataFileDatabase() method
+    # BuildMetaDataFileDatabase() method
     #
     #  Build the database for meta data files
     #
@@ -1590,13 +1680,13 @@ class Eot(object):
         for InfFile in Inf_Files:
             if not InfFile:
                 continue
-            EdkLogger.quiet("Parsing %s ..."  % str(InfFile))
+            EdkLogger.quiet("Parsing %s ..." % str(InfFile))
             EdkInfParser(InfFile, EotGlobalData.gDb, Inf_Files[InfFile])
 
         EotGlobalData.gDb.Conn.commit()
         EdkLogger.quiet("Building database for meta data files done!")
 
-    ## ParseOption() method
+    # ParseOption() method
     #
     #  Parse command line options
     #
@@ -1632,7 +1722,7 @@ class Eot(object):
         if Options.keepdatabase:
             self.IsInit = False
 
-    ## SetLogLevel() method
+    # SetLogLevel() method
     #
     #  Set current log level of the tool based on args
     #
@@ -1649,7 +1739,7 @@ class Eot(object):
         else:
             EdkLogger.SetLevel(EdkLogger.INFO)
 
-    ## EotOptionParser() method
+    # EotOptionParser() method
     #
     #  Using standard Python module optparse to parse command line option of this tool.
     #
@@ -1659,37 +1749,42 @@ class Eot(object):
     #  @retval Args  Target of build command
     #
     def EotOptionParser(self):
-        Parser = OptionParser(description = self.Copyright, version = self.Version, prog = "Eot.exe", usage = "%prog [options]")
+        Parser = OptionParser(description=self.Copyright,
+                              version=self.Version, prog="Eot.exe", usage="%prog [options]")
         Parser.add_option("-m", "--makefile filename", action="store", type="string", dest='MakeFile',
-            help="Specify a makefile for the platform.")
+                          help="Specify a makefile for the platform.")
         Parser.add_option("-c", "--dsc filename", action="store", type="string", dest="DscFile",
-            help="Specify a dsc file for the platform.")
+                          help="Specify a dsc file for the platform.")
         Parser.add_option("-f", "--fv filename", action="store", type="string", dest="FvFileList",
-            help="Specify fv file list, quoted by \"\".")
+                          help="Specify fv file list, quoted by \"\".")
         Parser.add_option("-a", "--map filename", action="store", type="string", dest="MapFileList",
-            help="Specify map file list, quoted by \"\".")
+                          help="Specify map file list, quoted by \"\".")
         Parser.add_option("-s", "--source files", action="store", type="string", dest="SourceFileList",
-            help="Specify source file list by a file")
+                          help="Specify source file list by a file")
         Parser.add_option("-i", "--include dirs", action="store", type="string", dest="IncludeDirList",
-            help="Specify include dir list by a file")
+                          help="Specify include dir list by a file")
         Parser.add_option("-e", "--dec files", action="store", type="string", dest="DecFileList",
-            help="Specify dec file list by a file")
+                          help="Specify dec file list by a file")
         Parser.add_option("-g", "--guid list", action="store", type="string", dest="GuidList",
-            help="Specify guid file list by a file")
+                          help="Specify guid file list by a file")
         Parser.add_option("-l", "--log filename", action="store", type="string", dest="LogFile",
-            help="Specify real execution log file")
+                          help="Specify real execution log file")
 
-        Parser.add_option("-k", "--keepdatabase", action="store_true", type=None, help="The existing Eot database will not be cleaned except report information if this option is specified.")
+        Parser.add_option("-k", "--keepdatabase", action="store_true", type=None,
+                          help="The existing Eot database will not be cleaned except report information if this option is specified.")
 
-        Parser.add_option("-q", "--quiet", action="store_true", type=None, help="Disable all messages except FATAL ERRORS.")
-        Parser.add_option("-v", "--verbose", action="store_true", type=None, help="Turn on verbose output with informational messages printed, "\
-                                                                                   "including library instances selected, final dependency expression, "\
-                                                                                   "and warning messages, etc.")
-        Parser.add_option("-d", "--debug", action="store", type="int", help="Enable debug messages at specified level.")
+        Parser.add_option("-q", "--quiet", action="store_true",
+                          type=None, help="Disable all messages except FATAL ERRORS.")
+        Parser.add_option("-v", "--verbose", action="store_true", type=None, help="Turn on verbose output with informational messages printed, "
+                          "including library instances selected, final dependency expression, "
+                          "and warning messages, etc.")
+        Parser.add_option("-d", "--debug", action="store", type="int",
+                          help="Enable debug messages at specified level.")
 
-        (Opt, Args)=Parser.parse_args()
+        (Opt, Args) = Parser.parse_args()
 
         return (Opt, Args)
+
 
 ##
 #
@@ -1700,7 +1795,8 @@ if __name__ == '__main__':
     # Initialize log system
     EdkLogger.Initialize()
     EdkLogger.IsRaiseError = False
-    EdkLogger.quiet(time.strftime("%H:%M:%S, %b.%d %Y ", time.localtime()) + "[00:00]" + "\n")
+    EdkLogger.quiet(time.strftime("%H:%M:%S, %b.%d %Y ",
+                    time.localtime()) + "[00:00]" + "\n")
 
     StartTime = time.clock()
     Eot = Eot(CommandLineOption=False,
@@ -1709,5 +1805,7 @@ if __name__ == '__main__':
               FvFileList=r'C:\TestEot\FVRECOVERY.Fv')
     FinishTime = time.clock()
 
-    BuildDuration = time.strftime("%M:%S", time.gmtime(int(round(FinishTime - StartTime))))
-    EdkLogger.quiet("\n%s [%s]" % (time.strftime("%H:%M:%S, %b.%d %Y", time.localtime()), BuildDuration))
+    BuildDuration = time.strftime(
+        "%M:%S", time.gmtime(int(round(FinishTime - StartTime))))
+    EdkLogger.quiet("\n%s [%s]" % (time.strftime(
+        "%H:%M:%S, %b.%d %Y", time.localtime()), BuildDuration))

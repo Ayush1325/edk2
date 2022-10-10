@@ -1,4 +1,4 @@
-## @file
+# @file
 #
 # This file is the main entry for UPT
 #
@@ -13,6 +13,35 @@ UPT
 
 ## import modules
 #
+from BuildVersion import gBUILD_VERSION
+from Core.IpiDb import IpiDatabase
+from Library import GlobalData
+from Library.Misc import GetWorkspace
+import TestInstall
+import ReplacePkg
+import InventoryWs
+import RmPkg
+import InstallPkg
+import MkPkg
+from Common.MultipleWorkspace import MultipleWorkspace as mws
+from Logger.ToolError import UPT_ALREADY_INSTALLED_ERROR
+from Logger.ToolError import FatalError
+from Logger.ToolError import OPTION_CONFLICT
+from Logger.ToolError import FILE_TYPE_MISMATCH
+from Logger.ToolError import OPTION_MISSING
+from Logger.ToolError import FILE_NOT_FOUND
+from Logger.StringTable import MSG_USAGE
+from Logger.StringTable import MSG_DESCRIPTION
+from Logger.StringTable import MSG_VERSION
+import Logger.Log as Logger
+from Logger import StringTable as ST
+from platform import python_version
+from traceback import format_exc
+from optparse import OptionParser
+import platform as pf
+from sys import platform
+import os.path
+from Core import FileHook
 import locale
 import sys
 from imp import reload
@@ -20,57 +49,29 @@ encoding = locale.getdefaultlocale()[1]
 if encoding:
     reload(sys)
     sys.setdefaultencoding(encoding)
-from Core import FileHook
-import os.path
-from sys import platform
-import platform as pf
-from optparse import OptionParser
-from traceback import format_exc
-from platform import python_version
 
-from Logger import StringTable as ST
-import Logger.Log as Logger
-from Logger.StringTable import MSG_VERSION
-from Logger.StringTable import MSG_DESCRIPTION
-from Logger.StringTable import MSG_USAGE
-from Logger.ToolError import FILE_NOT_FOUND
-from Logger.ToolError import OPTION_MISSING
-from Logger.ToolError import FILE_TYPE_MISMATCH
-from Logger.ToolError import OPTION_CONFLICT
-from Logger.ToolError import FatalError
-from Logger.ToolError import UPT_ALREADY_INSTALLED_ERROR
-from Common.MultipleWorkspace import MultipleWorkspace as mws
 
-import MkPkg
-import InstallPkg
-import RmPkg
-import InventoryWs
-import ReplacePkg
-import TestInstall
-from Library.Misc import GetWorkspace
-from Library import GlobalData
-from Core.IpiDb import IpiDatabase
-from BuildVersion import gBUILD_VERSION
-
-## CheckConflictOption
+# CheckConflictOption
 #
 # CheckConflictOption
 #
+
 def CheckConflictOption(Opt):
     if (Opt.PackFileToCreate or Opt.PackFileToInstall or Opt.PackFileToRemove or Opt.PackFileToReplace) \
-    and Opt.InventoryWs:
+            and Opt.InventoryWs:
         Logger.Error("UPT", OPTION_CONFLICT, ExtraData=ST.ERR_L_OA_EXCLUSIVE)
     elif Opt.PackFileToReplace and (Opt.PackFileToCreate or Opt.PackFileToInstall or Opt.PackFileToRemove):
         Logger.Error("UPT", OPTION_CONFLICT, ExtraData=ST.ERR_U_ICR_EXCLUSIVE)
     elif (Opt.PackFileToCreate and Opt.PackFileToInstall and Opt.PackFileToRemove):
-        Logger.Error("UPT", OPTION_CONFLICT, ExtraData=ST.ERR_REQUIRE_I_C_R_OPTION)
+        Logger.Error("UPT", OPTION_CONFLICT,
+                     ExtraData=ST.ERR_REQUIRE_I_C_R_OPTION)
     elif Opt.PackFileToCreate and Opt.PackFileToInstall:
         Logger.Error("UPT", OPTION_CONFLICT, ExtraData=ST.ERR_I_C_EXCLUSIVE)
     elif Opt.PackFileToInstall and Opt.PackFileToRemove:
         Logger.Error("UPT", OPTION_CONFLICT, ExtraData=ST.ERR_I_R_EXCLUSIVE)
-    elif Opt.PackFileToCreate and  Opt.PackFileToRemove:
+    elif Opt.PackFileToCreate and Opt.PackFileToRemove:
         Logger.Error("UPT", OPTION_CONFLICT, ExtraData=ST.ERR_C_R_EXCLUSIVE)
-    elif Opt.TestDistFiles and (Opt.PackFileToCreate or Opt.PackFileToInstall \
+    elif Opt.TestDistFiles and (Opt.PackFileToCreate or Opt.PackFileToInstall
                                 or Opt.PackFileToRemove or Opt.PackFileToReplace):
         Logger.Error("UPT", OPTION_CONFLICT, ExtraData=ST.ERR_C_R_EXCLUSIVE)
 
@@ -78,8 +79,10 @@ def CheckConflictOption(Opt):
         Logger.Warn("UPT", ST.WARN_CUSTOMPATH_OVERRIDE_USEGUIDEDPATH)
         Opt.UseGuidedPkgPath = False
 
-## SetLogLevel
+# SetLogLevel
 #
+
+
 def SetLogLevel(Opt):
     if Opt.opt_verbose:
         Logger.SetLevel(Logger.VERBOSE)
@@ -96,24 +99,29 @@ def SetLogLevel(Opt):
     else:
         Logger.SetLevel(Logger.INFO)
 
-## Main
+# Main
 #
 # Main
 #
+
+
 def Main():
     Logger.Initialize()
 
     Parser = OptionParser(version=(MSG_VERSION + ' Build ' + gBUILD_VERSION), description=MSG_DESCRIPTION,
                           prog="UPT.exe", usage=MSG_USAGE)
 
-    Parser.add_option("-d", "--debug", action="store", type="int", dest="debug_level", help=ST.HLP_PRINT_DEBUG_INFO)
+    Parser.add_option("-d", "--debug", action="store", type="int",
+                      dest="debug_level", help=ST.HLP_PRINT_DEBUG_INFO)
 
     Parser.add_option("-v", "--verbose", action="store_true", dest="opt_verbose",
                       help=ST.HLP_PRINT_INFORMATIONAL_STATEMENT)
 
-    Parser.add_option("-s", "--silent", action="store_true", dest="opt_slient", help=ST.HLP_RETURN_NO_DISPLAY)
+    Parser.add_option("-s", "--silent", action="store_true",
+                      dest="opt_slient", help=ST.HLP_RETURN_NO_DISPLAY)
 
-    Parser.add_option("-q", "--quiet", action="store_true", dest="opt_quiet", help=ST.HLP_RETURN_AND_DISPLAY)
+    Parser.add_option("-q", "--quiet", action="store_true",
+                      dest="opt_quiet", help=ST.HLP_RETURN_AND_DISPLAY)
 
     Parser.add_option("-i", "--install", action="append", type="string", dest="Install_Distribution_Package_File",
                       help=ST.HLP_SPECIFY_PACKAGE_NAME_INSTALL)
@@ -136,11 +144,14 @@ def Main():
     Parser.add_option("-l", "--list", action="store_true", dest="List_Dist_Installed",
                       help=ST.HLP_LIST_DIST_INSTALLED)
 
-    Parser.add_option("-f", "--force", action="store_true", dest="Yes", help=ST.HLP_DISABLE_PROMPT)
+    Parser.add_option("-f", "--force", action="store_true",
+                      dest="Yes", help=ST.HLP_DISABLE_PROMPT)
 
-    Parser.add_option("-n", "--custom-path", action="store_true", dest="CustomPath", help=ST.HLP_CUSTOM_PATH_PROMPT)
+    Parser.add_option("-n", "--custom-path", action="store_true",
+                      dest="CustomPath", help=ST.HLP_CUSTOM_PATH_PROMPT)
 
-    Parser.add_option("-x", "--free-lock", action="store_true", dest="SkipLock", help=ST.HLP_SKIP_LOCK_CHECK)
+    Parser.add_option("-x", "--free-lock", action="store_true",
+                      dest="SkipLock", help=ST.HLP_SKIP_LOCK_CHECK)
 
     Parser.add_option("-u", "--replace", action="store", type="string", dest="Replace_Distribution_Package_File",
                       help=ST.HLP_SPECIFY_PACKAGE_NAME_REPLACE)
@@ -148,7 +159,8 @@ def Main():
     Parser.add_option("-o", "--original", action="store", type="string", dest="Original_Distribution_Package_File",
                       help=ST.HLP_SPECIFY_PACKAGE_NAME_TO_BE_REPLACED)
 
-    Parser.add_option("--use-guided-paths", action="store_true", dest="Use_Guided_Paths", help=ST.HLP_USE_GUIDED_PATHS)
+    Parser.add_option("--use-guided-paths", action="store_true",
+                      dest="Use_Guided_Paths", help=ST.HLP_USE_GUIDED_PATHS)
 
     Parser.add_option("-j", "--test-install", action="append", type="string",
                       dest="Test_Install_Distribution_Package_Files", help=ST.HLP_TEST_INSTALL)
@@ -176,7 +188,8 @@ def Main():
         GlobalData.gWORKSPACE, GlobalData.gPACKAGE_PATH = GetWorkspace()
     except FatalError as XExcept:
         if Logger.GetLevel() <= Logger.DEBUG_9:
-            Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) + format_exc())
+            Logger.Quiet(ST.MSG_PYTHON_ON %
+                         (python_version(), platform) + format_exc())
         return XExcept.args[0]
 
     # Support WORKSPACE is a long path
@@ -197,7 +210,7 @@ def Main():
     Mgr = FileHook.RecoverMgr(WorkspaceDir)
     FileHook.SetRecoverMgr(Mgr)
 
-    GlobalData.gDB = IpiDatabase(os.path.normpath(os.path.join(WorkspaceDir, \
+    GlobalData.gDB = IpiDatabase(os.path.normpath(os.path.join(WorkspaceDir,
                                                                "Conf/DistributionPackageDatabase.db")), WorkspaceDir)
     GlobalData.gDB.InitDatabase(Opt.SkipLock)
 
@@ -213,24 +226,30 @@ def Main():
             if Opt.PackageInformationDataFile:
                 if not os.path.exists(Opt.PackageInformationDataFile):
                     if not os.path.exists(os.path.join(WorkspaceDir, Opt.PackageInformationDataFile)):
-                        Logger.Error("\nUPT", FILE_NOT_FOUND, ST.ERR_NO_TEMPLATE_FILE % Opt.PackageInformationDataFile)
+                        Logger.Error(
+                            "\nUPT", FILE_NOT_FOUND, ST.ERR_NO_TEMPLATE_FILE % Opt.PackageInformationDataFile)
                     else:
-                        Opt.PackageInformationDataFile = os.path.join(WorkspaceDir, Opt.PackageInformationDataFile)
+                        Opt.PackageInformationDataFile = os.path.join(
+                            WorkspaceDir, Opt.PackageInformationDataFile)
             else:
-                Logger.Error("UPT", OPTION_MISSING, ExtraData=ST.ERR_REQUIRE_T_OPTION)
+                Logger.Error("UPT", OPTION_MISSING,
+                             ExtraData=ST.ERR_REQUIRE_T_OPTION)
             if not Opt.PackFileToCreate.endswith('.dist'):
-                Logger.Error("CreatePkg", FILE_TYPE_MISMATCH, ExtraData=ST.ERR_DIST_EXT_ERROR % Opt.PackFileToCreate)
+                Logger.Error("CreatePkg", FILE_TYPE_MISMATCH,
+                             ExtraData=ST.ERR_DIST_EXT_ERROR % Opt.PackFileToCreate)
             RunModule = MkPkg.Main
 
         elif Opt.PackFileToInstall:
             AbsPath = []
             for Item in Opt.PackFileToInstall:
                 if not Item.endswith('.dist'):
-                    Logger.Error("InstallPkg", FILE_TYPE_MISMATCH, ExtraData=ST.ERR_DIST_EXT_ERROR % Item)
+                    Logger.Error("InstallPkg", FILE_TYPE_MISMATCH,
+                                 ExtraData=ST.ERR_DIST_EXT_ERROR % Item)
 
                 AbsPath.append(GetFullPathDist(Item, WorkspaceDir))
                 if not AbsPath:
-                    Logger.Error("InstallPkg", FILE_NOT_FOUND, ST.ERR_INSTALL_DIST_NOT_FOUND % Item)
+                    Logger.Error("InstallPkg", FILE_NOT_FOUND,
+                                 ST.ERR_INSTALL_DIST_NOT_FOUND % Item)
 
             Opt.PackFileToInstall = AbsPath
             setattr(Opt, 'PackageFile', Opt.PackFileToInstall)
@@ -238,7 +257,8 @@ def Main():
 
         elif Opt.PackFileToRemove:
             if not Opt.PackFileToRemove.endswith('.dist'):
-                Logger.Error("RemovePkg", FILE_TYPE_MISMATCH, ExtraData=ST.ERR_DIST_EXT_ERROR % Opt.PackFileToRemove)
+                Logger.Error("RemovePkg", FILE_TYPE_MISMATCH,
+                             ExtraData=ST.ERR_DIST_EXT_ERROR % Opt.PackFileToRemove)
             head, tail = os.path.split(Opt.PackFileToRemove)
             if head or not tail:
                 Logger.Error("RemovePkg",
@@ -251,13 +271,16 @@ def Main():
             RunModule = InventoryWs.Main
 
         elif Opt.PackFileToBeReplaced and not Opt.PackFileToReplace:
-            Logger.Error("ReplacePkg", OPTION_MISSING, ExtraData=ST.ERR_REQUIRE_U_OPTION)
+            Logger.Error("ReplacePkg", OPTION_MISSING,
+                         ExtraData=ST.ERR_REQUIRE_U_OPTION)
 
         elif Opt.PackFileToReplace:
             if not Opt.PackFileToReplace.endswith('.dist'):
-                Logger.Error("ReplacePkg", FILE_TYPE_MISMATCH, ExtraData=ST.ERR_DIST_EXT_ERROR % Opt.PackFileToReplace)
+                Logger.Error("ReplacePkg", FILE_TYPE_MISMATCH,
+                             ExtraData=ST.ERR_DIST_EXT_ERROR % Opt.PackFileToReplace)
             if not Opt.PackFileToBeReplaced:
-                Logger.Error("ReplacePkg", OPTION_MISSING, ExtraData=ST.ERR_REQUIRE_O_OPTION)
+                Logger.Error("ReplacePkg", OPTION_MISSING,
+                             ExtraData=ST.ERR_REQUIRE_O_OPTION)
             if not Opt.PackFileToBeReplaced.endswith('.dist'):
                 Logger.Error("ReplacePkg",
                              FILE_TYPE_MISMATCH,
@@ -271,7 +294,8 @@ def Main():
 
             AbsPath = GetFullPathDist(Opt.PackFileToReplace, WorkspaceDir)
             if not AbsPath:
-                Logger.Error("ReplacePkg", FILE_NOT_FOUND, ST.ERR_REPLACE_DIST_NOT_FOUND % Opt.PackFileToReplace)
+                Logger.Error("ReplacePkg", FILE_NOT_FOUND,
+                             ST.ERR_REPLACE_DIST_NOT_FOUND % Opt.PackFileToReplace)
 
             Opt.PackFileToReplace = AbsPath
             RunModule = ReplacePkg.Main
@@ -279,7 +303,8 @@ def Main():
         elif Opt.Test_Install_Distribution_Package_Files:
             for Dist in Opt.Test_Install_Distribution_Package_Files:
                 if not Dist.endswith('.dist'):
-                    Logger.Error("TestInstall", FILE_TYPE_MISMATCH, ExtraData=ST.ERR_DIST_EXT_ERROR % Dist)
+                    Logger.Error("TestInstall", FILE_TYPE_MISMATCH,
+                                 ExtraData=ST.ERR_DIST_EXT_ERROR % Dist)
 
             setattr(Opt, 'DistFiles', Opt.Test_Install_Distribution_Package_Files)
             RunModule = TestInstall.Main
@@ -292,7 +317,7 @@ def Main():
     except FatalError as XExcept:
         ReturnCode = XExcept.args[0]
         if Logger.GetLevel() <= Logger.DEBUG_9:
-            Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) + \
+            Logger.Quiet(ST.MSG_PYTHON_ON % (python_version(), platform) +
                          format_exc())
     finally:
         try:
@@ -313,7 +338,7 @@ def Main():
 
     return ReturnCode
 
-## GetFullPathDist
+# GetFullPathDist
 #
 #  This function will check DistFile existence, if not absolute path, then try current working directory,
 #  then $(WORKSPACE),and return the AbsPath. If file doesn't find, then return None
@@ -322,6 +347,8 @@ def Main():
 # @param WorkspaceDir:   Workspace Directory
 # @return AbsPath:       The Absolute path of the distribution file if existed, None else
 #
+
+
 def GetFullPathDist(DistFile, WorkspaceDir):
     if os.path.isabs(DistFile):
         if not (os.path.exists(DistFile) and os.path.isfile(DistFile)):
@@ -336,6 +363,7 @@ def GetFullPathDist(DistFile, WorkspaceDir):
                 return None
 
         return AbsPath
+
 
 if __name__ == '__main__':
     RETVAL = Main()

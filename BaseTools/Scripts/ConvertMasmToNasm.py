@@ -834,7 +834,8 @@ class ConvertInfFile(CommonUtils):
                 reldst = self.RootRelative(dst)
                 print('Unabled to convert', reldst)
         if unsupportedArchCount > 0 and not self.args.quiet:
-            print('Skipped', unsupportedArchCount, 'files based on architecture')
+            print('Skipped', unsupportedArchCount,
+                  'files based on architecture')
 
     def UpdateInfAsmFile(self, dst, IgnoreMissingAsm=False):
         infPath = os.path.split(os.path.realpath(self.inf))[0]
@@ -961,7 +962,8 @@ class ConvertInfFiles(CommonUtils):
                 reldst = self.RootRelative(dst)
                 print('Unabled to convert', reldst)
         if unsupportedArchCount > 0 and not self.args.quiet:
-            print('Skipped', unsupportedArchCount, 'files based on architecture')
+            print('Skipped', unsupportedArchCount,
+                  'files based on architecture')
 
 
 class ConvertDirectories(CommonUtils):
@@ -1001,5 +1003,6 @@ class ConvertAsmApp(CommonUtils):
             ConvertDirectories((src,), self)
         elif not self.dirmode:
             ConvertAsmFile(src, dst, self)
+
 
 ConvertAsmApp()

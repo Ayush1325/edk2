@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to define common parser functions for meta-data
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -12,12 +12,14 @@ from Ecc.EccToolError import *
 from Common.MultipleWorkspace import MultipleWorkspace as mws
 from Ecc import EccGlobalData
 import re
-## Get the include path list for a source file
+# Get the include path list for a source file
 #
 # 1. Find the source file belongs to which inf file
 # 2. Find the inf's package
 # 3. Return the include path list of the package
 #
+
+
 def GetIncludeListOfFile(WorkSpace, Filepath, Db):
     IncludeList = []
     Filepath = os.path.normpath(Filepath)
@@ -46,26 +48,32 @@ def GetIncludeListOfFile(WorkSpace, Filepath, Db):
 
     return IncludeList
 
-## Get the file list
+# Get the file list
 #
 # Search table file and find all specific type files
 #
+
+
 def GetFileList(FileModel, Db):
     FileList = []
-    SqlCommand = """select FullPath from File where Model = %s""" % str(FileModel)
+    SqlCommand = """select FullPath from File where Model = %s""" % str(
+        FileModel)
     RecordSet = Db.TblFile.Exec(SqlCommand)
     for Record in RecordSet:
         FileList.append(Record[0])
 
     return FileList
 
-## Get the table list
+# Get the table list
 #
 # Search table file and find all small tables
 #
+
+
 def GetTableList(FileModelList, Table, Db):
     TableList = []
-    SqlCommand = """select ID from File where Model in %s""" % str(FileModelList)
+    SqlCommand = """select ID from File where Model in %s""" % str(
+        FileModelList)
     RecordSet = Db.TblFile.Exec(SqlCommand)
     for Record in RecordSet:
         TableName = Table + str(Record[0])
@@ -73,7 +81,7 @@ def GetTableList(FileModelList, Table, Db):
 
     return TableList
 
-## ParseHeaderCommentSection
+# ParseHeaderCommentSection
 #
 # Parse Header comment section lines, extract Abstract, Description, Copyright
 # , License lines
@@ -81,7 +89,9 @@ def GetTableList(FileModelList, Table, Db):
 # @param CommentList:   List of (Comment, LineNumber)
 # @param FileName:      FileName of the comment
 #
-def ParseHeaderCommentSection(CommentList, FileName = None):
+
+
+def ParseHeaderCommentSection(CommentList, FileName=None):
 
     Abstract = ''
     Description = ''
@@ -95,13 +105,13 @@ def ParseHeaderCommentSection(CommentList, FileName = None):
     # inf files
     #
     HEADER_COMMENT_NOT_STARTED = -1
-    HEADER_COMMENT_STARTED     = 0
-    HEADER_COMMENT_FILE        = 1
-    HEADER_COMMENT_ABSTRACT    = 2
+    HEADER_COMMENT_STARTED = 0
+    HEADER_COMMENT_FILE = 1
+    HEADER_COMMENT_ABSTRACT = 2
     HEADER_COMMENT_DESCRIPTION = 3
-    HEADER_COMMENT_COPYRIGHT   = 4
-    HEADER_COMMENT_LICENSE     = 5
-    HEADER_COMMENT_END         = 6
+    HEADER_COMMENT_COPYRIGHT = 4
+    HEADER_COMMENT_LICENSE = 5
+    HEADER_COMMENT_END = 6
     #
     # first find the last copyright line
     #
@@ -122,7 +132,8 @@ def ParseHeaderCommentSection(CommentList, FileName = None):
             ResultSet = EccGlobalData.gDb.TblFile.Exec(SqlStatement)
             for Result in ResultSet:
                 Msg = 'Comment must start with #'
-                EccGlobalData.gDb.TblReport.Insert(ERROR_DOXYGEN_CHECK_FILE_HEADER, Msg, "File", Result[0])
+                EccGlobalData.gDb.TblReport.Insert(
+                    ERROR_DOXYGEN_CHECK_FILE_HEADER, Msg, "File", Result[0])
         Comment = CleanString2(Line)[1]
         Comment = Comment.strip()
         #
@@ -130,7 +141,7 @@ def ParseHeaderCommentSection(CommentList, FileName = None):
         # indication of different block; or in the position that Abstract should be, also keep it
         # as it indicates that no abstract
         #
-        if not Comment and HeaderCommentStage not in [HEADER_COMMENT_LICENSE, \
+        if not Comment and HeaderCommentStage not in [HEADER_COMMENT_LICENSE,
                                                       HEADER_COMMENT_DESCRIPTION, HEADER_COMMENT_ABSTRACT]:
             continue
 
@@ -185,36 +196,41 @@ def ParseHeaderCommentSection(CommentList, FileName = None):
         ResultSet = EccGlobalData.gDb.TblFile.Exec(SqlStatement)
         for Result in ResultSet:
             Msg = 'Header comment section must have copyright information'
-            EccGlobalData.gDb.TblReport.Insert(ERROR_DOXYGEN_CHECK_FILE_HEADER, Msg, "File", Result[0])
+            EccGlobalData.gDb.TblReport.Insert(
+                ERROR_DOXYGEN_CHECK_FILE_HEADER, Msg, "File", Result[0])
 
     if not License.strip():
         SqlStatement = """ select ID from File where FullPath like '%s'""" % FileName
         ResultSet = EccGlobalData.gDb.TblFile.Exec(SqlStatement)
         for Result in ResultSet:
             Msg = 'Header comment section must have license information'
-            EccGlobalData.gDb.TblReport.Insert(ERROR_DOXYGEN_CHECK_FILE_HEADER, Msg, "File", Result[0])
+            EccGlobalData.gDb.TblReport.Insert(
+                ERROR_DOXYGEN_CHECK_FILE_HEADER, Msg, "File", Result[0])
 
     if not Abstract.strip() or Abstract.find('Component description file') > -1:
         SqlStatement = """ select ID from File where FullPath like '%s'""" % FileName
         ResultSet = EccGlobalData.gDb.TblFile.Exec(SqlStatement)
         for Result in ResultSet:
             Msg = 'Header comment section must have Abstract information.'
-            EccGlobalData.gDb.TblReport.Insert(ERROR_DOXYGEN_CHECK_FILE_HEADER, Msg, "File", Result[0])
+            EccGlobalData.gDb.TblReport.Insert(
+                ERROR_DOXYGEN_CHECK_FILE_HEADER, Msg, "File", Result[0])
 
     return Abstract.strip(), Description.strip(), Copyright.strip(), License.strip()
 
-## _IsCopyrightLine
+# _IsCopyrightLine
 # check whether current line is copyright line, the criteria is whether there is case insensitive keyword "Copyright"
 # followed by zero or more white space characters followed by a "(" character
 #
 # @param LineContent:  the line need to be checked
 # @return: True if current line is copyright line, False else
 #
-def _IsCopyrightLine (LineContent):
+
+
+def _IsCopyrightLine(LineContent):
     LineContent = LineContent.upper()
     Result = False
 
-    #Support below Copyright format
+    # Support below Copyright format
     # Copyright (C) 2020 Hewlett Packard Enterprise Development LP<BR>
     # (C) Copyright 2020 Hewlett Packard Enterprise Development LP<BR>
     ReIsCopyrightRe = re.compile(r"""(^|\s)COPYRIGHT *\(""", re.DOTALL)
@@ -225,7 +241,7 @@ def _IsCopyrightLine (LineContent):
     return Result
 
 
-## CleanString2
+# CleanString2
 #
 # Split comments in a string
 # Remove spaces

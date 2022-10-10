@@ -1,4 +1,4 @@
-## @file GenInfFile.py
+# @file GenInfFile.py
 #
 # This file contained the logical of transfer package object to INF files.
 #
@@ -38,7 +38,7 @@ from Library.UniClassObject import FormatUniEntry
 from Library.StringUtils import GetUniFileName
 
 
-## Transfer Module Object to Inf files
+# Transfer Module Object to Inf files
 #
 # Transfer all contents of a standard Module Object to an Inf file
 # @param ModuleObject: A Module Object
@@ -112,9 +112,11 @@ def ModuleToInf(ModuleObject, PackageObject=None, DistHeader=None):
     #
     for UserExtension in ModuleObject.GetUserExtensionList():
         if UserExtension.GetUserID() == DT.TAB_BINARY_HEADER_USERID \
-        and UserExtension.GetIdentifier() == DT.TAB_BINARY_HEADER_IDENTIFIER:
-            ModuleBinaryAbstract = GetLocalValue(UserExtension.GetBinaryAbstract())
-            ModuleBinaryDescription = GetLocalValue(UserExtension.GetBinaryDescription())
+                and UserExtension.GetIdentifier() == DT.TAB_BINARY_HEADER_IDENTIFIER:
+            ModuleBinaryAbstract = GetLocalValue(
+                UserExtension.GetBinaryAbstract())
+            ModuleBinaryDescription = GetLocalValue(
+                UserExtension.GetBinaryDescription())
             ModuleBinaryCopyright = ''
             ModuleBinaryLicense = ''
             for (Lang, Copyright) in UserExtension.GetBinaryCopyright():
@@ -122,17 +124,17 @@ def ModuleToInf(ModuleObject, PackageObject=None, DistHeader=None):
             for (Lang, License) in UserExtension.GetBinaryLicense():
                 ModuleBinaryLicense = License
             if ModuleBinaryAbstract and ModuleBinaryDescription and \
-            ModuleBinaryCopyright and ModuleBinaryLicense:
+                    ModuleBinaryCopyright and ModuleBinaryLicense:
                 Content += GenHeaderCommentSection(ModuleBinaryAbstract,
-                                           ModuleBinaryDescription,
-                                           ModuleBinaryCopyright,
-                                           ModuleBinaryLicense,
-                                           True)
+                                                   ModuleBinaryDescription,
+                                                   ModuleBinaryCopyright,
+                                                   ModuleBinaryLicense,
+                                                   True)
 
     #
     # Generate MODULE_UNI_FILE for module
     #
-    FileHeader = GenHeaderCommentSection(ModuleAbstract, ModuleDescription, ModuleCopyright, ModuleLicense, False, \
+    FileHeader = GenHeaderCommentSection(ModuleAbstract, ModuleDescription, ModuleCopyright, ModuleLicense, False,
                                          DT.TAB_COMMENT_EDK1_SPLIT)
     ModuleUniFile = GenModuleUNIEncodeFile(ModuleObject, FileHeader)
     if ModuleUniFile:
@@ -172,19 +174,25 @@ def ModuleToInf(ModuleObject, PackageObject=None, DistHeader=None):
     #
     # generate [Event], [BootMode], [Hob] section
     #
-    Content += GenSpecialSections(ModuleObject.GetEventList(), 'Event', __UserExtensionsContent)
-    Content += GenSpecialSections(ModuleObject.GetBootModeList(), 'BootMode', __UserExtensionsContent)
-    Content += GenSpecialSections(ModuleObject.GetHobList(), 'Hob', __UserExtensionsContent)
+    Content += GenSpecialSections(ModuleObject.GetEventList(),
+                                  'Event', __UserExtensionsContent)
+    Content += GenSpecialSections(ModuleObject.GetBootModeList(),
+                                  'BootMode', __UserExtensionsContent)
+    Content += GenSpecialSections(ModuleObject.GetHobList(),
+                                  'Hob', __UserExtensionsContent)
     SaveFileOnChange(ContainerFile, Content, False)
     if DistHeader.ReadOnly:
-        os.chmod(ContainerFile, stat.S_IRUSR|stat.S_IRGRP|stat.S_IROTH)
+        os.chmod(ContainerFile, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
     else:
-        os.chmod(ContainerFile, stat.S_IRUSR|stat.S_IRGRP|stat.S_IROTH|stat.S_IWUSR|stat.S_IWGRP|stat.S_IWOTH)
+        os.chmod(ContainerFile, stat.S_IRUSR | stat.S_IRGRP |
+                 stat.S_IROTH | stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
     return ContainerFile
 
-## GenModuleUNIEncodeFile
+# GenModuleUNIEncodeFile
 # GenModuleUNIEncodeFile, default is a UCS-2LE encode file
 #
+
+
 def GenModuleUNIEncodeFile(ModuleObject, UniFileHeader='', Encoding=DT.TAB_ENCODING_UTF16LE):
     GenUNIFlag = False
     OnlyLANGUAGE_EN_X = True
@@ -202,7 +210,7 @@ def GenModuleUNIEncodeFile(ModuleObject, UniFileHeader='', Encoding=DT.TAB_ENCOD
 
     for UserExtension in ModuleObject.GetUserExtensionList():
         if UserExtension.GetUserID() == DT.TAB_BINARY_HEADER_USERID \
-        and UserExtension.GetIdentifier() == DT.TAB_BINARY_HEADER_IDENTIFIER:
+                and UserExtension.GetIdentifier() == DT.TAB_BINARY_HEADER_IDENTIFIER:
             for (Key, Value) in UserExtension.GetBinaryAbstract():
                 if Key == DT.TAB_LANGUAGE_EN_X:
                     GenUNIFlag = True
@@ -216,14 +224,14 @@ def GenModuleUNIEncodeFile(ModuleObject, UniFileHeader='', Encoding=DT.TAB_ENCOD
                     OnlyLANGUAGE_EN_X = False
                 BinaryDescription.append((Key, Value))
 
-
     if not GenUNIFlag:
         return
     elif OnlyLANGUAGE_EN_X:
         return
     else:
         ModuleObject.UNIFlag = True
-    ContainerFile = GetUniFileName(os.path.dirname(ModuleObject.GetFullPath()), ModuleObject.GetBaseName())
+    ContainerFile = GetUniFileName(os.path.dirname(
+        ModuleObject.GetFullPath()), ModuleObject.GetBaseName())
 
     if not os.path.exists(os.path.dirname(ModuleObject.GetFullPath())):
         os.makedirs(os.path.dirname(ModuleObject.GetFullPath()))
@@ -231,16 +239,18 @@ def GenModuleUNIEncodeFile(ModuleObject, UniFileHeader='', Encoding=DT.TAB_ENCOD
     Content = UniFileHeader + '\r\n'
     Content += '\r\n'
 
-    Content += FormatUniEntry('#string ' + DT.TAB_INF_ABSTRACT, ModuleObject.GetAbstract(), ContainerFile) + '\r\n'
+    Content += FormatUniEntry('#string ' + DT.TAB_INF_ABSTRACT,
+                              ModuleObject.GetAbstract(), ContainerFile) + '\r\n'
 
     Content += FormatUniEntry('#string ' + DT.TAB_INF_DESCRIPTION, ModuleObject.GetDescription(), ContainerFile) \
-            + '\r\n'
+        + '\r\n'
 
-    BinaryAbstractString = FormatUniEntry('#string ' + DT.TAB_INF_BINARY_ABSTRACT, BinaryAbstract, ContainerFile)
+    BinaryAbstractString = FormatUniEntry(
+        '#string ' + DT.TAB_INF_BINARY_ABSTRACT, BinaryAbstract, ContainerFile)
     if BinaryAbstractString:
         Content += BinaryAbstractString + '\r\n'
 
-    BinaryDescriptionString = FormatUniEntry('#string ' + DT.TAB_INF_BINARY_DESCRIPTION, BinaryDescription, \
+    BinaryDescriptionString = FormatUniEntry('#string ' + DT.TAB_INF_BINARY_DESCRIPTION, BinaryDescription,
                                              ContainerFile)
     if BinaryDescriptionString:
         Content += BinaryDescriptionString + '\r\n'
@@ -255,6 +265,8 @@ def GenModuleUNIEncodeFile(ModuleObject, UniFileHeader='', Encoding=DT.TAB_ENCOD
         ModuleObject.FileList.append((ContainerFile, Md5Sum))
 
     return ContainerFile
+
+
 def GenDefines(ModuleObject):
     #
     # generate [Defines] section
@@ -270,7 +282,7 @@ def GenDefines(ModuleObject):
         for Statement in DefinesDict:
             if len(Statement.split(DT.TAB_EQUAL_SPLIT)) > 1:
                 Statement = (u'%s ' % Statement.split(DT.TAB_EQUAL_SPLIT, 1)[0]).ljust(LeftOffset) \
-                             + u'= %s' % Statement.split(DT.TAB_EQUAL_SPLIT, 1)[1].lstrip()
+                    + u'= %s' % Statement.split(DT.TAB_EQUAL_SPLIT, 1)[1].lstrip()
             SortedArch = DT.TAB_ARCH_COMMON
             if Statement.strip().startswith(DT.TAB_INF_DEFINES_CUSTOM_MAKEFILE):
                 pos = Statement.find(DT.TAB_VALUE_SPLIT)
@@ -285,51 +297,56 @@ def GenDefines(ModuleObject):
     SpecialStatementList = []
 
     # TAB_INF_DEFINES_INF_VERSION
-    Statement = (u'%s ' % DT.TAB_INF_DEFINES_INF_VERSION).ljust(LeftOffset) + u'= %s' % '0x00010017'
+    Statement = (u'%s ' % DT.TAB_INF_DEFINES_INF_VERSION).ljust(
+        LeftOffset) + u'= %s' % '0x00010017'
     SpecialStatementList.append(Statement)
 
     # BaseName
     BaseName = ModuleObject.GetBaseName()
     if BaseName.startswith('.') or BaseName.startswith('-'):
         BaseName = '_' + BaseName
-    Statement = (u'%s ' % DT.TAB_INF_DEFINES_BASE_NAME).ljust(LeftOffset) + u'= %s' % BaseName
+    Statement = (u'%s ' % DT.TAB_INF_DEFINES_BASE_NAME).ljust(
+        LeftOffset) + u'= %s' % BaseName
     SpecialStatementList.append(Statement)
 
     # TAB_INF_DEFINES_FILE_GUID
-    Statement = (u'%s ' % DT.TAB_INF_DEFINES_FILE_GUID).ljust(LeftOffset) + u'= %s' % ModuleObject.GetGuid()
+    Statement = (u'%s ' % DT.TAB_INF_DEFINES_FILE_GUID).ljust(
+        LeftOffset) + u'= %s' % ModuleObject.GetGuid()
     SpecialStatementList.append(Statement)
 
     # TAB_INF_DEFINES_VERSION_STRING
-    Statement = (u'%s ' % DT.TAB_INF_DEFINES_VERSION_STRING).ljust(LeftOffset) + u'= %s' % ModuleObject.GetVersion()
+    Statement = (u'%s ' % DT.TAB_INF_DEFINES_VERSION_STRING).ljust(
+        LeftOffset) + u'= %s' % ModuleObject.GetVersion()
     SpecialStatementList.append(Statement)
 
     # TAB_INF_DEFINES_VERSION_STRING
     if ModuleObject.UNIFlag:
         Statement = (u'%s ' % DT.TAB_INF_DEFINES_MODULE_UNI_FILE).ljust(LeftOffset) + \
-                    u'= %s' % ModuleObject.GetModuleUniFile()
+            u'= %s' % ModuleObject.GetModuleUniFile()
         SpecialStatementList.append(Statement)
 
     # TAB_INF_DEFINES_MODULE_TYPE
     if ModuleObject.GetModuleType():
-        Statement = (u'%s ' % DT.TAB_INF_DEFINES_MODULE_TYPE).ljust(LeftOffset) + u'= %s' % ModuleObject.GetModuleType()
+        Statement = (u'%s ' % DT.TAB_INF_DEFINES_MODULE_TYPE).ljust(
+            LeftOffset) + u'= %s' % ModuleObject.GetModuleType()
         SpecialStatementList.append(Statement)
 
     # TAB_INF_DEFINES_PCD_IS_DRIVER
     if ModuleObject.GetPcdIsDriver():
         Statement = (u'%s ' % DT.TAB_INF_DEFINES_PCD_IS_DRIVER).ljust(LeftOffset) + \
-                    u'= %s' % ModuleObject.GetPcdIsDriver()
+            u'= %s' % ModuleObject.GetPcdIsDriver()
         SpecialStatementList.append(Statement)
 
     # TAB_INF_DEFINES_UEFI_SPECIFICATION_VERSION
     if ModuleObject.GetUefiSpecificationVersion():
         Statement = (u'%s ' % DT.TAB_INF_DEFINES_UEFI_SPECIFICATION_VERSION).ljust(LeftOffset) + \
-                    u'= %s' % ModuleObject.GetUefiSpecificationVersion()
+            u'= %s' % ModuleObject.GetUefiSpecificationVersion()
         SpecialStatementList.append(Statement)
 
     # TAB_INF_DEFINES_PI_SPECIFICATION_VERSION
     if ModuleObject.GetPiSpecificationVersion():
         Statement = (u'%s ' % DT.TAB_INF_DEFINES_PI_SPECIFICATION_VERSION).ljust(LeftOffset) + \
-                    u'= %s' % ModuleObject.GetPiSpecificationVersion()
+            u'= %s' % ModuleObject.GetPiSpecificationVersion()
         SpecialStatementList.append(Statement)
 
     # LibraryClass
@@ -337,9 +354,11 @@ def GenDefines(ModuleObject):
         if LibraryClass.GetUsage() == DT.USAGE_ITEM_PRODUCES or \
            LibraryClass.GetUsage() == DT.USAGE_ITEM_SOMETIMES_PRODUCES:
             Statement = (u'%s ' % DT.TAB_INF_DEFINES_LIBRARY_CLASS).ljust(LeftOffset) + \
-                        u'= %s' % LibraryClass.GetLibraryClass()
+                u'= %s' % LibraryClass.GetLibraryClass()
             if LibraryClass.GetSupModuleList():
-                Statement += '|' + DT.TAB_SPACE_SPLIT.join(l for l in LibraryClass.GetSupModuleList())
+                Statement += '|' + \
+                    DT.TAB_SPACE_SPLIT.join(
+                        l for l in LibraryClass.GetSupModuleList())
             SpecialStatementList.append(Statement)
 
     # Spec Item
@@ -359,7 +378,8 @@ def GenDefines(ModuleObject):
         Destructor = Extern.GetDestructor()
         HelpStringList = Extern.GetHelpTextList()
         FFE = Extern.GetFeatureFlag()
-        ExternList.append([ArchList, EntryPoint, UnloadImage, Constructor, Destructor, FFE, HelpStringList])
+        ExternList.append([ArchList, EntryPoint, UnloadImage,
+                          Constructor, Destructor, FFE, HelpStringList])
     #
     # Add VALID_ARCHITECTURES information
     #
@@ -368,16 +388,21 @@ def GenDefines(ModuleObject):
         ValidArchStatement = '\n' + '# ' + '\n'
         ValidArchStatement += '# The following information is for reference only and not required by the build tools.\n'
         ValidArchStatement += '# ' + '\n'
-        ValidArchStatement += '# VALID_ARCHITECTURES = %s' % (' '.join(ModuleObject.SupArchList)) + '\n'
+        ValidArchStatement += '# VALID_ARCHITECTURES = %s' % (
+            ' '.join(ModuleObject.SupArchList)) + '\n'
         ValidArchStatement += '# '
     if DT.TAB_ARCH_COMMON not in NewSectionDict:
         NewSectionDict[DT.TAB_ARCH_COMMON] = []
-    NewSectionDict[DT.TAB_ARCH_COMMON] = NewSectionDict[DT.TAB_ARCH_COMMON] + SpecialStatementList
-    GenMetaFileMisc.AddExternToDefineSec(NewSectionDict, DT.TAB_ARCH_COMMON, ExternList)
+    NewSectionDict[DT.TAB_ARCH_COMMON] = NewSectionDict[DT.TAB_ARCH_COMMON] + \
+        SpecialStatementList
+    GenMetaFileMisc.AddExternToDefineSec(
+        NewSectionDict, DT.TAB_ARCH_COMMON, ExternList)
     if ValidArchStatement is not None:
-        NewSectionDict[DT.TAB_ARCH_COMMON] = NewSectionDict[DT.TAB_ARCH_COMMON] + [ValidArchStatement]
+        NewSectionDict[DT.TAB_ARCH_COMMON] = NewSectionDict[DT.TAB_ARCH_COMMON] + \
+            [ValidArchStatement]
     Content += GenSection('Defines', NewSectionDict)
     return Content
+
 
 def GenLibraryClasses(ModuleObject):
     #
@@ -451,6 +476,7 @@ def GenLibraryClasses(ModuleObject):
 
     return Content
 
+
 def GenPackages(ModuleObject):
     Content = ''
     #
@@ -496,6 +522,7 @@ def GenPackages(ModuleObject):
     Content += GenSection('Packages', NewSectionDict)
     return Content
 
+
 def GenSources(ModuleObject):
     #
     # generate [Sources] section
@@ -508,7 +535,8 @@ def GenSources(ModuleObject):
         FeatureFlag = Source.GetFeatureFlag()
         SupArchList = sorted(Source.GetSupArchList())
         SortedArch = ' '.join(SupArchList)
-        Statement = GenSourceStatement(ConvertPath(SourceFile), Family, FeatureFlag)
+        Statement = GenSourceStatement(
+            ConvertPath(SourceFile), Family, FeatureFlag)
         if SortedArch in NewSectionDict:
             NewSectionDict[SortedArch] = NewSectionDict[SortedArch] + [Statement]
         else:
@@ -516,6 +544,7 @@ def GenSources(ModuleObject):
     Content += GenSection('Sources', NewSectionDict)
 
     return Content
+
 
 def GenDepex(ModuleObject):
     #
@@ -540,7 +569,8 @@ def GenDepex(ModuleObject):
         else:
             for ModuleType in SupModList:
                 for Arch in SupArchList:
-                    KeyList.append(ConvertArchForInstall(Arch) + '.' + ModuleType)
+                    KeyList.append(ConvertArchForInstall(
+                        Arch) + '.' + ModuleType)
         for Key in KeyList:
             if Key in NewSectionDict:
                 NewSectionDict[Key] = NewSectionDict[Key] + [Statement]
@@ -549,15 +579,17 @@ def GenDepex(ModuleObject):
     Content += GenSection('Depex', NewSectionDict, False)
 
     return Content
-## GenUserExtensions
+# GenUserExtensions
 #
 # GenUserExtensions
 #
+
+
 def GenUserExtensions(ModuleObject):
     NewSectionDict = {}
     for UserExtension in ModuleObject.GetUserExtensionList():
         if UserExtension.GetUserID() == DT.TAB_BINARY_HEADER_USERID and \
-            UserExtension.GetIdentifier() == DT.TAB_BINARY_HEADER_IDENTIFIER:
+                UserExtension.GetIdentifier() == DT.TAB_BINARY_HEADER_IDENTIFIER:
             continue
         if UserExtension.GetIdentifier() == 'Depex':
             continue
@@ -601,6 +633,8 @@ def GenUserExtensions(ModuleObject):
 #
 #  @retval Statement: The generated statement for source
 #
+
+
 def GenSourceStatement(SourceFile, Family, FeatureFlag, TagName=None,
                        ToolCode=None, HelpStr=None):
     Statement = ''
@@ -632,6 +666,8 @@ def GenSourceStatement(SourceFile, Family, FeatureFlag, TagName=None,
 #  @param Value:     (Target, Family, TagName, Comment)
 #
 #
+
+
 def GenBinaryStatement(Key, Value, SubTypeGuidValue=None):
     (FileName, FileType, FFE, SortedArch) = Key
     if SortedArch:
@@ -666,11 +702,13 @@ def GenBinaryStatement(Key, Value, SubTypeGuidValue=None):
         elif Target:
             Statement += '|' + Target
     return Statement
-## GenGuidSections
+# GenGuidSections
 #
 #  @param GuidObjList: List of GuidObject
 #  @retVal Content: The generated section contents
 #
+
+
 def GenGuidSections(GuidObjList):
     #
     # generate [Guids] section
@@ -729,11 +767,13 @@ def GenGuidSections(GuidObjList):
 
     return Content
 
-## GenProtocolPPiSections
+# GenProtocolPPiSections
 #
 #  @param ObjList: List of ProtocolObject or Ppi Object
 #  @retVal Content: The generated section contents
 #
+
+
 def GenProtocolPPiSections(ObjList, IsProtocol):
     Content = ''
     Dict = Sdict()
@@ -791,9 +831,11 @@ def GenProtocolPPiSections(ObjList, IsProtocol):
 
     return Content
 
-## GenPcdSections
+# GenPcdSections
 #
 #
+
+
 def GenPcdSections(ModuleObject):
     Content = ''
     if not GlobalData.gIS_BINARY_INF:
@@ -868,9 +910,11 @@ def GenPcdSections(ModuleObject):
 
     return Content
 
-## GenPcdSections
+# GenPcdSections
 #
 #
+
+
 def GenAsBuiltPacthPcdSections(ModuleObject):
     PatchPcdDict = {}
     for BinaryFile in ModuleObject.GetBinaryFileList():
@@ -894,10 +938,11 @@ def GenAsBuiltPacthPcdSections(ModuleObject):
             if TokenSpaceName == '' or PcdCName == '':
                 Logger.Error("Upt",
                              ToolError.RESOURCE_NOT_AVAILABLE,
-                             ST.ERR_INSTALL_FILE_DEC_FILE_ERROR % (TokenSpaceGuidValue, Token),
+                             ST.ERR_INSTALL_FILE_DEC_FILE_ERROR % (
+                                 TokenSpaceGuidValue, Token),
                              File=ModuleObject.GetFullPath())
             Statement = HelpString + TokenSpaceName + '.' + PcdCName + ' | ' + PcdValue + ' | ' + \
-                         PcdOffset + DT.TAB_SPACE_SPLIT
+                PcdOffset + DT.TAB_SPACE_SPLIT
             #
             # Use binary file's Arch to be Pcd's Arch
             #
@@ -919,9 +964,11 @@ def GenAsBuiltPacthPcdSections(ModuleObject):
                     else:
                         PatchPcdDict[Arch] = [Statement]
     return GenSection(DT.TAB_INF_PATCH_PCD, PatchPcdDict)
-## GenPcdSections
+# GenPcdSections
 #
 #
+
+
 def GenAsBuiltPcdExSections(ModuleObject):
     PcdExDict = {}
     for BinaryFile in ModuleObject.GetBinaryFileList():
@@ -942,10 +989,12 @@ def GenAsBuiltPcdExSections(ModuleObject):
             if TokenSpaceName == '' or PcdCName == '':
                 Logger.Error("Upt",
                              ToolError.RESOURCE_NOT_AVAILABLE,
-                             ST.ERR_INSTALL_FILE_DEC_FILE_ERROR % (TokenSpaceGuidValue, Token),
+                             ST.ERR_INSTALL_FILE_DEC_FILE_ERROR % (
+                                 TokenSpaceGuidValue, Token),
                              File=ModuleObject.GetFullPath())
 
-            Statement = HelpString + TokenSpaceName + DT.TAB_SPLIT + PcdCName + DT.TAB_SPACE_SPLIT
+            Statement = HelpString + TokenSpaceName + \
+                DT.TAB_SPLIT + PcdCName + DT.TAB_SPACE_SPLIT
 
             #
             # Use binary file's Arch to be Pcd's Arch
@@ -969,9 +1018,11 @@ def GenAsBuiltPcdExSections(ModuleObject):
                         PcdExDict[Arch] = [Statement]
     return GenSection('PcdEx', PcdExDict)
 
-## GenSpecialSections
+# GenSpecialSections
 #  generate special sections for Event/BootMode/Hob
 #
+
+
 def GenSpecialSections(ObjectList, SectionName, UserExtensionsContent=''):
     #
     # generate section
@@ -1017,13 +1068,15 @@ def GenSpecialSections(ObjectList, SectionName, UserExtensionsContent=''):
         SupArch = sorted(Obj.GetSupArchList())
         SortedArch = ' '.join(SupArch)
         if SortedArch in NewSectionDict:
-            NewSectionDict[SortedArch] = NewSectionDict[SortedArch] + [NewStateMent]
+            NewSectionDict[SortedArch] = NewSectionDict[SortedArch] + \
+                [NewStateMent]
         else:
             NewSectionDict[SortedArch] = [NewStateMent]
     SectionContent = GenSection(SectionName, NewSectionDict)
     SectionContent = SectionContent.strip()
     if SectionContent:
-        Content = '# ' + ('\n' + '# ').join(GetSplitValueList(SectionContent, '\n'))
+        Content = '# ' + \
+            ('\n' + '# ').join(GetSplitValueList(SectionContent, '\n'))
         Content = Content.lstrip()
     #
     # add a return to differentiate it between other possible sections
@@ -1031,9 +1084,11 @@ def GenSpecialSections(ObjectList, SectionName, UserExtensionsContent=''):
     if Content:
         Content += '\n'
     return Content
-## GenBuildOptions
+# GenBuildOptions
 #
 #
+
+
 def GenBuildOptions(ModuleObject):
     Content = ''
     if not ModuleObject.BinaryModule:
@@ -1047,7 +1102,8 @@ def GenBuildOptions(ModuleObject):
                 continue
             for Arch in BuildOptionDict:
                 if Arch in NewSectionDict:
-                    NewSectionDict[Arch] = NewSectionDict[Arch] + [BuildOptionDict[Arch]]
+                    NewSectionDict[Arch] = NewSectionDict[Arch] + \
+                        [BuildOptionDict[Arch]]
                 else:
                     NewSectionDict[Arch] = [BuildOptionDict[Arch]]
         Content = GenSection('BuildOptions', NewSectionDict)
@@ -1076,9 +1132,11 @@ def GenBuildOptions(ModuleObject):
         Content = GenSection('BuildOptions', BuildOptionDict)
 
     return Content
-## GenBinaries
+# GenBinaries
 #
 #
+
+
 def GenBinaries(ModuleObject):
     NewSectionDict = {}
     BinariesDict = []
@@ -1110,7 +1168,8 @@ def GenBinaries(ModuleObject):
                 BinariesDict[Key] = []
             else:
                 if FileType == 'SUBTYPE_GUID' and FileNameObj.GetGuidValue():
-                    Statement = GenBinaryStatement(Key, None, FileNameObj.GetGuidValue())
+                    Statement = GenBinaryStatement(
+                        Key, None, FileNameObj.GetGuidValue())
                 else:
                     Statement = GenBinaryStatement(Key, None)
                 if SortedArch in NewSectionDict:

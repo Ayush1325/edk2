@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to create a database used by build tool
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -15,11 +15,13 @@ from Workspace.BuildClassObject import PackageBuildClassObject, StructurePcd, Pc
 from Common.GlobalData import gGlobalDefines
 from re import compile
 
-## Platform build information from DEC file
+# Platform build information from DEC file
 #
 #  This class is used to retrieve information stored in database and convert them
 # into PackageBuildClassObject form for easier use for AutoGen.
 #
+
+
 class DecBuildData(PackageBuildClassObject):
 
     # dict used to convert part of [Defines] to members of DecBuildData directly
@@ -27,13 +29,13 @@ class DecBuildData(PackageBuildClassObject):
         #
         # Required Fields
         #
-        TAB_DEC_DEFINES_PACKAGE_NAME                : "_PackageName",
-        TAB_DEC_DEFINES_PACKAGE_GUID                : "_Guid",
-        TAB_DEC_DEFINES_PACKAGE_VERSION             : "_Version",
-        TAB_DEC_DEFINES_PKG_UNI_FILE                : "_PkgUniFile",
+        TAB_DEC_DEFINES_PACKAGE_NAME: "_PackageName",
+        TAB_DEC_DEFINES_PACKAGE_GUID: "_Guid",
+        TAB_DEC_DEFINES_PACKAGE_VERSION: "_Version",
+        TAB_DEC_DEFINES_PKG_UNI_FILE: "_PkgUniFile",
     }
 
-    ## Constructor of DecBuildData
+    # Constructor of DecBuildData
     #
     #  Initialize object of DecBuildData
     #
@@ -63,43 +65,43 @@ class DecBuildData(PackageBuildClassObject):
     def __getitem__(self, key):
         return self.__dict__[self._PROPERTY_[key]]
 
-    ## "in" test support
+    # "in" test support
     def __contains__(self, key):
         return key in self._PROPERTY_
 
-    ## Set all internal used members of DecBuildData to None
+    # Set all internal used members of DecBuildData to None
     def _Clear(self):
-        self._Header            = None
-        self._PackageName       = None
-        self._Guid              = None
-        self._Version           = None
-        self._PkgUniFile        = None
-        self._Protocols         = None
-        self._Ppis              = None
-        self._Guids             = None
-        self._Includes          = None
-        self._CommonIncludes    = None
-        self._LibraryClasses    = None
-        self._Pcds              = None
-        self._MacroDict         = None
-        self._PrivateProtocols  = None
-        self._PrivatePpis       = None
-        self._PrivateGuids      = None
-        self._PrivateIncludes   = None
+        self._Header = None
+        self._PackageName = None
+        self._Guid = None
+        self._Version = None
+        self._PkgUniFile = None
+        self._Protocols = None
+        self._Ppis = None
+        self._Guids = None
+        self._Includes = None
+        self._CommonIncludes = None
+        self._LibraryClasses = None
+        self._Pcds = None
+        self._MacroDict = None
+        self._PrivateProtocols = None
+        self._PrivatePpis = None
+        self._PrivateGuids = None
+        self._PrivateIncludes = None
 
-    ## Get current effective macros
+    # Get current effective macros
     @property
     def _Macros(self):
         if self._MacroDict is None:
             self._MacroDict = dict(gGlobalDefines)
         return self._MacroDict
 
-    ## Get architecture
+    # Get architecture
     @property
     def Arch(self):
         return self._Arch
 
-    ## Retrieve all information in [Defines] section
+    # Retrieve all information in [Defines] section
     #
     #   (Retrieving all [Defines] information in one-shot is just to save time.)
     #
@@ -111,27 +113,29 @@ class DecBuildData(PackageBuildClassObject):
                 self[Name] = Record[2]
         self._Header = 'DUMMY'
 
-    ## Retrieve package name
+    # Retrieve package name
     @property
     def PackageName(self):
         if self._PackageName is None:
             if self._Header is None:
                 self._GetHeaderInfo()
             if self._PackageName is None:
-                EdkLogger.error("build", ATTRIBUTE_NOT_AVAILABLE, "No PACKAGE_NAME", File=self.MetaFile)
+                EdkLogger.error("build", ATTRIBUTE_NOT_AVAILABLE,
+                                "No PACKAGE_NAME", File=self.MetaFile)
         return self._PackageName
 
-    ## Retrieve file guid
+    # Retrieve file guid
     @property
     def PackageName(self):
         if self._Guid is None:
             if self._Header is None:
                 self._GetHeaderInfo()
             if self._Guid is None:
-                EdkLogger.error("build", ATTRIBUTE_NOT_AVAILABLE, "No PACKAGE_GUID", File=self.MetaFile)
+                EdkLogger.error("build", ATTRIBUTE_NOT_AVAILABLE,
+                                "No PACKAGE_GUID", File=self.MetaFile)
         return self._Guid
 
-    ## Retrieve package version
+    # Retrieve package version
     @property
     def Version(self):
         if self._Version is None:
@@ -141,7 +145,7 @@ class DecBuildData(PackageBuildClassObject):
                 self._Version = ''
         return self._Version
 
-    ## Retrieve protocol definitions (name/value pairs)
+    # Retrieve protocol definitions (name/value pairs)
     @property
     def Protocols(self):
         if self._Protocols is None:
@@ -162,12 +166,14 @@ class DecBuildData(PackageBuildClassObject):
                         PrivateNameList.append(Name)
                         PrivateProtocolDict[Arch, Name] = Guid
                     if Name in PublicNameList:
-                        EdkLogger.error('build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
+                        EdkLogger.error(
+                            'build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
                 else:
                     if Name not in PublicNameList:
                         PublicNameList.append(Name)
                     if Name in PrivateNameList:
-                        EdkLogger.error('build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
+                        EdkLogger.error(
+                            'build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
                 if Name not in NameList:
                     NameList.append(Name)
                 ProtocolDict[Arch, Name] = Guid
@@ -184,7 +190,7 @@ class DecBuildData(PackageBuildClassObject):
                 self._PrivateProtocols[Name] = PrivateProtocolDict[self._Arch, Name]
         return self._Protocols
 
-    ## Retrieve PPI definitions (name/value pairs)
+    # Retrieve PPI definitions (name/value pairs)
     @property
     def Ppis(self):
         if self._Ppis is None:
@@ -205,12 +211,14 @@ class DecBuildData(PackageBuildClassObject):
                         PrivateNameList.append(Name)
                         PrivatePpiDict[Arch, Name] = Guid
                     if Name in PublicNameList:
-                        EdkLogger.error('build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
+                        EdkLogger.error(
+                            'build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
                 else:
                     if Name not in PublicNameList:
                         PublicNameList.append(Name)
                     if Name in PrivateNameList:
-                        EdkLogger.error('build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
+                        EdkLogger.error(
+                            'build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
                 if Name not in NameList:
                     NameList.append(Name)
                 PpiDict[Arch, Name] = Guid
@@ -227,7 +235,7 @@ class DecBuildData(PackageBuildClassObject):
                 self._PrivatePpis[Name] = PrivatePpiDict[self._Arch, Name]
         return self._Ppis
 
-    ## Retrieve GUID definitions (name/value pairs)
+    # Retrieve GUID definitions (name/value pairs)
     @property
     def Guids(self):
         if self._Guids is None:
@@ -248,12 +256,14 @@ class DecBuildData(PackageBuildClassObject):
                         PrivateNameList.append(Name)
                         PrivateGuidDict[Arch, Name] = Guid
                     if Name in PublicNameList:
-                        EdkLogger.error('build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
+                        EdkLogger.error(
+                            'build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
                 else:
                     if Name not in PublicNameList:
                         PublicNameList.append(Name)
                     if Name in PrivateNameList:
-                        EdkLogger.error('build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
+                        EdkLogger.error(
+                            'build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % Name, File=self.MetaFile, Line=LineNo)
                 if Name not in NameList:
                     NameList.append(Name)
                 GuidDict[Arch, Name] = Guid
@@ -270,7 +280,7 @@ class DecBuildData(PackageBuildClassObject):
                 self._PrivateGuids[Name] = PrivateGuidDict[self._Arch, Name]
         return self._Guids
 
-    ## Retrieve public include paths declared in this package
+    # Retrieve public include paths declared in this package
     @property
     def Includes(self):
         if self._Includes is None or self._CommonIncludes is None:
@@ -281,12 +291,14 @@ class DecBuildData(PackageBuildClassObject):
             RecordList = self._RawData[MODEL_EFI_INCLUDE, self._Arch]
             Macros = self._Macros
             for Record in RecordList:
-                File = PathClass(NormPath(Record[0], Macros), self._PackageDir, Arch=self._Arch)
+                File = PathClass(
+                    NormPath(Record[0], Macros), self._PackageDir, Arch=self._Arch)
                 LineNo = Record[-1]
                 # validate the path
                 ErrorCode, ErrorInfo = File.Validate()
                 if ErrorCode != 0:
-                    EdkLogger.error('build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
+                    EdkLogger.error(
+                        'build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
 
                 # avoid duplicate include path
                 if File not in self._Includes:
@@ -295,17 +307,19 @@ class DecBuildData(PackageBuildClassObject):
                     if File not in self._PrivateIncludes:
                         self._PrivateIncludes.append(File)
                     if File in PublicInclues:
-                        EdkLogger.error('build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % File, File=self.MetaFile, Line=LineNo)
+                        EdkLogger.error(
+                            'build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % File, File=self.MetaFile, Line=LineNo)
                 else:
                     if File not in PublicInclues:
                         PublicInclues.append(File)
                     if File in self._PrivateIncludes:
-                        EdkLogger.error('build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % File, File=self.MetaFile, Line=LineNo)
+                        EdkLogger.error(
+                            'build', OPTION_CONFLICT, "Can't determine %s's attribute, it is both defined as Private and non-Private attribute in DEC file." % File, File=self.MetaFile, Line=LineNo)
                 if Record[3] == TAB_COMMON:
                     self._CommonIncludes.append(File)
         return self._Includes
 
-    ## Retrieve library class declarations (not used in build at present)
+    # Retrieve library class declarations (not used in build at present)
     @property
     def LibraryClasses(self):
         if self._LibraryClasses is None:
@@ -318,11 +332,13 @@ class DecBuildData(PackageBuildClassObject):
             RecordList = self._RawData[MODEL_EFI_LIBRARY_CLASS, self._Arch]
             Macros = self._Macros
             for LibraryClass, File, Dummy, Arch, PrivateFlag, ID, LineNo in RecordList:
-                File = PathClass(NormPath(File, Macros), self._PackageDir, Arch=self._Arch)
+                File = PathClass(NormPath(File, Macros),
+                                 self._PackageDir, Arch=self._Arch)
                 # check the file validation
                 ErrorCode, ErrorInfo = File.Validate()
                 if ErrorCode != 0:
-                    EdkLogger.error('build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
+                    EdkLogger.error(
+                        'build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
                 LibraryClassSet.add(LibraryClass)
                 LibraryClassDict[Arch, LibraryClass] = File
             self._LibraryClasses = OrderedDict()
@@ -330,7 +346,7 @@ class DecBuildData(PackageBuildClassObject):
                 self._LibraryClasses[LibraryClass] = LibraryClassDict[self._Arch, LibraryClass]
         return self._LibraryClasses
 
-    ## Retrieve PCD declarations
+    # Retrieve PCD declarations
     @property
     def Pcds(self):
         if self._Pcds is None:
@@ -342,7 +358,7 @@ class DecBuildData(PackageBuildClassObject):
             self._Pcds.update(self._GetPcd(MODEL_PCD_DYNAMIC_EX))
         return self._Pcds
 
-    def ParsePcdName(self,TokenCName):
+    def ParsePcdName(self, TokenCName):
         TokenCName = TokenCName.strip()
         if TokenCName.startswith("["):
             if "." in TokenCName:
@@ -355,7 +371,7 @@ class DecBuildData(PackageBuildClassObject):
             Demesionattr = ""
             Fields = TokenCName
 
-        return Demesionattr,Fields
+        return Demesionattr, Fields
 
     def ProcessStructurePcd(self, StructurePcdRawDataSet):
         s_pcd_set = OrderedDict()
@@ -372,25 +388,30 @@ class DecBuildData(PackageBuildClassObject):
                 if not item.TokenCName:
                     continue
                 if "<HeaderFiles>" in item.TokenCName:
-                    struct_pcd.StructuredPcdIncludeFile.append(item.DefaultValue)
+                    struct_pcd.StructuredPcdIncludeFile.append(
+                        item.DefaultValue)
                 elif "<Packages>" in item.TokenCName:
                     dep_pkgs.append(item.DefaultValue)
                 elif item.DatumType == item.TokenCName:
                     struct_pcd.copy(item)
-                    struct_pcd.TokenValue = struct_pcd.TokenValue.strip("{").strip()
-                    struct_pcd.TokenSpaceGuidCName, struct_pcd.TokenCName = pcdname.split(".")
+                    struct_pcd.TokenValue = struct_pcd.TokenValue.strip(
+                        "{").strip()
+                    struct_pcd.TokenSpaceGuidCName, struct_pcd.TokenCName = pcdname.split(
+                        ".")
                     struct_pcd.PcdDefineLineNo = LineNo
                     struct_pcd.PkgPath = self.MetaFile.File
-                    struct_pcd.SetDecDefaultValue(item.DefaultValue,self.MetaFile.File,LineNo)
+                    struct_pcd.SetDecDefaultValue(
+                        item.DefaultValue, self.MetaFile.File, LineNo)
                 else:
                     DemesionAttr, Fields = self.ParsePcdName(item.TokenCName)
-                    struct_pcd.AddDefaultValue(Fields, item.DefaultValue, self.MetaFile.File, LineNo,DemesionAttr)
+                    struct_pcd.AddDefaultValue(
+                        Fields, item.DefaultValue, self.MetaFile.File, LineNo, DemesionAttr)
 
             struct_pcd.PackageDecs = dep_pkgs
             str_pcd_set.append(struct_pcd)
         return str_pcd_set
 
-    ## Retrieve PCD declarations for given type
+    # Retrieve PCD declarations for given type
     def _GetPcd(self, Type):
         Pcds = OrderedDict()
         #
@@ -420,38 +441,43 @@ class DecBuildData(PackageBuildClassObject):
                 continue
 
             DefaultValue, DatumType, TokenNumber = AnalyzePcdData(Setting)
-            validateranges, validlists, expressions = self._RawData.GetValidExpression(TokenSpaceGuid, PcdCName)
+            validateranges, validlists, expressions = self._RawData.GetValidExpression(
+                TokenSpaceGuid, PcdCName)
             PcdObj = PcdClassObject(
-                                        PcdCName,
-                                        TokenSpaceGuid,
-                                        self._PCD_TYPE_STRING_[Type],
-                                        DatumType,
-                                        DefaultValue,
-                                        TokenNumber,
-                                        '',
-                                        {},
-                                        False,
-                                        None,
-                                        list(validateranges),
-                                        list(validlists),
-                                        list(expressions)
-                                        )
+                PcdCName,
+                TokenSpaceGuid,
+                self._PCD_TYPE_STRING_[Type],
+                DatumType,
+                DefaultValue,
+                TokenNumber,
+                '',
+                {},
+                False,
+                None,
+                list(validateranges),
+                list(validlists),
+                list(expressions)
+            )
             DefinitionPosition[PcdObj] = (self.MetaFile.File, LineNo)
             if "." in TokenSpaceGuid:
                 StrPcdSet.append((PcdObj, LineNo))
             else:
-                Pcds[PcdCName, TokenSpaceGuid, self._PCD_TYPE_STRING_[Type]] = PcdObj
+                Pcds[PcdCName, TokenSpaceGuid,
+                     self._PCD_TYPE_STRING_[Type]] = PcdObj
 
         StructurePcds = self.ProcessStructurePcd(StrPcdSet)
         for pcd in StructurePcds:
-            Pcds[pcd.TokenCName, pcd.TokenSpaceGuidCName, self._PCD_TYPE_STRING_[Type]] = pcd
+            Pcds[pcd.TokenCName, pcd.TokenSpaceGuidCName,
+                 self._PCD_TYPE_STRING_[Type]] = pcd
         StructPattern = compile(r'[_a-zA-Z][0-9A-Za-z_]*$')
         for pcd in Pcds.values():
             if pcd.DatumType not in [TAB_UINT8, TAB_UINT16, TAB_UINT32, TAB_UINT64, TAB_VOID, "BOOLEAN"]:
                 if not pcd.IsAggregateDatumType():
-                    EdkLogger.error('build', FORMAT_INVALID, "DatumType only support BOOLEAN, UINT8, UINT16, UINT32, UINT64, VOID* or a valid struct name.", DefinitionPosition[pcd][0], DefinitionPosition[pcd][1])
+                    EdkLogger.error('build', FORMAT_INVALID, "DatumType only support BOOLEAN, UINT8, UINT16, UINT32, UINT64, VOID* or a valid struct name.",
+                                    DefinitionPosition[pcd][0], DefinitionPosition[pcd][1])
                 elif not pcd.IsArray() and not pcd.StructuredPcdIncludeFile:
-                    EdkLogger.error("build", PCD_STRUCTURE_PCD_ERROR, "The structure Pcd %s.%s header file is not found in %s line %s \n" % (pcd.TokenSpaceGuidCName, pcd.TokenCName, pcd.DefinitionPosition[0], pcd.DefinitionPosition[1] ))
+                    EdkLogger.error("build", PCD_STRUCTURE_PCD_ERROR, "The structure Pcd %s.%s header file is not found in %s line %s \n" % (
+                        pcd.TokenSpaceGuidCName, pcd.TokenCName, pcd.DefinitionPosition[0], pcd.DefinitionPosition[1]))
         return Pcds
 
     @property

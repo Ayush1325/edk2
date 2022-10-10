@@ -1,4 +1,4 @@
-## @file
+# @file
 #  Set up the git configuration for contributing to TianoCore projects
 #
 #  Copyright (c) 2019, Linaro Ltd. All rights reserved.<BR>
@@ -50,7 +50,7 @@ UPSTREAMS = [
     {'name': 'edk2-test',
      'repo': 'https://github.com/tianocore/edk2-test.git',
      'list': 'devel@edk2.groups.io', 'prefix': 'edk2-test'}
-    ]
+]
 
 # The minimum version required for all of the below options to work
 MIN_GIT_VERSION = (1, 9, 0)
@@ -78,11 +78,12 @@ OPTIONS = [
     {'section': 'format',      'option': 'numbered',          'value': True},
     {'section': 'format',      'option': 'signoff',           'value': False},
     {'section': 'log',         'option': 'mailmap',           'value': True},
-    {'section': 'notes',       'option': 'rewriteRef',        'value': 'refs/notes/commits'},
+    {'section': 'notes',       'option': 'rewriteRef',
+        'value': 'refs/notes/commits'},
     {'section': 'sendemail',   'option': 'chainreplyto',      'value': False},
     {'section': 'sendemail',   'option': 'thread',            'value': True},
     {'section': 'sendemail',   'option': 'transferEncoding',  'value': '8bit'},
-    ]
+]
 
 
 def locate_repo():
@@ -97,7 +98,7 @@ def locate_repo():
 
 def fuzzy_match_repo_url(one, other):
     """Compares two repository URLs, ignoring protocol and optional trailing '.git'."""
-    oneresult   = re.match(r'.*://(?P<oneresult>.*?)(\.git)*$', one)
+    oneresult = re.match(r'.*://(?P<oneresult>.*?)(\.git)*$', one)
     otherresult = re.match(r'.*://(?P<otherresult>.*?)(\.git)*$', other)
 
     if oneresult and otherresult:
@@ -204,13 +205,17 @@ if __name__ == '__main__':
                                                            entry['option'], value))
             else:
                 if ARGS.force:
-                    write_config_value(REPO, entry['section'], entry['option'], entry['value'])
+                    write_config_value(
+                        REPO, entry['section'], entry['option'], entry['value'])
                 else:
                     print("Not overwriting existing %s.%s value:" % (entry['section'],
                                                                      entry['option']))
                     print("  '%s' != '%s'" % (value, entry['value']))
-                    print("  add '-f' to command line to force overwriting existing settings")
+                    print(
+                        "  add '-f' to command line to force overwriting existing settings")
         else:
-            print("%s.%s => '%s'" % (entry['section'], entry['option'], entry['value']))
+            print("%s.%s => '%s'" %
+                  (entry['section'], entry['option'], entry['value']))
             if not ARGS.check:
-                write_config_value(REPO, entry['section'], entry['option'], entry['value'])
+                write_config_value(
+                    REPO, entry['section'], entry['option'], entry['value'])

@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file contained the parser for sections in INF file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -53,10 +53,12 @@ from Parser.InfBinarySectionParser import InfBinarySectionParser
 from Parser.InfPcdSectionParser import InfPcdSectionParser
 from Parser.InfDepexSectionParser import InfDepexSectionParser
 
-## GetSpecialStr2
+# GetSpecialStr2
 #
 # GetSpecialStr2
 #
+
+
 def GetSpecialStr2(ItemList, FileName, LineNo, SectionString):
     Str2 = ''
     #
@@ -68,13 +70,14 @@ def GetSpecialStr2(ItemList, FileName, LineNo, SectionString):
         # section can has more than 2 items in section header string,
         # others should report error.
         #
-        if not (ItemList[0].upper() == DT.TAB_LIBRARY_CLASSES.upper() or \
-                ItemList[0].upper() == DT.TAB_DEPEX.upper() or \
+        if not (ItemList[0].upper() == DT.TAB_LIBRARY_CLASSES.upper() or
+                ItemList[0].upper() == DT.TAB_DEPEX.upper() or
                 ItemList[0].upper() == DT.TAB_USER_EXTENSIONS.upper()):
             if ItemList[2] != '':
                 Logger.Error('Parser',
                              FORMAT_INVALID,
-                             ST.ERR_INF_PARSER_SOURCE_SECTION_SECTIONNAME_INVALID % (SectionString),
+                             ST.ERR_INF_PARSER_SOURCE_SECTION_SECTIONNAME_INVALID % (
+                                 SectionString),
                              File=FileName,
                              Line=LineNo,
                              ExtraData=SectionString)
@@ -87,7 +90,7 @@ def GetSpecialStr2(ItemList, FileName, LineNo, SectionString):
         #
         if not ItemList[0].upper() == DT.TAB_USER_EXTENSIONS.upper() or ItemList[0].upper() == DT.TAB_DEPEX.upper():
             if ItemList[3] != '':
-                Logger.Error('Parser', FORMAT_INVALID, ST.ERR_INF_PARSER_SOURCE_SECTION_SECTIONNAME_INVALID \
+                Logger.Error('Parser', FORMAT_INVALID, ST.ERR_INF_PARSER_SOURCE_SECTION_SECTIONNAME_INVALID
                              % (SectionString), File=FileName, Line=LineNo, ExtraData=SectionString)
 
         if not ItemList[0].upper() == DT.TAB_USER_EXTENSIONS.upper():
@@ -96,14 +99,16 @@ def GetSpecialStr2(ItemList, FileName, LineNo, SectionString):
             Str2 = ItemList[2]
 
     elif len(ItemList) > 4:
-        Logger.Error('Parser', FORMAT_INVALID, ST.ERR_INF_PARSER_SOURCE_SECTION_SECTIONNAME_INVALID \
+        Logger.Error('Parser', FORMAT_INVALID, ST.ERR_INF_PARSER_SOURCE_SECTION_SECTIONNAME_INVALID
                      % (SectionString), File=FileName, Line=LineNo, ExtraData=SectionString)
 
     return Str2
 
-## ProcessUseExtHeader
+# ProcessUseExtHeader
 #
 #
+
+
 def ProcessUseExtHeader(ItemList):
     NewItemList = []
     AppendContent = ''
@@ -138,10 +143,12 @@ def ProcessUseExtHeader(ItemList):
 
     return True, NewItemList
 
-## GetArch
+# GetArch
 #
 # GetArch
 #
+
+
 def GetArch(ItemList, ArchList, FileName, LineNo, SectionString):
     #
     # S1 is always Arch
@@ -165,10 +172,12 @@ def GetArch(ItemList, ArchList, FileName, LineNo, SectionString):
 
     return Arch, ArchList
 
-## InfSectionParser
+# InfSectionParser
 #
 # Inherit from object
 #
+
+
 class InfSectionParser(InfDefinSectionParser,
                        InfBuildOptionSectionParser,
                        InfSourceSectionParser,
@@ -183,7 +192,7 @@ class InfSectionParser(InfDefinSectionParser,
     #
     MetaFiles = {}
 
-    ## Factory method
+    # Factory method
     #
     # One file, one parser object. This factory method makes sure that there's
     # only one object constructed for one meta file.
@@ -248,16 +257,18 @@ class InfSectionParser(InfDefinSectionParser,
     #
     # File Header content parser
     #
-    def InfHeaderParser(self, Content, InfHeaderObject2, FileName, IsBinaryHeader = False):
+    def InfHeaderParser(self, Content, InfHeaderObject2, FileName, IsBinaryHeader=False):
         if IsBinaryHeader:
-            (Abstract, Description, Copyright, License) = ParseHeaderCommentSection(Content, FileName, True)
+            (Abstract, Description, Copyright, License) = ParseHeaderCommentSection(
+                Content, FileName, True)
             if not Abstract or not Description or not Copyright or not License:
                 Logger.Error('Parser',
                              FORMAT_INVALID,
                              ST.ERR_INVALID_BINARYHEADER_FORMAT,
                              File=FileName)
         else:
-            (Abstract, Description, Copyright, License) = ParseHeaderCommentSection(Content, FileName)
+            (Abstract, Description, Copyright,
+             License) = ParseHeaderCommentSection(Content, FileName)
         #
         # Not process file name now, for later usage.
         #
@@ -272,10 +283,7 @@ class InfSectionParser(InfDefinSectionParser,
         InfHeaderObject2.SetCopyright(Copyright)
         InfHeaderObject2.SetLicense(License)
 
-
-
-
-    ## Section header parser
+    # Section header parser
     #
     #   The section header is always in following format:
     #
@@ -283,23 +291,25 @@ class InfSectionParser(InfDefinSectionParser,
     #
     # @param String    A string contained the content need to be parsed.
     #
+
     def SectionHeaderParser(self, SectionString, FileName, LineNo):
         _Scope = []
         _SectionName = ''
         ArchList = set()
         _ValueList = []
         _PcdNameList = [DT.TAB_INF_FIXED_PCD.upper(),
-                             DT.TAB_INF_FEATURE_PCD.upper(),
-                             DT.TAB_INF_PATCH_PCD.upper(),
-                             DT.TAB_INF_PCD.upper(),
-                             DT.TAB_INF_PCD_EX.upper()
-                             ]
+                        DT.TAB_INF_FEATURE_PCD.upper(),
+                        DT.TAB_INF_PATCH_PCD.upper(),
+                        DT.TAB_INF_PCD.upper(),
+                        DT.TAB_INF_PCD_EX.upper()
+                        ]
         SectionString = SectionString.strip()
         for Item in GetSplitValueList(SectionString[1:-1], DT.TAB_COMMA_SPLIT):
             if Item == '':
                 Logger.Error('Parser',
                              FORMAT_INVALID,
-                             ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (""),
+                             ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (
+                                 ""),
                              File=FileName,
                              Line=LineNo,
                              ExtraData=SectionString)
@@ -317,10 +327,11 @@ class InfSectionParser(InfDefinSectionParser,
                                  Line=LineNo,
                                  ExtraData=SectionString)
             elif _PcdNameList[1] in [_SectionName.upper(), ItemList[0].upper()] and \
-                (_SectionName.upper()!= ItemList[0].upper()):
+                    (_SectionName.upper() != ItemList[0].upper()):
                 Logger.Error('Parser',
                              FORMAT_INVALID,
-                             ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (""),
+                             ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (
+                                 ""),
                              File=FileName,
                              Line=LineNo,
                              ExtraData=SectionString)
@@ -340,7 +351,8 @@ class InfSectionParser(InfDefinSectionParser,
             #
             # Get Arch
             #
-            Str1, ArchList = GetArch(ItemList, ArchList, FileName, LineNo, SectionString)
+            Str1, ArchList = GetArch(
+                ItemList, ArchList, FileName, LineNo, SectionString)
 
             #
             # For [Defines] section, do special check.
@@ -349,7 +361,8 @@ class InfSectionParser(InfDefinSectionParser,
                 if len(ItemList) != 1:
                     Logger.Error('Parser',
                                  FORMAT_INVALID,
-                                 ST.ERR_INF_PARSER_DEFINE_FROMAT_INVALID % (SectionString),
+                                 ST.ERR_INF_PARSER_DEFINE_FROMAT_INVALID % (
+                                     SectionString),
                                  File=FileName, Line=LineNo, ExtraData=SectionString)
 
             #
@@ -362,7 +375,8 @@ class InfSectionParser(InfDefinSectionParser,
                 if not RetValue[0]:
                     Logger.Error('Parser',
                                  FORMAT_INVALID,
-                                 ST.ERR_INF_PARSER_DEFINE_FROMAT_INVALID % (SectionString),
+                                 ST.ERR_INF_PARSER_DEFINE_FROMAT_INVALID % (
+                                     SectionString),
                                  File=FileName, Line=LineNo, ExtraData=SectionString)
                 else:
                     ItemList = RetValue[1]
@@ -377,12 +391,14 @@ class InfSectionParser(InfDefinSectionParser,
             #
             if ItemList[0].upper() == DT.TAB_LIBRARY_CLASSES.upper() and len(ItemList) == 3:
                 if ItemList[2] != '':
-                    ModuleTypeList = GetSplitValueList(ItemList[2], DT.TAB_VALUE_SPLIT)
+                    ModuleTypeList = GetSplitValueList(
+                        ItemList[2], DT.TAB_VALUE_SPLIT)
                     for Item in ModuleTypeList:
                         if Item.strip() not in DT.MODULE_LIST:
                             Logger.Error('Parser',
                                          FORMAT_INVALID,
-                                         ST.ERR_INF_PARSER_DEFINE_MODULETYPE_INVALID % (Item),
+                                         ST.ERR_INF_PARSER_DEFINE_MODULETYPE_INVALID % (
+                                             Item),
                                          File=FileName,
                                          Line=LineNo,
                                          ExtraData=SectionString)
@@ -412,18 +428,20 @@ class InfSectionParser(InfDefinSectionParser,
                     _ValueList.append([_SectionName, Str1, Str2, LineNo])
                 else:
                     if len(ItemList) == 4:
-                        _ValueList.append([_SectionName, Str1, Str2, ItemList[3], LineNo])
+                        _ValueList.append(
+                            [_SectionName, Str1, Str2, ItemList[3], LineNo])
 
         self.SectionHeaderContent = deepcopy(_ValueList)
 
-    ## GenSpecialSectionList
+    # GenSpecialSectionList
     #
     #  @param SpecialSectionList: a list of list, of which item's format
     #                             (Comment, LineNum)
     #  @param ContainerFile:      Input value for filename of Inf file
     #
-    def InfSpecialCommentParser (self, SpecialSectionList, InfSectionObject, ContainerFile, SectionType):
-        ReFindSpecialCommentRe = re.compile(r"""#(?:\s*)\[(.*?)\](?:.*)""", re.DOTALL)
+    def InfSpecialCommentParser(self, SpecialSectionList, InfSectionObject, ContainerFile, SectionType):
+        ReFindSpecialCommentRe = re.compile(
+            r"""#(?:\s*)\[(.*?)\](?:.*)""", re.DOTALL)
         ReFindHobArchRe = re.compile(r"""[Hh][Oo][Bb]\.([^,]*)""", re.DOTALL)
         if self.FileName:
             pass
@@ -450,7 +468,8 @@ class InfSectionParser(InfDefinSectionParser,
                     ArchList.append(Arch)
             CommentSoFar = ''
             for Index in range(1, len(List)):
-                Result = ParseComment(List[Index], DT.ALL_USAGE_TOKENS, TokenDict, [], False)
+                Result = ParseComment(
+                    List[Index], DT.ALL_USAGE_TOKENS, TokenDict, [], False)
                 Usage = Result[0]
                 Type = Result[1]
                 HelpText = Result[3]
@@ -488,6 +507,7 @@ class InfSectionParser(InfDefinSectionParser,
                                                    SectionType):
             Logger.Error('InfParser',
                          FORMAT_INVALID,
-                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (SectionType),
+                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (
+                             SectionType),
                          ContainerFile
                          )

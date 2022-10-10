@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file contained the parser for define sections in INF file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -26,14 +26,17 @@ from Object.Parser.InfMisc import ErrorInInf
 from Logger import StringTable as ST
 from Parser.InfParserMisc import InfParserSectionRoot
 
-## __GetValidateArchList
+# __GetValidateArchList
 #
 #
+
+
 def GetValidateArchList(LineContent):
 
     TempArch = ''
     ArchList = []
-    ValidateAcrhPatten = re.compile(r"^\s*#\s*VALID_ARCHITECTURES\s*=\s*.*$", re.DOTALL)
+    ValidateAcrhPatten = re.compile(
+        r"^\s*#\s*VALID_ARCHITECTURES\s*=\s*.*$", re.DOTALL)
 
     if ValidateAcrhPatten.match(LineContent):
         TempArch = GetSplitValueList(LineContent, DT.TAB_EQUAL_SPLIT, 1)[1]
@@ -50,6 +53,7 @@ def GetValidateArchList(LineContent):
 
     return ArchList
 
+
 class InfDefinSectionParser(InfParserSectionRoot):
     def InfDefineParser(self, SectionString, InfSectionObject, FileName, SectionComment):
 
@@ -58,12 +62,12 @@ class InfDefinSectionParser(InfParserSectionRoot):
         #
         # Parser Defines section content and fill self._ContentList dict.
         #
-        StillCommentFalg  = False
+        StillCommentFalg = False
         HeaderComments = []
         SectionContent = ''
-        ArchList       = []
-        _ContentList   = []
-        _ValueList     = []
+        ArchList = []
+        _ContentList = []
+        _ValueList = []
         #
         # Add WORKSPACE to global Marco dict.
         #
@@ -71,14 +75,14 @@ class InfDefinSectionParser(InfParserSectionRoot):
 
         for Line in SectionString:
             LineContent = Line[0]
-            LineNo      = Line[1]
-            TailComments   = ''
-            LineComment    = None
+            LineNo = Line[1]
+            TailComments = ''
+            LineComment = None
 
-            LineInfo       = ['', -1, '']
-            LineInfo[0]    = FileName
-            LineInfo[1]    = LineNo
-            LineInfo[2]    = LineContent
+            LineInfo = ['', -1, '']
+            LineInfo[0] = FileName
+            LineInfo[1] = LineNo
+            LineInfo[2] = LineContent
 
             if LineContent.strip() == '':
                 continue
@@ -125,8 +129,10 @@ class InfDefinSectionParser(InfParserSectionRoot):
             # Find Tail comment.
             #
             if LineContent.find(DT.TAB_COMMENT_SPLIT) > -1:
-                TailComments = LineContent[LineContent.find(DT.TAB_COMMENT_SPLIT):]
-                LineContent = LineContent[:LineContent.find(DT.TAB_COMMENT_SPLIT)]
+                TailComments = LineContent[LineContent.find(
+                    DT.TAB_COMMENT_SPLIT):]
+                LineContent = LineContent[:LineContent.find(
+                    DT.TAB_COMMENT_SPLIT)]
                 if LineComment is None:
                     LineComment = InfLineCommentObject()
                 LineComment.SetTailComments(TailComments)
@@ -168,8 +174,10 @@ class InfDefinSectionParser(InfParserSectionRoot):
 
             InfDefMemberObj = InfDefMember(Name, Value)
             if (LineComment is not None):
-                InfDefMemberObj.Comments.SetHeaderComments(LineComment.GetHeaderComments())
-                InfDefMemberObj.Comments.SetTailComments(LineComment.GetTailComments())
+                InfDefMemberObj.Comments.SetHeaderComments(
+                    LineComment.GetHeaderComments())
+                InfDefMemberObj.Comments.SetTailComments(
+                    LineComment.GetTailComments())
 
             InfDefMemberObj.CurrentLine.SetFileName(self.FullPath)
             InfDefMemberObj.CurrentLine.SetLineString(LineContent)
@@ -188,4 +196,3 @@ class InfDefinSectionParser(InfParserSectionRoot):
         InfSectionObject.SetAllContent(SectionContent)
 
         InfSectionObject.SetDefines(_ContentList, Arch=ArchList)
-

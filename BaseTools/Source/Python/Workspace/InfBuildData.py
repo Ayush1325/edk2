@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to create a database used by build tool
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -16,7 +16,7 @@ from collections import OrderedDict
 from Workspace.BuildClassObject import ModuleBuildClassObject, LibraryClassObject, PcdClassObject
 from Common.Expression import ValueExpressionEx, PcdPattern
 
-## Get Protocol value from given packages
+# Get Protocol value from given packages
 #
 #   @param      CName           The CName of the GUID
 #   @param      PackageList     List of packages looking-up in
@@ -25,17 +25,20 @@ from Common.Expression import ValueExpressionEx, PcdPattern
 #   @retval     GuidValue   if the CName is found in any given package
 #   @retval     None        if the CName is not found in all given packages
 #
-def _ProtocolValue(CName, PackageList, Inffile = None):
+
+
+def _ProtocolValue(CName, PackageList, Inffile=None):
     for P in PackageList:
         ProtocolKeys = list(P.Protocols.keys())
         if Inffile and P._PrivateProtocols:
             if not Inffile.startswith(P.MetaFile.Dir):
-                ProtocolKeys = [x for x in P.Protocols if x not in P._PrivateProtocols]
+                ProtocolKeys = [
+                    x for x in P.Protocols if x not in P._PrivateProtocols]
         if CName in ProtocolKeys:
             return P.Protocols[CName]
     return None
 
-## Get PPI value from given packages
+# Get PPI value from given packages
 #
 #   @param      CName           The CName of the GUID
 #   @param      PackageList     List of packages looking-up in
@@ -44,7 +47,9 @@ def _ProtocolValue(CName, PackageList, Inffile = None):
 #   @retval     GuidValue   if the CName is found in any given package
 #   @retval     None        if the CName is not found in all given packages
 #
-def _PpiValue(CName, PackageList, Inffile = None):
+
+
+def _PpiValue(CName, PackageList, Inffile=None):
     for P in PackageList:
         PpiKeys = list(P.Ppis.keys())
         if Inffile and P._PrivatePpis:
@@ -54,11 +59,13 @@ def _PpiValue(CName, PackageList, Inffile = None):
             return P.Ppis[CName]
     return None
 
-## Module build information from INF file
+# Module build information from INF file
 #
 #  This class is used to retrieve information stored in database and convert them
 # into ModuleBuildClassObject form for easier use for AutoGen.
 #
+
+
 class InfBuildData(ModuleBuildClassObject):
 
     # dict used to convert part of [Defines] to members of InfBuildData directly
@@ -66,35 +73,35 @@ class InfBuildData(ModuleBuildClassObject):
         #
         # Required Fields
         #
-        TAB_INF_DEFINES_BASE_NAME                   : "_BaseName",
-        TAB_INF_DEFINES_FILE_GUID                   : "_Guid",
-        TAB_INF_DEFINES_MODULE_TYPE                 : "_ModuleType",
+        TAB_INF_DEFINES_BASE_NAME: "_BaseName",
+        TAB_INF_DEFINES_FILE_GUID: "_Guid",
+        TAB_INF_DEFINES_MODULE_TYPE: "_ModuleType",
         #
         # Optional Fields
         #
         # TAB_INF_DEFINES_INF_VERSION                 : "_AutoGenVersion",
-        TAB_INF_DEFINES_COMPONENT_TYPE              : "_ComponentType",
-        TAB_INF_DEFINES_MAKEFILE_NAME               : "_MakefileName",
+        TAB_INF_DEFINES_COMPONENT_TYPE: "_ComponentType",
+        TAB_INF_DEFINES_MAKEFILE_NAME: "_MakefileName",
         # TAB_INF_DEFINES_CUSTOM_MAKEFILE             : "_CustomMakefile",
-        TAB_INF_DEFINES_DPX_SOURCE                  :"_DxsFile",
-        TAB_INF_DEFINES_VERSION_NUMBER              : "_Version",
-        TAB_INF_DEFINES_VERSION_STRING              : "_Version",
-        TAB_INF_DEFINES_VERSION                     : "_Version",
-        TAB_INF_DEFINES_PCD_IS_DRIVER               : "_PcdIsDriver",
-        TAB_INF_DEFINES_SHADOW                      : "_Shadow"
+        TAB_INF_DEFINES_DPX_SOURCE: "_DxsFile",
+        TAB_INF_DEFINES_VERSION_NUMBER: "_Version",
+        TAB_INF_DEFINES_VERSION_STRING: "_Version",
+        TAB_INF_DEFINES_VERSION: "_Version",
+        TAB_INF_DEFINES_PCD_IS_DRIVER: "_PcdIsDriver",
+        TAB_INF_DEFINES_SHADOW: "_Shadow"
     }
 
     # regular expression for converting XXX_FLAGS in [nmake] section to new type
-    _NMAKE_FLAG_PATTERN_ = re.compile("(?:EBC_)?([A-Z]+)_(?:STD_|PROJ_|ARCH_)?FLAGS(?:_DLL|_ASL|_EXE)?", re.UNICODE)
+    _NMAKE_FLAG_PATTERN_ = re.compile(
+        "(?:EBC_)?([A-Z]+)_(?:STD_|PROJ_|ARCH_)?FLAGS(?:_DLL|_ASL|_EXE)?", re.UNICODE)
     # dict used to convert old tool name used in [nmake] section to new ones
     _TOOL_CODE_ = {
-        "C"         :   "CC",
-        BINARY_FILE_TYPE_LIB       :   "SLINK",
-        "LINK"      :   "DLINK",
+        "C":   "CC",
+        BINARY_FILE_TYPE_LIB:   "SLINK",
+        "LINK":   "DLINK",
     }
 
-
-    ## Constructor of InfBuildData
+    # Constructor of InfBuildData
     #
     #  Initialize object of InfBuildData
     #
@@ -105,6 +112,7 @@ class InfBuildData(ModuleBuildClassObject):
     #   @param      Platform        The name of platform employing this module
     #   @param      Macros          Macros used for replacement in DSC file
     #
+
     def __init__(self, FilePath, RawData, BuildDatabase, Arch=TAB_ARCH_COMMON, Target=None, Toolchain=None):
         self.MetaFile = FilePath
         self._ModuleDir = FilePath.Dir
@@ -145,7 +153,7 @@ class InfBuildData(ModuleBuildClassObject):
         self.LibInstances = []
         self.ReferenceModules = set()
 
-    def SetReferenceModule(self,Module):
+    def SetReferenceModule(self, Module):
         self.ReferenceModules.add(Module)
         return self
 
@@ -157,22 +165,22 @@ class InfBuildData(ModuleBuildClassObject):
     def __getitem__(self, key):
         return self.__dict__[self._PROPERTY_[key]]
 
-    ## "in" test support
+    # "in" test support
     def __contains__(self, key):
         return key in self._PROPERTY_
 
-    ## Get current effective macros
+    # Get current effective macros
     @cached_property
     def _Macros(self):
         RetVal = {}
         return RetVal
 
-    ## Get architecture
+    # Get architecture
     @cached_property
     def Arch(self):
         return self._Arch
 
-    ## Return the name of platform employing this module
+    # Return the name of platform employing this module
     @cached_property
     def Platform(self):
         return self._Platform
@@ -185,15 +193,17 @@ class InfBuildData(ModuleBuildClassObject):
     def TailComments(self):
         return [a[0] for a in self._RawData[MODEL_META_DATA_TAIL_COMMENT]]
 
-    ## Retrieve all information in [Defines] section
+    # Retrieve all information in [Defines] section
     #
     #   (Retrieving all [Defines] information in one-shot is just to save time.)
     #
     @cached_class_function
     def _GetHeaderInfo(self):
-        RecordList = self._RawData[MODEL_META_DATA_HEADER, self._Arch, self._Platform]
+        RecordList = self._RawData[MODEL_META_DATA_HEADER,
+                                   self._Arch, self._Platform]
         for Record in RecordList:
-            Name, Value = Record[1], ReplaceMacro(Record[2], self._Macros, False)
+            Name, Value = Record[1], ReplaceMacro(
+                Record[2], self._Macros, False)
             # items defined _PROPERTY_ don't need additional processing
             if Name in self:
                 self[Name] = Value
@@ -208,7 +218,8 @@ class InfBuildData(ModuleBuildClassObject):
                 self._Specification[Name] = GetHexVerValue(Value)
                 if self._Specification[Name] is None:
                     EdkLogger.error("build", FORMAT_NOT_SUPPORTED,
-                                    "'%s' format is not supported for %s" % (Value, Name),
+                                    "'%s' format is not supported for %s" % (
+                                        Value, Name),
                                     File=self.MetaFile, Line=Record[-1])
             elif Name == 'LIBRARY_CLASS':
                 if self._LibraryClass is None:
@@ -219,7 +230,8 @@ class InfBuildData(ModuleBuildClassObject):
                     SupModuleList = GetSplitValueList(ValueList[1], ' ')
                 else:
                     SupModuleList = SUP_MODULE_LIST
-                self._LibraryClass.append(LibraryClassObject(LibraryClass, SupModuleList))
+                self._LibraryClass.append(
+                    LibraryClassObject(LibraryClass, SupModuleList))
             elif Name == 'ENTRY_POINT':
                 if self._ModuleEntryPointList is None:
                     self._ModuleEntryPointList = []
@@ -266,38 +278,45 @@ class InfBuildData(ModuleBuildClassObject):
             EdkLogger.error("build", ATTRIBUTE_NOT_AVAILABLE,
                             "MODULE_TYPE is not given", File=self.MetaFile)
         if self._ModuleType not in SUP_MODULE_LIST:
-            RecordList = self._RawData[MODEL_META_DATA_HEADER, self._Arch, self._Platform]
+            RecordList = self._RawData[MODEL_META_DATA_HEADER,
+                                       self._Arch, self._Platform]
             for Record in RecordList:
                 Name = Record[1]
                 if Name == "MODULE_TYPE":
                     LineNo = Record[6]
                     break
             EdkLogger.error("build", FORMAT_NOT_SUPPORTED,
-                            "MODULE_TYPE %s is not supported for EDK II, valid values are:\n %s" % (self._ModuleType, ' '.join(l for l in SUP_MODULE_LIST)),
+                            "MODULE_TYPE %s is not supported for EDK II, valid values are:\n %s" % (
+                                self._ModuleType, ' '.join(l for l in SUP_MODULE_LIST)),
                             File=self.MetaFile, Line=LineNo)
         if (self._Specification is None) or (not 'PI_SPECIFICATION_VERSION' in self._Specification) or (int(self._Specification['PI_SPECIFICATION_VERSION'], 16) < 0x0001000A):
             if self._ModuleType == SUP_MODULE_SMM_CORE:
-                EdkLogger.error("build", FORMAT_NOT_SUPPORTED, "SMM_CORE module type can't be used in the module with PI_SPECIFICATION_VERSION less than 0x0001000A", File=self.MetaFile)
+                EdkLogger.error("build", FORMAT_NOT_SUPPORTED,
+                                "SMM_CORE module type can't be used in the module with PI_SPECIFICATION_VERSION less than 0x0001000A", File=self.MetaFile)
         if (self._Specification is None) or (not 'PI_SPECIFICATION_VERSION' in self._Specification) or (int(self._Specification['PI_SPECIFICATION_VERSION'], 16) < 0x00010032):
             if self._ModuleType == SUP_MODULE_MM_CORE_STANDALONE:
-                EdkLogger.error("build", FORMAT_NOT_SUPPORTED, "MM_CORE_STANDALONE module type can't be used in the module with PI_SPECIFICATION_VERSION less than 0x00010032", File=self.MetaFile)
+                EdkLogger.error("build", FORMAT_NOT_SUPPORTED,
+                                "MM_CORE_STANDALONE module type can't be used in the module with PI_SPECIFICATION_VERSION less than 0x00010032", File=self.MetaFile)
             if self._ModuleType == SUP_MODULE_MM_STANDALONE:
-                EdkLogger.error("build", FORMAT_NOT_SUPPORTED, "MM_STANDALONE module type can't be used in the module with PI_SPECIFICATION_VERSION less than 0x00010032", File=self.MetaFile)
+                EdkLogger.error("build", FORMAT_NOT_SUPPORTED,
+                                "MM_STANDALONE module type can't be used in the module with PI_SPECIFICATION_VERSION less than 0x00010032", File=self.MetaFile)
         if 'PCI_DEVICE_ID' in self._Defs and 'PCI_VENDOR_ID' in self._Defs \
            and 'PCI_CLASS_CODE' in self._Defs and 'PCI_REVISION' in self._Defs:
             self._BuildType = 'UEFI_OPTIONROM'
             if 'PCI_COMPRESS' in self._Defs:
                 if self._Defs['PCI_COMPRESS'] not in ('TRUE', 'FALSE'):
-                    EdkLogger.error("build", FORMAT_INVALID, "Expected TRUE/FALSE for PCI_COMPRESS: %s" % self.MetaFile)
+                    EdkLogger.error(
+                        "build", FORMAT_INVALID, "Expected TRUE/FALSE for PCI_COMPRESS: %s" % self.MetaFile)
 
         elif 'UEFI_HII_RESOURCE_SECTION' in self._Defs \
-           and self._Defs['UEFI_HII_RESOURCE_SECTION'] == 'TRUE':
+                and self._Defs['UEFI_HII_RESOURCE_SECTION'] == 'TRUE':
             self._BuildType = 'UEFI_HII'
         else:
             self._BuildType = self._ModuleType.upper()
 
         if self._DxsFile:
-            File = PathClass(NormPath(self._DxsFile), self._ModuleDir, Arch=self._Arch)
+            File = PathClass(NormPath(self._DxsFile),
+                             self._ModuleDir, Arch=self._Arch)
             # check the file validation
             ErrorCode, ErrorInfo = File.Validate(".dxs", CaseSensitive=False)
             if ErrorCode != 0:
@@ -307,11 +326,12 @@ class InfBuildData(ModuleBuildClassObject):
                 self._DependencyFileList = []
             self._DependencyFileList.append(File)
 
-    ## Retrieve file version
+    # Retrieve file version
     @cached_property
     def AutoGenVersion(self):
         RetVal = 0x00010000
-        RecordList = self._RawData[MODEL_META_DATA_HEADER, self._Arch, self._Platform]
+        RecordList = self._RawData[MODEL_META_DATA_HEADER,
+                                   self._Arch, self._Platform]
         for Record in RecordList:
             if Record[1] == TAB_INF_DEFINES_INF_VERSION:
                 if '.' in Record[2]:
@@ -324,16 +344,17 @@ class InfBuildData(ModuleBuildClassObject):
                 break
         return RetVal
 
-    ## Retrieve BASE_NAME
+    # Retrieve BASE_NAME
     @cached_property
     def BaseName(self):
         if self._BaseName is None:
             self._GetHeaderInfo()
             if self._BaseName is None:
-                EdkLogger.error('build', ATTRIBUTE_NOT_AVAILABLE, "No BASE_NAME name", File=self.MetaFile)
+                EdkLogger.error('build', ATTRIBUTE_NOT_AVAILABLE,
+                                "No BASE_NAME name", File=self.MetaFile)
         return self._BaseName
 
-    ## Retrieve DxsFile
+    # Retrieve DxsFile
     @cached_property
     def DxsFile(self):
         if self._DxsFile is None:
@@ -342,7 +363,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._DxsFile = ''
         return self._DxsFile
 
-    ## Retrieve MODULE_TYPE
+    # Retrieve MODULE_TYPE
     @cached_property
     def ModuleType(self):
         if self._ModuleType is None:
@@ -353,7 +374,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._ModuleType = SUP_MODULE_USER_DEFINED
         return self._ModuleType
 
-    ## Retrieve COMPONENT_TYPE
+    # Retrieve COMPONENT_TYPE
     @cached_property
     def ComponentType(self):
         if self._ComponentType is None:
@@ -362,7 +383,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._ComponentType = SUP_MODULE_USER_DEFINED
         return self._ComponentType
 
-    ## Retrieve "BUILD_TYPE"
+    # Retrieve "BUILD_TYPE"
     @cached_property
     def BuildType(self):
         if self._BuildType is None:
@@ -371,7 +392,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._BuildType = SUP_MODULE_BASE
         return self._BuildType
 
-    ## Retrieve file guid
+    # Retrieve file guid
     @cached_property
     def Guid(self):
         if self._Guid is None:
@@ -380,7 +401,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._Guid = '00000000-0000-0000-0000-000000000000'
         return self._Guid
 
-    ## Retrieve module version
+    # Retrieve module version
     @cached_property
     def Version(self):
         if self._Version is None:
@@ -389,7 +410,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._Version = '0.0'
         return self._Version
 
-    ## Retrieve PCD_IS_DRIVER
+    # Retrieve PCD_IS_DRIVER
     @cached_property
     def PcdIsDriver(self):
         if self._PcdIsDriver is None:
@@ -398,7 +419,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._PcdIsDriver = ''
         return self._PcdIsDriver
 
-    ## Retrieve SHADOW
+    # Retrieve SHADOW
     @cached_property
     def Shadow(self):
         if self._Shadow is None:
@@ -409,7 +430,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._Shadow = False
         return self._Shadow
 
-    ## Retrieve CUSTOM_MAKEFILE
+    # Retrieve CUSTOM_MAKEFILE
     @cached_property
     def CustomMakefile(self):
         if self._CustomMakefile is None:
@@ -418,7 +439,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._CustomMakefile = {}
         return self._CustomMakefile
 
-    ## Retrieve EFI_SPECIFICATION_VERSION
+    # Retrieve EFI_SPECIFICATION_VERSION
     @cached_property
     def Specification(self):
         if self._Specification is None:
@@ -427,7 +448,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._Specification = {}
         return self._Specification
 
-    ## Retrieve LIBRARY_CLASS
+    # Retrieve LIBRARY_CLASS
     @cached_property
     def LibraryClass(self):
         if self._LibraryClass is None:
@@ -436,7 +457,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._LibraryClass = []
         return self._LibraryClass
 
-    ## Retrieve ENTRY_POINT
+    # Retrieve ENTRY_POINT
     @cached_property
     def ModuleEntryPointList(self):
         if self._ModuleEntryPointList is None:
@@ -445,7 +466,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._ModuleEntryPointList = []
         return self._ModuleEntryPointList
 
-    ## Retrieve UNLOAD_IMAGE
+    # Retrieve UNLOAD_IMAGE
     @cached_property
     def ModuleUnloadImageList(self):
         if self._ModuleUnloadImageList is None:
@@ -454,7 +475,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._ModuleUnloadImageList = []
         return self._ModuleUnloadImageList
 
-    ## Retrieve CONSTRUCTOR
+    # Retrieve CONSTRUCTOR
     @cached_property
     def ConstructorList(self):
         if self._ConstructorList is None:
@@ -463,7 +484,7 @@ class InfBuildData(ModuleBuildClassObject):
                 self._ConstructorList = []
         return self._ConstructorList
 
-    ## Retrieve DESTRUCTOR
+    # Retrieve DESTRUCTOR
     @cached_property
     def DestructorList(self):
         if self._DestructorList is None:
@@ -472,17 +493,18 @@ class InfBuildData(ModuleBuildClassObject):
                 self._DestructorList = []
         return self._DestructorList
 
-    ## Retrieve definies other than above ones
+    # Retrieve definies other than above ones
     @cached_property
     def Defines(self):
         self._GetHeaderInfo()
         return self._Defs
 
-    ## Retrieve binary files
+    # Retrieve binary files
     @cached_class_function
     def _GetBinaries(self):
         RetVal = []
-        RecordList = self._RawData[MODEL_EFI_BINARY_FILE, self._Arch, self._Platform]
+        RecordList = self._RawData[MODEL_EFI_BINARY_FILE,
+                                   self._Arch, self._Platform]
         Macros = self._Macros
         Macros['PROCESSOR'] = self._Arch
         for Record in RecordList:
@@ -497,25 +519,28 @@ class InfBuildData(ModuleBuildClassObject):
                 if len(TokenList) > 1:
                     FeatureFlag = Record[1:]
 
-            File = PathClass(NormPath(Record[1], Macros), self._ModuleDir, '', FileType, True, self._Arch, '', Target)
+            File = PathClass(NormPath(
+                Record[1], Macros), self._ModuleDir, '', FileType, True, self._Arch, '', Target)
             # check the file validation
             ErrorCode, ErrorInfo = File.Validate()
             if ErrorCode != 0:
-                EdkLogger.error('build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
+                EdkLogger.error(
+                    'build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
             RetVal.append(File)
         return RetVal
 
-    ## Retrieve binary files with error check.
+    # Retrieve binary files with error check.
     @cached_property
     def Binaries(self):
         RetVal = self._GetBinaries()
         if GlobalData.gIgnoreSource and not RetVal:
             ErrorInfo = "The INF file does not contain any RetVal to use in creating the image\n"
-            EdkLogger.error('build', RESOURCE_NOT_AVAILABLE, ExtraData=ErrorInfo, File=self.MetaFile)
+            EdkLogger.error('build', RESOURCE_NOT_AVAILABLE,
+                            ExtraData=ErrorInfo, File=self.MetaFile)
 
         return RetVal
 
-    ## Retrieve source files
+    # Retrieve source files
     @cached_property
     def Sources(self):
         self._GetHeaderInfo()
@@ -524,7 +549,8 @@ class InfBuildData(ModuleBuildClassObject):
             return []
 
         RetVal = []
-        RecordList = self._RawData[MODEL_EFI_SOURCE_FILE, self._Arch, self._Platform]
+        RecordList = self._RawData[MODEL_EFI_SOURCE_FILE,
+                                   self._Arch, self._Platform]
         Macros = self._Macros
         for Record in RecordList:
             LineNo = Record[-1]
@@ -543,7 +569,8 @@ class InfBuildData(ModuleBuildClassObject):
             # check the file validation
             ErrorCode, ErrorInfo = File.Validate()
             if ErrorCode != 0:
-                EdkLogger.error('build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
+                EdkLogger.error(
+                    'build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
 
             RetVal.append(File)
         # add any previously found dependency files to the source list
@@ -551,11 +578,12 @@ class InfBuildData(ModuleBuildClassObject):
             RetVal.extend(self._DependencyFileList)
         return RetVal
 
-    ## Retrieve library classes employed by this module
+    # Retrieve library classes employed by this module
     @cached_property
     def LibraryClasses(self):
         RetVal = OrderedDict()
-        RecordList = self._RawData[MODEL_EFI_LIBRARY_CLASS, self._Arch, self._Platform]
+        RecordList = self._RawData[MODEL_EFI_LIBRARY_CLASS,
+                                   self._Arch, self._Platform]
         for Record in RecordList:
             Lib = Record[0]
             Instance = Record[1]
@@ -566,11 +594,12 @@ class InfBuildData(ModuleBuildClassObject):
                 RetVal[Lib] = None
         return RetVal
 
-    ## Retrieve library names (for Edk.x style of modules)
+    # Retrieve library names (for Edk.x style of modules)
     @cached_property
     def Libraries(self):
         RetVal = []
-        RecordList = self._RawData[MODEL_EFI_LIBRARY_INSTANCE, self._Arch, self._Platform]
+        RecordList = self._RawData[MODEL_EFI_LIBRARY_INSTANCE,
+                                   self._Arch, self._Platform]
         for Record in RecordList:
             LibraryName = ReplaceMacro(Record[0], self._Macros, False)
             # in case of name with '.lib' extension, which is unusual in Edk.x inf
@@ -584,12 +613,13 @@ class InfBuildData(ModuleBuildClassObject):
         self.Protocols
         return self._ProtocolComments
 
-    ## Retrieve protocols consumed/produced by this module
+    # Retrieve protocols consumed/produced by this module
     @cached_property
     def Protocols(self):
         RetVal = OrderedDict()
         self._ProtocolComments = OrderedDict()
-        RecordList = self._RawData[MODEL_EFI_PROTOCOL, self._Arch, self._Platform]
+        RecordList = self._RawData[MODEL_EFI_PROTOCOL,
+                                   self._Arch, self._Platform]
         for Record in RecordList:
             CName = Record[0]
             Value = _ProtocolValue(CName, self.Packages, self.MetaFile.Path)
@@ -599,7 +629,8 @@ class InfBuildData(ModuleBuildClassObject):
                                 "Value of Protocol [%s] is not found under [Protocols] section in" % CName,
                                 ExtraData=PackageList, File=self.MetaFile, Line=Record[-1])
             RetVal[CName] = Value
-            CommentRecords = self._RawData[MODEL_META_DATA_COMMENT, self._Arch, self._Platform, Record[5]]
+            CommentRecords = self._RawData[MODEL_META_DATA_COMMENT,
+                                           self._Arch, self._Platform, Record[5]]
             self._ProtocolComments[CName] = [a[0] for a in CommentRecords]
         return RetVal
 
@@ -608,7 +639,7 @@ class InfBuildData(ModuleBuildClassObject):
         self.Ppis
         return self._PpiComments
 
-    ## Retrieve PPIs consumed/produced by this module
+    # Retrieve PPIs consumed/produced by this module
     @cached_property
     def Ppis(self):
         RetVal = OrderedDict()
@@ -623,7 +654,8 @@ class InfBuildData(ModuleBuildClassObject):
                                 "Value of PPI [%s] is not found under [Ppis] section in " % CName,
                                 ExtraData=PackageList, File=self.MetaFile, Line=Record[-1])
             RetVal[CName] = Value
-            CommentRecords = self._RawData[MODEL_META_DATA_COMMENT, self._Arch, self._Platform, Record[5]]
+            CommentRecords = self._RawData[MODEL_META_DATA_COMMENT,
+                                           self._Arch, self._Platform, Record[5]]
             self._PpiComments[CName] = [a[0] for a in CommentRecords]
         return RetVal
 
@@ -632,7 +664,7 @@ class InfBuildData(ModuleBuildClassObject):
         self.Guids
         return self._GuidComments
 
-    ## Retrieve GUIDs consumed/produced by this module
+    # Retrieve GUIDs consumed/produced by this module
     @cached_property
     def Guids(self):
         RetVal = OrderedDict()
@@ -647,17 +679,20 @@ class InfBuildData(ModuleBuildClassObject):
                                 "Value of Guid [%s] is not found under [Guids] section in" % CName,
                                 ExtraData=PackageList, File=self.MetaFile, Line=Record[-1])
             RetVal[CName] = Value
-            CommentRecords = self._RawData[MODEL_META_DATA_COMMENT, self._Arch, self._Platform, Record[5]]
+            CommentRecords = self._RawData[MODEL_META_DATA_COMMENT,
+                                           self._Arch, self._Platform, Record[5]]
             self._GuidComments[CName] = [a[0] for a in CommentRecords]
 
-        for Type in [MODEL_PCD_FIXED_AT_BUILD,MODEL_PCD_PATCHABLE_IN_MODULE,MODEL_PCD_FEATURE_FLAG,MODEL_PCD_DYNAMIC,MODEL_PCD_DYNAMIC_EX]:
+        for Type in [MODEL_PCD_FIXED_AT_BUILD, MODEL_PCD_PATCHABLE_IN_MODULE, MODEL_PCD_FEATURE_FLAG, MODEL_PCD_DYNAMIC, MODEL_PCD_DYNAMIC_EX]:
             RecordList = self._RawData[Type, self._Arch, self._Platform]
             for TokenSpaceGuid, _, _, _, _, _, LineNo in RecordList:
                 # get the guid value
                 if TokenSpaceGuid not in RetVal:
-                    Value = GuidValue(TokenSpaceGuid, self.Packages, self.MetaFile.Path)
+                    Value = GuidValue(
+                        TokenSpaceGuid, self.Packages, self.MetaFile.Path)
                     if Value is None:
-                        PackageList = "\n\t".join(str(P) for P in self.Packages)
+                        PackageList = "\n\t".join(str(P)
+                                                  for P in self.Packages)
                         EdkLogger.error('build', RESOURCE_NOT_AVAILABLE,
                                         "Value of Guid [%s] is not found under [Guids] section in" % TokenSpaceGuid,
                                         ExtraData=PackageList, File=self.MetaFile, Line=LineNo)
@@ -665,13 +700,15 @@ class InfBuildData(ModuleBuildClassObject):
                     self._GuidsUsedByPcd[TokenSpaceGuid] = Value
         return RetVal
 
-    ## Retrieve include paths necessary for this module (for Edk.x style of modules)
+    # Retrieve include paths necessary for this module (for Edk.x style of modules)
     @cached_property
     def Includes(self):
         RetVal = []
         Macros = self._Macros
-        Macros['PROCESSOR'] = GlobalData.gEdkGlobal.get('PROCESSOR', self._Arch)
-        RecordList = self._RawData[MODEL_EFI_INCLUDE, self._Arch, self._Platform]
+        Macros['PROCESSOR'] = GlobalData.gEdkGlobal.get(
+            'PROCESSOR', self._Arch)
+        RecordList = self._RawData[MODEL_EFI_INCLUDE,
+                                   self._Arch, self._Platform]
         for Record in RecordList:
             File = NormPath(Record[0], Macros)
             if File[0] == '.':
@@ -683,30 +720,34 @@ class InfBuildData(ModuleBuildClassObject):
                 RetVal.append(File)
         return RetVal
 
-    ## Retrieve packages this module depends on
+    # Retrieve packages this module depends on
     @cached_property
     def Packages(self):
         RetVal = []
-        RecordList = self._RawData[MODEL_META_DATA_PACKAGE, self._Arch, self._Platform]
+        RecordList = self._RawData[MODEL_META_DATA_PACKAGE,
+                                   self._Arch, self._Platform]
         Macros = self._Macros
         for Record in RecordList:
-            File = PathClass(NormPath(Record[0], Macros), GlobalData.gWorkspace, Arch=self._Arch)
+            File = PathClass(
+                NormPath(Record[0], Macros), GlobalData.gWorkspace, Arch=self._Arch)
             # check the file validation
             ErrorCode, ErrorInfo = File.Validate('.dec')
             if ErrorCode != 0:
                 LineNo = Record[-1]
-                EdkLogger.error('build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
+                EdkLogger.error(
+                    'build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
             # parse this package now. we need it to get protocol/ppi/guid value
-            RetVal.append(self._Bdb[File, self._Arch, self._Target, self._Toolchain])
+            RetVal.append(self._Bdb[File, self._Arch,
+                          self._Target, self._Toolchain])
         return RetVal
 
-    ## Retrieve PCD comments
+    # Retrieve PCD comments
     @cached_property
     def PcdComments(self):
         self.Pcds
         return self._PcdComments
 
-    ## Retrieve PCDs used in this module
+    # Retrieve PCDs used in this module
     @cached_property
     def Pcds(self):
         self._PcdComments = OrderedDict()
@@ -722,6 +763,7 @@ class InfBuildData(ModuleBuildClassObject):
     def ModulePcdList(self):
         RetVal = self.Pcds
         return RetVal
+
     @cached_property
     def LibraryPcdList(self):
         if bool(self.LibraryClass):
@@ -737,21 +779,23 @@ class InfBuildData(ModuleBuildClassObject):
                 PcdsInLibrary[Key] = copy.copy(Library.Pcds[Key])
             RetVal[Library] = PcdsInLibrary
         return RetVal
+
     @cached_property
     def PcdsName(self):
         PcdsName = set()
-        for Type in (MODEL_PCD_FIXED_AT_BUILD,MODEL_PCD_PATCHABLE_IN_MODULE,MODEL_PCD_FEATURE_FLAG,MODEL_PCD_DYNAMIC,MODEL_PCD_DYNAMIC_EX):
+        for Type in (MODEL_PCD_FIXED_AT_BUILD, MODEL_PCD_PATCHABLE_IN_MODULE, MODEL_PCD_FEATURE_FLAG, MODEL_PCD_DYNAMIC, MODEL_PCD_DYNAMIC_EX):
             RecordList = self._RawData[Type, self._Arch, self._Platform]
             for TokenSpaceGuid, PcdCName, _, _, _, _, _ in RecordList:
                 PcdsName.add((PcdCName, TokenSpaceGuid))
         return PcdsName
 
-    ## Retrieve build options specific to this module
+    # Retrieve build options specific to this module
     @cached_property
     def BuildOptions(self):
         if self._BuildOptions is None:
             self._BuildOptions = OrderedDict()
-            RecordList = self._RawData[MODEL_META_DATA_BUILD_OPTION, self._Arch, self._Platform]
+            RecordList = self._RawData[MODEL_META_DATA_BUILD_OPTION,
+                                       self._Arch, self._Platform]
             for Record in RecordList:
                 ToolChainFamily = Record[0]
                 ToolChain = Record[1]
@@ -761,10 +805,11 @@ class InfBuildData(ModuleBuildClassObject):
                 else:
                     # concatenate the option string if they're for the same tool
                     OptionString = self._BuildOptions[ToolChainFamily, ToolChain]
-                    self._BuildOptions[ToolChainFamily, ToolChain] = OptionString + " " + Option
+                    self._BuildOptions[ToolChainFamily,
+                                       ToolChain] = OptionString + " " + Option
         return self._BuildOptions
 
-    ## Retrieve dependency expression
+    # Retrieve dependency expression
     @cached_property
     def Depex(self):
         RetVal = tdict(False, 2)
@@ -777,8 +822,8 @@ class InfBuildData(ModuleBuildClassObject):
         # PEIM and DXE drivers must have a valid [Depex] section
         if len(self.LibraryClass) == 0 and len(RecordList) == 0:
             if self.ModuleType == SUP_MODULE_DXE_DRIVER or self.ModuleType == SUP_MODULE_PEIM or self.ModuleType == SUP_MODULE_DXE_SMM_DRIVER or \
-                self.ModuleType == SUP_MODULE_DXE_SAL_DRIVER or self.ModuleType == SUP_MODULE_DXE_RUNTIME_DRIVER:
-                EdkLogger.error('build', RESOURCE_NOT_AVAILABLE, "No [Depex] section or no valid expression in [Depex] section for [%s] module" \
+                    self.ModuleType == SUP_MODULE_DXE_SAL_DRIVER or self.ModuleType == SUP_MODULE_DXE_RUNTIME_DRIVER:
+                EdkLogger.error('build', RESOURCE_NOT_AVAILABLE, "No [Depex] section or no valid expression in [Depex] section for [%s] module"
                                 % self.ModuleType, File=self.MetaFile)
 
         if len(RecordList) != 0 and (self.ModuleType == SUP_MODULE_USER_DEFINED or self.ModuleType == SUP_MODULE_HOST_APPLICATION):
@@ -811,21 +856,27 @@ class InfBuildData(ModuleBuildClassObject):
                     # it use the Fixed PCD format
                     if '.' in Token:
                         if tuple(Token.split('.')[::-1]) not in self.Pcds:
-                            EdkLogger.error('build', RESOURCE_NOT_AVAILABLE, "PCD [{}] used in [Depex] section should be listed in module PCD section".format(Token), File=self.MetaFile, Line=Record[-1])
+                            EdkLogger.error('build', RESOURCE_NOT_AVAILABLE, "PCD [{}] used in [Depex] section should be listed in module PCD section".format(
+                                Token), File=self.MetaFile, Line=Record[-1])
                         else:
                             if self.Pcds[tuple(Token.split('.')[::-1])].DatumType != TAB_VOID:
-                                EdkLogger.error('build', FORMAT_INVALID, "PCD [{}] used in [Depex] section should be VOID* datum type".format(Token), File=self.MetaFile, Line=Record[-1])
+                                EdkLogger.error('build', FORMAT_INVALID, "PCD [{}] used in [Depex] section should be VOID* datum type".format(
+                                    Token), File=self.MetaFile, Line=Record[-1])
                         Value = Token
                     else:
                         # get the GUID value now
-                        Value = _ProtocolValue(Token, self.Packages, self.MetaFile.Path)
+                        Value = _ProtocolValue(
+                            Token, self.Packages, self.MetaFile.Path)
                         if Value is None:
-                            Value = _PpiValue(Token, self.Packages, self.MetaFile.Path)
+                            Value = _PpiValue(
+                                Token, self.Packages, self.MetaFile.Path)
                             if Value is None:
-                                Value = GuidValue(Token, self.Packages, self.MetaFile.Path)
+                                Value = GuidValue(
+                                    Token, self.Packages, self.MetaFile.Path)
 
                     if Value is None:
-                        PackageList = "\n\t".join(str(P) for P in self.Packages)
+                        PackageList = "\n\t".join(str(P)
+                                                  for P in self.Packages)
                         EdkLogger.error('build', RESOURCE_NOT_AVAILABLE,
                                         "Value of [%s] is not found in" % Token,
                                         ExtraData=PackageList, File=self.MetaFile, Line=Record[-1])
@@ -834,7 +885,7 @@ class InfBuildData(ModuleBuildClassObject):
             RetVal[Arch, ModuleType] = TemporaryDictionary[Arch, ModuleType]
         return RetVal
 
-    ## Retrieve dependency expression
+    # Retrieve dependency expression
     @cached_property
     def DepexExpression(self):
         RetVal = tdict(False, 2)
@@ -848,36 +899,41 @@ class InfBuildData(ModuleBuildClassObject):
             if (Arch, ModuleType) not in TemporaryDictionary:
                 TemporaryDictionary[Arch, ModuleType] = ''
             for Token in TokenList:
-                TemporaryDictionary[Arch, ModuleType] = TemporaryDictionary[Arch, ModuleType] + Token.strip() + ' '
+                TemporaryDictionary[Arch, ModuleType] = TemporaryDictionary[Arch,
+                                                                            ModuleType] + Token.strip() + ' '
         for Arch, ModuleType in TemporaryDictionary:
             RetVal[Arch, ModuleType] = TemporaryDictionary[Arch, ModuleType]
         return RetVal
+
     def LocalPkg(self):
         module_path = self.MetaFile.File
         subdir = os.path.split(module_path)[0]
         TopDir = ""
         while subdir:
-            subdir,TopDir = os.path.split(subdir)
+            subdir, TopDir = os.path.split(subdir)
 
-        for file_name in os.listdir(os.path.join(self.MetaFile.Root,TopDir)):
+        for file_name in os.listdir(os.path.join(self.MetaFile.Root, TopDir)):
             if file_name.upper().endswith("DEC"):
-                pkg = os.path.join(TopDir,file_name)
+                pkg = os.path.join(TopDir, file_name)
         return pkg
+
     @cached_class_function
     def GetGuidsUsedByPcd(self):
         self.Guid
         return self._GuidsUsedByPcd
 
-    ## Retrieve PCD for given type
+    # Retrieve PCD for given type
     def _GetPcd(self, Type):
         Pcds = OrderedDict()
         PcdDict = tdict(True, 4)
         PcdList = []
         RecordList = self._RawData[Type, self._Arch, self._Platform]
         for TokenSpaceGuid, PcdCName, Setting, Arch, Platform, Id, LineNo in RecordList:
-            PcdDict[Arch, Platform, PcdCName, TokenSpaceGuid] = (Setting, LineNo)
+            PcdDict[Arch, Platform, PcdCName,
+                    TokenSpaceGuid] = (Setting, LineNo)
             PcdList.append((PcdCName, TokenSpaceGuid))
-            CommentRecords = self._RawData[MODEL_META_DATA_COMMENT, self._Arch, self._Platform, Id]
+            CommentRecords = self._RawData[MODEL_META_DATA_COMMENT,
+                                           self._Arch, self._Platform, Id]
             Comments = []
             for CmtRec in CommentRecords:
                 Comments.append(CmtRec[0])
@@ -887,23 +943,24 @@ class InfBuildData(ModuleBuildClassObject):
         _GuidDict = self.Guids.copy()
         for PcdCName, TokenSpaceGuid in PcdList:
             PcdRealName = PcdCName
-            Setting, LineNo = PcdDict[self._Arch, self.Platform, PcdCName, TokenSpaceGuid]
+            Setting, LineNo = PcdDict[self._Arch,
+                                      self.Platform, PcdCName, TokenSpaceGuid]
             if Setting is None:
                 continue
             ValueList = AnalyzePcdData(Setting)
             DefaultValue = ValueList[0]
             Pcd = PcdClassObject(
-                    PcdCName,
-                    TokenSpaceGuid,
-                    '',
-                    '',
-                    DefaultValue,
-                    '',
-                    '',
-                    {},
-                    False,
-                    self.Guids[TokenSpaceGuid]
-                    )
+                PcdCName,
+                TokenSpaceGuid,
+                '',
+                '',
+                DefaultValue,
+                '',
+                '',
+                {},
+                False,
+                self.Guids[TokenSpaceGuid]
+            )
             if Type == MODEL_PCD_PATCHABLE_IN_MODULE and ValueList[1]:
                 # Patch PCD: TokenSpace.PcdCName|Value|Offset
                 Pcd.Offset = ValueList[1]
@@ -916,11 +973,13 @@ class InfBuildData(ModuleBuildClassObject):
                                 Pcd_Type = item[0].split('_')[-1]
                                 if Pcd_Type == Package.Pcds[key].Type:
                                     Value = Package.Pcds[key]
-                                    Value.TokenCName = Package.Pcds[key].TokenCName + '_' + Pcd_Type
+                                    Value.TokenCName = Package.Pcds[key].TokenCName + \
+                                        '_' + Pcd_Type
                                     if len(key) == 2:
                                         newkey = (Value.TokenCName, key[1])
                                     elif len(key) == 3:
-                                        newkey = (Value.TokenCName, key[1], key[2])
+                                        newkey = (Value.TokenCName,
+                                                  key[1], key[2])
                                     del Package.Pcds[key]
                                     Package.Pcds[newkey] = Value
                                     break
@@ -971,7 +1030,8 @@ class InfBuildData(ModuleBuildClassObject):
                         pass
 
                 if (PcdCName, TokenSpaceGuid, PcdType) in Package.Pcds:
-                    PcdInPackage = Package.Pcds[PcdCName, TokenSpaceGuid, PcdType]
+                    PcdInPackage = Package.Pcds[PcdCName,
+                                                TokenSpaceGuid, PcdType]
                     Pcd.Type = PcdType
                     Pcd.TokenValue = PcdInPackage.TokenValue
 
@@ -980,48 +1040,53 @@ class InfBuildData(ModuleBuildClassObject):
                     #
                     if Pcd.TokenValue is None or Pcd.TokenValue == "":
                         EdkLogger.error(
-                                'build',
-                                FORMAT_INVALID,
-                                "No TokenValue for PCD [%s.%s] in [%s]!" % (TokenSpaceGuid, PcdRealName, str(Package)),
-                                File=self.MetaFile, Line=LineNo,
-                                ExtraData=None
-                                )
+                            'build',
+                            FORMAT_INVALID,
+                            "No TokenValue for PCD [%s.%s] in [%s]!" % (
+                                TokenSpaceGuid, PcdRealName, str(Package)),
+                            File=self.MetaFile, Line=LineNo,
+                            ExtraData=None
+                        )
                     #
                     # Check hexadecimal token value length and format.
                     #
-                    ReIsValidPcdTokenValue = re.compile(r"^[0][x|X][0]*[0-9a-fA-F]{1,8}$", re.DOTALL)
+                    ReIsValidPcdTokenValue = re.compile(
+                        r"^[0][x|X][0]*[0-9a-fA-F]{1,8}$", re.DOTALL)
                     if Pcd.TokenValue.startswith("0x") or Pcd.TokenValue.startswith("0X"):
                         if ReIsValidPcdTokenValue.match(Pcd.TokenValue) is None:
                             EdkLogger.error(
-                                    'build',
-                                    FORMAT_INVALID,
-                                    "The format of TokenValue [%s] of PCD [%s.%s] in [%s] is invalid:" % (Pcd.TokenValue, TokenSpaceGuid, PcdRealName, str(Package)),
-                                    File=self.MetaFile, Line=LineNo,
-                                    ExtraData=None
-                                    )
+                                'build',
+                                FORMAT_INVALID,
+                                "The format of TokenValue [%s] of PCD [%s.%s] in [%s] is invalid:" % (
+                                    Pcd.TokenValue, TokenSpaceGuid, PcdRealName, str(Package)),
+                                File=self.MetaFile, Line=LineNo,
+                                ExtraData=None
+                            )
 
                     #
                     # Check decimal token value length and format.
                     #
                     else:
                         try:
-                            TokenValueInt = int (Pcd.TokenValue, 10)
+                            TokenValueInt = int(Pcd.TokenValue, 10)
                             if (TokenValueInt < 0 or TokenValueInt > 4294967295):
                                 EdkLogger.error(
-                                            'build',
-                                            FORMAT_INVALID,
-                                            "The format of TokenValue [%s] of PCD [%s.%s] in [%s] is invalid, as a decimal it should between: 0 - 4294967295!" % (Pcd.TokenValue, TokenSpaceGuid, PcdRealName, str(Package)),
-                                            File=self.MetaFile, Line=LineNo,
-                                            ExtraData=None
-                                            )
+                                    'build',
+                                    FORMAT_INVALID,
+                                    "The format of TokenValue [%s] of PCD [%s.%s] in [%s] is invalid, as a decimal it should between: 0 - 4294967295!" % (
+                                        Pcd.TokenValue, TokenSpaceGuid, PcdRealName, str(Package)),
+                                    File=self.MetaFile, Line=LineNo,
+                                    ExtraData=None
+                                )
                         except:
                             EdkLogger.error(
-                                        'build',
-                                        FORMAT_INVALID,
-                                        "The format of TokenValue [%s] of PCD [%s.%s] in [%s] is invalid, it should be hexadecimal or decimal!" % (Pcd.TokenValue, TokenSpaceGuid, PcdRealName, str(Package)),
-                                        File=self.MetaFile, Line=LineNo,
-                                        ExtraData=None
-                                        )
+                                'build',
+                                FORMAT_INVALID,
+                                "The format of TokenValue [%s] of PCD [%s.%s] in [%s] is invalid, it should be hexadecimal or decimal!" % (
+                                    Pcd.TokenValue, TokenSpaceGuid, PcdRealName, str(Package)),
+                                File=self.MetaFile, Line=LineNo,
+                                ExtraData=None
+                            )
 
                     Pcd.DatumType = PcdInPackage.DatumType
                     Pcd.MaxDatumSize = PcdInPackage.MaxDatumSize
@@ -1030,30 +1095,34 @@ class InfBuildData(ModuleBuildClassObject):
                         Pcd.DefaultValue = PcdInPackage.DefaultValue
                     else:
                         try:
-                            Pcd.DefaultValue = ValueExpressionEx(Pcd.DefaultValue, Pcd.DatumType, _GuidDict)(True)
+                            Pcd.DefaultValue = ValueExpressionEx(
+                                Pcd.DefaultValue, Pcd.DatumType, _GuidDict)(True)
                         except BadExpression as Value:
-                            EdkLogger.error('Parser', FORMAT_INVALID, 'PCD [%s.%s] Value "%s", %s' %(TokenSpaceGuid, PcdRealName, Pcd.DefaultValue, Value),
+                            EdkLogger.error('Parser', FORMAT_INVALID, 'PCD [%s.%s] Value "%s", %s' % (TokenSpaceGuid, PcdRealName, Pcd.DefaultValue, Value),
                                             File=self.MetaFile, Line=LineNo)
                     break
             else:
                 EdkLogger.error(
-                            'build',
-                            FORMAT_INVALID,
-                            "PCD [%s.%s] in [%s] is not found in dependent packages:" % (TokenSpaceGuid, PcdRealName, self.MetaFile),
-                            File=self.MetaFile, Line=LineNo,
-                            ExtraData="\t%s" % '\n\t'.join(str(P) for P in self.Packages)
-                            )
+                    'build',
+                    FORMAT_INVALID,
+                    "PCD [%s.%s] in [%s] is not found in dependent packages:" % (
+                        TokenSpaceGuid, PcdRealName, self.MetaFile),
+                    File=self.MetaFile, Line=LineNo,
+                    ExtraData="\t%s" % '\n\t'.join(
+                        str(P) for P in self.Packages)
+                )
             Pcds[PcdCName, TokenSpaceGuid] = Pcd
 
         return Pcds
 
-    ## check whether current module is binary module
+    # check whether current module is binary module
     @property
     def IsBinaryModule(self):
         if (self.Binaries and not self.Sources) or GlobalData.gIgnoreSource:
             return True
         return False
-    def CheckFeatureFlagPcd(self,Instance):
+
+    def CheckFeatureFlagPcd(self, Instance):
         Pcds = GlobalData.gPlatformFinalPcds.copy()
         if PcdPattern.search(Instance):
             PcdTuple = tuple(Instance.split('.')[::-1])
@@ -1064,7 +1133,7 @@ class InfBuildData(ModuleBuildClassObject):
                                     File=str(self), ExtraData=Instance)
                 if not Instance in Pcds:
                     Pcds[Instance] = self.Pcds[PcdTuple].DefaultValue
-            else: #if PcdTuple not in self.Pcds:
+            else:  # if PcdTuple not in self.Pcds:
                 EdkLogger.error('build', FORMAT_INVALID,
                                 "\nFeatureFlagPcd must be defined in [FeaturePcd] or [FixedPcd] of Inf file",
                                 File=str(self), ExtraData=Instance)
@@ -1079,22 +1148,27 @@ class InfBuildData(ModuleBuildClassObject):
                     return True
                 return False
             except:
-                EdkLogger.warn('build', FORMAT_INVALID,"The FeatureFlagExpression cannot be evaluated", File=str(self), ExtraData=Instance)
+                EdkLogger.warn('build', FORMAT_INVALID, "The FeatureFlagExpression cannot be evaluated", File=str(
+                    self), ExtraData=Instance)
                 return False
         else:
             for Name, Guid in self.Pcds:
                 if self.Pcds[(Name, Guid)].Type == 'FeatureFlag' or self.Pcds[(Name, Guid)].Type == 'FixedAtBuild':
-                    PcdFullName = '%s.%s' % (Guid, Name);
+                    PcdFullName = '%s.%s' % (Guid, Name)
                     if not PcdFullName in Pcds:
-                        Pcds[PcdFullName] = self.Pcds[(Name, Guid)].DefaultValue
+                        Pcds[PcdFullName] = self.Pcds[(
+                            Name, Guid)].DefaultValue
             try:
                 Value = ValueExpression(Instance, Pcds)()
                 if Value == True:
                     return True
                 return False
             except:
-                EdkLogger.warn('build', FORMAT_INVALID, "The FeatureFlagExpression cannot be evaluated", File=str(self), ExtraData=Instance)
+                EdkLogger.warn('build', FORMAT_INVALID, "The FeatureFlagExpression cannot be evaluated", File=str(
+                    self), ExtraData=Instance)
                 return False
+
+
 def ExtendCopyDictionaryLists(CopyToDict, CopyFromDict):
     for Key in CopyFromDict:
         CopyToDict[Key].extend(CopyFromDict[Key])

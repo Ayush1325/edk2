@@ -14,16 +14,19 @@ try:
             try:
                 from edk2toolext.environment import version_aggregator
             except ImportError:
-                logging.critical("Loading BuildToolsReportGenerator failed, please update your Edk2-PyTool-Extensions")
+                logging.critical(
+                    "Loading BuildToolsReportGenerator failed, please update your Edk2-PyTool-Extensions")
                 return 0
 
-            OutputReport = os.path.join(thebuilder.env.GetValue("BUILD_OUTPUT_BASE"), "BUILD_TOOLS_REPORT")
+            OutputReport = os.path.join(thebuilder.env.GetValue(
+                "BUILD_OUTPUT_BASE"), "BUILD_TOOLS_REPORT")
             OutputReport = os.path.normpath(OutputReport)
             if not os.path.isdir(os.path.dirname(OutputReport)):
                 os.makedirs(os.path.dirname(OutputReport))
 
             Report = BuildToolsReport()
-            Report.MakeReport(version_aggregator.GetVersionAggregator().GetAggregatedVersionInformation(), OutputReport=OutputReport)
+            Report.MakeReport(version_aggregator.GetVersionAggregator(
+            ).GetAggregatedVersionInformation(), OutputReport=OutputReport)
 
         def do_pre_build(self, thebuilder):
             self.do_report(thebuilder)
@@ -55,11 +58,13 @@ class BuildToolsReport(object):
 
         htmlfile = open(OutputReport + ".html", "w")
         jsonfile = open(OutputReport + ".json", "w")
-        template = open(os.path.join(BuildToolsReport.MY_FOLDER, "BuildToolsReport_Template.html"), "r")
+        template = open(os.path.join(BuildToolsReport.MY_FOLDER,
+                        "BuildToolsReport_Template.html"), "r")
 
         for line in template.readlines():
             if "%TO_BE_FILLED_IN_BY_PYTHON_SCRIPT%" in line:
-                line = line.replace("%TO_BE_FILLED_IN_BY_PYTHON_SCRIPT%", json.dumps(json_dict))
+                line = line.replace(
+                    "%TO_BE_FILLED_IN_BY_PYTHON_SCRIPT%", json.dumps(json_dict))
             htmlfile.write(line)
 
         jsonfile.write(json.dumps(versions_list, indent=4))

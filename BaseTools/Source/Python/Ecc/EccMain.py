@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to be the main entrance of ECC tool
 #
 # Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -10,7 +10,10 @@
 # Import Modules
 #
 from __future__ import absolute_import
-import Common.LongFilePathOs as os, time, glob, sys
+import Common.LongFilePathOs as os
+import time
+import glob
+import sys
 import Common.EdkLogger as EdkLogger
 from Ecc import Database
 from Ecc import EccGlobalData
@@ -31,17 +34,20 @@ from Ecc.MetaFileWorkspace.MetaFileParser import InfParser
 from Ecc.MetaFileWorkspace.MetaFileParser import Fdf
 from Ecc.MetaFileWorkspace.MetaFileTable import MetaFileStorage
 from Ecc import c
-import re, string
+import re
+import string
 from Ecc.Exception import *
 from Common.LongFilePathSupport import OpenLongFilePath as open
 from Common.MultipleWorkspace import MultipleWorkspace as mws
 
-## Ecc
+# Ecc
 #
 # This class is used to define Ecc main entrance
 #
 # @param object:          Inherited from object class
 #
+
+
 class Ecc(object):
     def __init__(self):
         # Version and Copyright
@@ -61,9 +67,11 @@ class Ecc(object):
 
         # Parse the options and args
         self.ParseOption()
-        EdkLogger.info(time.strftime("%H:%M:%S, %b.%d %Y ", time.localtime()) + "[00:00]" + "\n")
+        EdkLogger.info(time.strftime("%H:%M:%S, %b.%d %Y ",
+                       time.localtime()) + "[00:00]" + "\n")
 
-        WorkspaceDir = os.path.normcase(os.path.normpath(os.environ["WORKSPACE"]))
+        WorkspaceDir = os.path.normcase(
+            os.path.normpath(os.environ["WORKSPACE"]))
         os.environ["WORKSPACE"] = WorkspaceDir
 
         # set multiple workspace
@@ -72,7 +80,7 @@ class Ecc(object):
 
         GlobalData.gWorkspace = WorkspaceDir
 
-        GlobalData.gGlobalDefines["WORKSPACE"]  = WorkspaceDir
+        GlobalData.gGlobalDefines["WORKSPACE"] = WorkspaceDir
 
         EdkLogger.info("Loading ECC configuration ... done")
         # Generate checkpoints list
@@ -112,11 +120,11 @@ class Ecc(object):
                 return
         self.ConfigFile = 'config.ini'
 
-
-    ## DetectOnlyScan
+    # DetectOnlyScan
     #
     # Detect whether only scanned folders have been enabled
     #
+
     def DetectOnlyScanDirs(self):
         if self.OnlyScan == True:
             OnlyScanDirs = []
@@ -126,16 +134,17 @@ class Ecc(object):
             if len(OnlyScanDirs) != 0:
                 self.BuildDatabase(OnlyScanDirs)
             else:
-                EdkLogger.error("ECC", BuildToolError.OPTION_VALUE_INVALID, ExtraData="Use -f option need to fill specific folders in config.ini file")
+                EdkLogger.error("ECC", BuildToolError.OPTION_VALUE_INVALID,
+                                ExtraData="Use -f option need to fill specific folders in config.ini file")
         else:
             self.BuildDatabase()
 
-
-    ## BuildDatabase
+    # BuildDatabase
     #
     # Build the database for target
     #
-    def BuildDatabase(self, SpeciDirs = None):
+
+    def BuildDatabase(self, SpeciDirs=None):
         # Clean report table
         EccGlobalData.gDb.TblReport.Drop()
         EccGlobalData.gDb.TblReport.Create()
@@ -151,27 +160,32 @@ class Ecc(object):
                     c.CollectSourceCodeDataIntoDB(EccGlobalData.gTarget)
                 else:
                     for specificDir in SpeciDirs:
-                        c.CollectSourceCodeDataIntoDB(os.path.join(EccGlobalData.gTarget, specificDir))
+                        c.CollectSourceCodeDataIntoDB(
+                            os.path.join(EccGlobalData.gTarget, specificDir))
 
-        EccGlobalData.gIdentifierTableList = GetTableList((MODEL_FILE_C, MODEL_FILE_H), 'Identifier', EccGlobalData.gDb)
+        EccGlobalData.gIdentifierTableList = GetTableList(
+            (MODEL_FILE_C, MODEL_FILE_H), 'Identifier', EccGlobalData.gDb)
         EccGlobalData.gCFileList = GetFileList(MODEL_FILE_C, EccGlobalData.gDb)
         EccGlobalData.gHFileList = GetFileList(MODEL_FILE_H, EccGlobalData.gDb)
-        EccGlobalData.gUFileList = GetFileList(MODEL_FILE_UNI, EccGlobalData.gDb)
+        EccGlobalData.gUFileList = GetFileList(
+            MODEL_FILE_UNI, EccGlobalData.gDb)
 
-    ## BuildMetaDataFileDatabase
+    # BuildMetaDataFileDatabase
     #
     # Build the database for meta data files
     #
-    def BuildMetaDataFileDatabase(self, SpecificDirs = None):
+    def BuildMetaDataFileDatabase(self, SpecificDirs=None):
         ScanFolders = []
         if SpecificDirs is None:
             ScanFolders.append(EccGlobalData.gTarget)
         else:
             for specificDir in SpecificDirs:
-                ScanFolders.append(os.path.join(EccGlobalData.gTarget, specificDir))
+                ScanFolders.append(os.path.join(
+                    EccGlobalData.gTarget, specificDir))
         EdkLogger.quiet("Building database for meta data files ...")
-        Op = open(EccGlobalData.gConfig.MetaDataFileCheckPathOfGenerateFileList, 'w+')
-        #SkipDirs = Read from config file
+        Op = open(
+            EccGlobalData.gConfig.MetaDataFileCheckPathOfGenerateFileList, 'w+')
+        # SkipDirs = Read from config file
         SkipDirs = EccGlobalData.gConfig.SkipDirList
         SkipDirString = '|'.join(SkipDirs)
 #         p = re.compile(r'.*[\\/](?:%s)[\\/]?.*' % SkipDirString)
@@ -195,7 +209,8 @@ class Ecc(object):
                         EdkLogger.quiet("Parsing %s" % Filename)
                         Op.write("%s\r" % Filename)
                         #Dec(Filename, True, True, EccGlobalData.gWorkspace, EccGlobalData.gDb)
-                        self.MetaFile = DecParser(Filename, MODEL_FILE_DEC, EccGlobalData.gDb.TblDec)
+                        self.MetaFile = DecParser(
+                            Filename, MODEL_FILE_DEC, EccGlobalData.gDb.TblDec)
                         self.MetaFile.Start()
                         continue
                     if len(File) > 4 and File[-4:].upper() == ".DSC":
@@ -203,7 +218,8 @@ class Ecc(object):
                         EdkLogger.quiet("Parsing %s" % Filename)
                         Op.write("%s\r" % Filename)
                         #Dsc(Filename, True, True, EccGlobalData.gWorkspace, EccGlobalData.gDb)
-                        self.MetaFile = DscParser(PathClass(Filename, Root), MODEL_FILE_DSC, MetaFileStorage(EccGlobalData.gDb.TblDsc.Cur, Filename, MODEL_FILE_DSC, True))
+                        self.MetaFile = DscParser(PathClass(Filename, Root), MODEL_FILE_DSC, MetaFileStorage(
+                            EccGlobalData.gDb.TblDsc.Cur, Filename, MODEL_FILE_DSC, True))
                         # always do post-process, in case of macros change
                         self.MetaFile.DoPostProcess()
                         self.MetaFile.Start()
@@ -214,21 +230,25 @@ class Ecc(object):
                         EdkLogger.quiet("Parsing %s" % Filename)
                         Op.write("%s\r" % Filename)
                         #Inf(Filename, True, True, EccGlobalData.gWorkspace, EccGlobalData.gDb)
-                        self.MetaFile = InfParser(Filename, MODEL_FILE_INF, EccGlobalData.gDb.TblInf)
+                        self.MetaFile = InfParser(
+                            Filename, MODEL_FILE_INF, EccGlobalData.gDb.TblInf)
                         self.MetaFile.Start()
                         continue
                     if len(File) > 4 and File[-4:].upper() == ".FDF":
                         Filename = os.path.normpath(os.path.join(Root, File))
                         EdkLogger.quiet("Parsing %s" % Filename)
                         Op.write("%s\r" % Filename)
-                        Fdf(Filename, True, EccGlobalData.gWorkspace, EccGlobalData.gDb)
+                        Fdf(Filename, True, EccGlobalData.gWorkspace,
+                            EccGlobalData.gDb)
                         continue
                     if len(File) > 4 and File[-4:].upper() == ".UNI":
                         Filename = os.path.normpath(os.path.join(Root, File))
                         EdkLogger.quiet("Parsing %s" % Filename)
                         Op.write("%s\r" % Filename)
-                        FileID = EccGlobalData.gDb.TblFile.InsertFile(Filename, MODEL_FILE_UNI)
-                        EccGlobalData.gDb.TblReport.UpdateBelongsToItemByFile(FileID, File)
+                        FileID = EccGlobalData.gDb.TblFile.InsertFile(
+                            Filename, MODEL_FILE_UNI)
+                        EccGlobalData.gDb.TblReport.UpdateBelongsToItemByFile(
+                            FileID, File)
                         continue
 
         Op.close()
@@ -292,7 +312,7 @@ class Ecc(object):
 
         return RealPath
 
-    ## ParseOption
+    # ParseOption
     #
     # Parse options
     #
@@ -309,7 +329,8 @@ class Ecc(object):
         else:
             EccGlobalData.gWorkspace = os.path.normpath(os.getenv("WORKSPACE"))
             if not os.path.exists(EccGlobalData.gWorkspace):
-                EdkLogger.error("ECC", BuildToolError.FILE_NOT_FOUND, ExtraData="WORKSPACE = %s" % EccGlobalData.gWorkspace)
+                EdkLogger.error("ECC", BuildToolError.FILE_NOT_FOUND,
+                                ExtraData="WORKSPACE = %s" % EccGlobalData.gWorkspace)
             os.environ["WORKSPACE"] = EccGlobalData.gWorkspace
         # Set log level
         self.SetLogLevel(Options)
@@ -325,16 +346,20 @@ class Ecc(object):
             self.ExceptionFile = Options.ExceptionFile
         if Options.Target is not None:
             if not os.path.isdir(Options.Target):
-                EdkLogger.error("ECC", BuildToolError.OPTION_VALUE_INVALID, ExtraData="Target [%s] does NOT exist" % Options.Target)
+                EdkLogger.error("ECC", BuildToolError.OPTION_VALUE_INVALID,
+                                ExtraData="Target [%s] does NOT exist" % Options.Target)
             else:
-                EccGlobalData.gTarget = self.GetRealPathCase(os.path.normpath(Options.Target))
+                EccGlobalData.gTarget = self.GetRealPathCase(
+                    os.path.normpath(Options.Target))
         else:
-            EdkLogger.warn("Ecc", EdkLogger.ECC_ERROR, "The target source tree was not specified, using current WORKSPACE instead!")
+            EdkLogger.warn("Ecc", EdkLogger.ECC_ERROR,
+                           "The target source tree was not specified, using current WORKSPACE instead!")
             EccGlobalData.gTarget = os.path.normpath(os.getenv("WORKSPACE"))
         if Options.keepdatabase is not None:
             self.IsInit = False
         if Options.metadata is not None and Options.sourcecode is not None:
-            EdkLogger.error("ECC", BuildToolError.OPTION_CONFLICT, ExtraData="-m and -s can't be specified at one time")
+            EdkLogger.error("ECC", BuildToolError.OPTION_CONFLICT,
+                            ExtraData="-m and -s can't be specified at one time")
         if Options.metadata is not None:
             self.ScanSourceCode = False
         if Options.sourcecode is not None:
@@ -342,7 +367,7 @@ class Ecc(object):
         if Options.folders is not None:
             self.OnlyScan = True
 
-    ## SetLogLevel
+    # SetLogLevel
     #
     # Set current log level of the tool based on args
     #
@@ -358,7 +383,7 @@ class Ecc(object):
         else:
             EdkLogger.SetLevel(EdkLogger.INFO)
 
-    ## Parse command line options
+    # Parse command line options
     #
     # Using standard Python module optparse to parse command line option of this tool.
     #
@@ -366,36 +391,45 @@ class Ecc(object):
     # @retval Args  Target of build command
     #
     def EccOptionParser(self):
-        Parser = OptionParser(description = self.Copyright, version = self.Version, prog = "Ecc.exe", usage = "%prog [options]")
+        Parser = OptionParser(description=self.Copyright,
+                              version=self.Version, prog="Ecc.exe", usage="%prog [options]")
         Parser.add_option("-t", "--target sourcepath", action="store", type="string", dest='Target',
-            help="Check all files under the target workspace.")
+                          help="Check all files under the target workspace.")
         Parser.add_option("-c", "--config filename", action="store", type="string", dest="ConfigFile",
-            help="Specify a configuration file. Defaultly use config.ini under ECC tool directory.")
+                          help="Specify a configuration file. Defaultly use config.ini under ECC tool directory.")
         Parser.add_option("-o", "--outfile filename", action="store", type="string", dest="OutputFile",
-            help="Specify the name of an output file, if and only if one filename was specified.")
+                          help="Specify the name of an output file, if and only if one filename was specified.")
         Parser.add_option("-r", "--reportfile filename", action="store", type="string", dest="ReportFile",
-            help="Specify the name of an report file, if and only if one filename was specified.")
+                          help="Specify the name of an report file, if and only if one filename was specified.")
         Parser.add_option("-e", "--exceptionfile filename", action="store", type="string", dest="ExceptionFile",
-            help="Specify the name of an exception file, if and only if one filename was specified.")
-        Parser.add_option("-m", "--metadata", action="store_true", type=None, help="Only scan meta-data files information if this option is specified.")
-        Parser.add_option("-s", "--sourcecode", action="store_true", type=None, help="Only scan source code files information if this option is specified.")
-        Parser.add_option("-k", "--keepdatabase", action="store_true", type=None, help="The existing Ecc database will not be cleaned except report information if this option is specified.")
+                          help="Specify the name of an exception file, if and only if one filename was specified.")
+        Parser.add_option("-m", "--metadata", action="store_true", type=None,
+                          help="Only scan meta-data files information if this option is specified.")
+        Parser.add_option("-s", "--sourcecode", action="store_true", type=None,
+                          help="Only scan source code files information if this option is specified.")
+        Parser.add_option("-k", "--keepdatabase", action="store_true", type=None,
+                          help="The existing Ecc database will not be cleaned except report information if this option is specified.")
         Parser.add_option("-l", "--log filename", action="store", dest="LogFile", help="""If specified, the tool should emit the changes that
                                                                                           were made by the tool after printing the result message.
                                                                                           If filename, the emit to the file, otherwise emit to
                                                                                           standard output. If no modifications were made, then do not
                                                                                           create a log file, or output a log message.""")
-        Parser.add_option("-q", "--quiet", action="store_true", type=None, help="Disable all messages except FATAL ERRORS.")
-        Parser.add_option("-v", "--verbose", action="store_true", type=None, help="Turn on verbose output with informational messages printed, "\
-                                                                                   "including library instances selected, final dependency expression, "\
-                                                                                   "and warning messages, etc.")
-        Parser.add_option("-d", "--debug", action="store", type="int", help="Enable debug messages at specified level.")
-        Parser.add_option("-w", "--workspace", action="store", type="string", dest='Workspace', help="Specify workspace.")
-        Parser.add_option("-f", "--folders", action="store_true", type=None, help="Only scanning specified folders which are recorded in config.ini file.")
+        Parser.add_option("-q", "--quiet", action="store_true",
+                          type=None, help="Disable all messages except FATAL ERRORS.")
+        Parser.add_option("-v", "--verbose", action="store_true", type=None, help="Turn on verbose output with informational messages printed, "
+                          "including library instances selected, final dependency expression, "
+                          "and warning messages, etc.")
+        Parser.add_option("-d", "--debug", action="store", type="int",
+                          help="Enable debug messages at specified level.")
+        Parser.add_option("-w", "--workspace", action="store",
+                          type="string", dest='Workspace', help="Specify workspace.")
+        Parser.add_option("-f", "--folders", action="store_true", type=None,
+                          help="Only scanning specified folders which are recorded in config.ini file.")
 
-        (Opt, Args)=Parser.parse_args()
+        (Opt, Args) = Parser.parse_args()
 
         return (Opt, Args)
+
 
 ##
 #
@@ -411,5 +445,7 @@ if __name__ == '__main__':
     Ecc = Ecc()
     FinishTime = time.perf_counter()
 
-    BuildDuration = time.strftime("%M:%S", time.gmtime(int(round(FinishTime - StartTime))))
-    EdkLogger.quiet("\n%s [%s]" % (time.strftime("%H:%M:%S, %b.%d %Y", time.localtime()), BuildDuration))
+    BuildDuration = time.strftime(
+        "%M:%S", time.gmtime(int(round(FinishTime - StartTime))))
+    EdkLogger.quiet("\n%s [%s]" % (time.strftime(
+        "%H:%M:%S, %b.%d %Y", time.localtime()), BuildDuration))

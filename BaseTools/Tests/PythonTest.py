@@ -1,4 +1,4 @@
-## @file
+# @file
 # Test whether PYTHON_COMMAND is available
 #
 # Copyright (c) 2013 - 2018, Intel Corporation. All rights reserved.<BR>

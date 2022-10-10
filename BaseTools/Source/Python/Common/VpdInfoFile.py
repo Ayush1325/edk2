@@ -1,4 +1,4 @@
-## @file
+# @file
 #
 # This package manage the VPD PCD information file which will be generated
 # by build tool's autogen.
@@ -21,7 +21,7 @@ from Common.Misc import SaveFileOnChange
 from Common.DataType import *
 
 FILE_COMMENT_TEMPLATE = \
-"""
+    """
 ## @file
 #
 #  THIS IS AUTO-GENERATED FILE BY BUILD TOOLS AND PLEASE DO NOT MAKE MODIFICATION.
@@ -40,7 +40,7 @@ FILE_COMMENT_TEMPLATE = \
 
 """
 
-## The class manage VpdInfoFile.
+# The class manage VpdInfoFile.
 #
 #  This file contains an ordered (based on position in the DSC file) list of the PCDs specified in the platform description file (DSC). The Value field that will be assigned to the PCD comes from the DSC file, INF file (if not defined in the DSC file) or the DEC file (if not defined in the INF file). This file is used as an input to the BPDG tool.
 #  Format for this file (using EBNF notation) is:
@@ -62,12 +62,15 @@ FILE_COMMENT_TEMPLATE = \
 #  <CArray>          ::=  "{" <HexNumber> ["," <HexNumber>]* "}"
 #  <NList>           ::=  <HexNumber> ["," <HexNumber>]*
 #
+
+
 class VpdInfoFile:
 
     _rVpdPcdLine = None
-    ## Constructor
+    # Constructor
+
     def __init__(self):
-        ## Dictionary for VPD in following format
+        # Dictionary for VPD in following format
         #
         #  Key    : PcdClassObject instance.
         #           @see BuildClassObject.PcdClassObject
@@ -75,7 +78,7 @@ class VpdInfoFile:
         self._VpdArray = {}
         self._VpdInfo = {}
 
-    ## Add a VPD PCD collected from platform's autogen when building.
+    # Add a VPD PCD collected from platform's autogen when building.
     #
     #  @param vpds  The list of VPD PCD collected for a platform.
     #               @see BuildClassObject.PcdClassObject
@@ -84,10 +87,12 @@ class VpdInfoFile:
     #
     def Add(self, Vpd, skuname, Offset):
         if (Vpd is None):
-            EdkLogger.error("VpdInfoFile", BuildToolError.ATTRIBUTE_UNKNOWN_ERROR, "Invalid VPD PCD entry.")
+            EdkLogger.error(
+                "VpdInfoFile", BuildToolError.ATTRIBUTE_UNKNOWN_ERROR, "Invalid VPD PCD entry.")
 
         if not (Offset >= "0" or Offset == TAB_STAR):
-            EdkLogger.error("VpdInfoFile", BuildToolError.PARAMETER_INVALID, "Invalid offset parameter: %s." % Offset)
+            EdkLogger.error("VpdInfoFile", BuildToolError.PARAMETER_INVALID,
+                            "Invalid offset parameter: %s." % Offset)
 
         if Vpd.DatumType == TAB_VOID:
             if Vpd.MaxDatumSize <= "0":
@@ -107,14 +112,14 @@ class VpdInfoFile:
             #
             self._VpdArray[Vpd] = {}
 
-        self._VpdArray[Vpd].update({skuname:Offset})
+        self._VpdArray[Vpd].update({skuname: Offset})
 
-
-    ## Generate VPD PCD information into a text file
+    # Generate VPD PCD information into a text file
     #
     #  If parameter FilePath is invalid, then assert.
     #  If
     #  @param FilePath        The given file path which would hold VPD information
+
     def Write(self, FilePath):
         if not (FilePath is not None or len(FilePath) != 0):
             EdkLogger.error("VpdInfoFile", BuildToolError.PARAMETER_INVALID,
@@ -130,15 +135,16 @@ class VpdInfoFile:
                     PcdTokenCName = PcdItem[0]
             for skuname in self._VpdArray[Pcd]:
                 PcdValue = str(Pcd.SkuInfoList[skuname].DefaultValue).strip()
-                if PcdValue == "" :
-                    PcdValue  = Pcd.DefaultValue
+                if PcdValue == "":
+                    PcdValue = Pcd.DefaultValue
 
-                Content += "%s.%s|%s|%s|%s|%s  \n" % (Pcd.TokenSpaceGuidCName, PcdTokenCName, skuname, str(self._VpdArray[Pcd][skuname]).strip(), str(Pcd.MaxDatumSize).strip(), PcdValue)
+                Content += "%s.%s|%s|%s|%s|%s  \n" % (Pcd.TokenSpaceGuidCName, PcdTokenCName, skuname, str(
+                    self._VpdArray[Pcd][skuname]).strip(), str(Pcd.MaxDatumSize).strip(), PcdValue)
                 i += 1
 
         return SaveFileOnChange(FilePath, Content, False)
 
-    ## Read an existing VPD PCD info file.
+    # Read an existing VPD PCD info file.
     #
     #  This routine will read VPD PCD information from existing file and construct
     #  internal PcdClassObject array.
@@ -162,17 +168,21 @@ class VpdInfoFile:
             # the line must follow output format defined in BPDG spec.
             #
             try:
-                PcdName, SkuId, Offset, Size, Value = Line.split("#")[0].split("|")
-                PcdName, SkuId, Offset, Size, Value = PcdName.strip(), SkuId.strip(), Offset.strip(), Size.strip(), Value.strip()
+                PcdName, SkuId, Offset, Size, Value = Line.split("#")[
+                    0].split("|")
+                PcdName, SkuId, Offset, Size, Value = PcdName.strip(
+                ), SkuId.strip(), Offset.strip(), Size.strip(), Value.strip()
                 TokenSpaceName, PcdTokenName = PcdName.split(".")
             except:
-                EdkLogger.error("BPDG", BuildToolError.PARSER_ERROR, "Fail to parse VPD information file %s" % FilePath)
+                EdkLogger.error("BPDG", BuildToolError.PARSER_ERROR,
+                                "Fail to parse VPD information file %s" % FilePath)
 
             Found = False
 
             if (TokenSpaceName, PcdTokenName) not in self._VpdInfo:
                 self._VpdInfo[(TokenSpaceName, PcdTokenName)] = {}
-            self._VpdInfo[(TokenSpaceName, PcdTokenName)][(SkuId, Offset)] = Value
+            self._VpdInfo[(TokenSpaceName, PcdTokenName)
+                          ][(SkuId, Offset)] = Value
             for VpdObject in self._VpdArray:
                 VpdObjectTokenCName = VpdObject.TokenCName
                 for PcdItem in GlobalData.MixedPcd:
@@ -182,13 +192,15 @@ class VpdInfoFile:
                     if VpdObject.TokenSpaceGuidCName == TokenSpaceName and VpdObjectTokenCName == PcdTokenName.strip() and sku == SkuId:
                         if self._VpdArray[VpdObject][sku] == TAB_STAR:
                             if Offset == TAB_STAR:
-                                EdkLogger.error("BPDG", BuildToolError.FORMAT_INVALID, "The offset of %s has not been fixed up by third-party BPDG tool." % PcdName)
+                                EdkLogger.error("BPDG", BuildToolError.FORMAT_INVALID,
+                                                "The offset of %s has not been fixed up by third-party BPDG tool." % PcdName)
                             self._VpdArray[VpdObject][sku] = Offset
                         Found = True
             if not Found:
-                EdkLogger.error("BPDG", BuildToolError.PARSER_ERROR, "Can not find PCD defined in VPD guid file.")
+                EdkLogger.error("BPDG", BuildToolError.PARSER_ERROR,
+                                "Can not find PCD defined in VPD guid file.")
 
-    ## Get count of VPD PCD collected from platform's autogen when building.
+    # Get count of VPD PCD collected from platform's autogen when building.
     #
     #  @return The integer count value
     def GetCount(self):
@@ -198,7 +210,7 @@ class VpdInfoFile:
 
         return Count
 
-    ## Get an offset value for a given VPD PCD
+    # Get an offset value for a given VPD PCD
     #
     #  Because BPDG only support one Sku, so only return offset for SKU default.
     #
@@ -211,18 +223,22 @@ class VpdInfoFile:
             return None
 
         return self._VpdArray[vpd]
+
     def GetVpdInfo(self, arg):
         (PcdTokenName, TokenSpaceName) = arg
-        return [(sku,offset,value) for (sku,offset),value in self._VpdInfo.get((TokenSpaceName, PcdTokenName)).items()]
+        return [(sku, offset, value) for (sku, offset), value in self._VpdInfo.get((TokenSpaceName, PcdTokenName)).items()]
 
-## Call external BPDG tool to process VPD file
+# Call external BPDG tool to process VPD file
 #
 #  @param ToolPath      The string path name for BPDG tool
 #  @param VpdFileName   The string path name for VPD information guid.txt
 #
+
+
 def CallExtenalBPDGTool(ToolPath, VpdFileName):
     assert ToolPath is not None, "Invalid parameter ToolPath"
-    assert VpdFileName is not None and os.path.exists(VpdFileName), "Invalid parameter VpdFileName"
+    assert VpdFileName is not None and os.path.exists(
+        VpdFileName), "Invalid parameter VpdFileName"
 
     OutputDir = os.path.dirname(VpdFileName)
     FileName = os.path.basename(VpdFileName)
@@ -232,24 +248,26 @@ def CallExtenalBPDGTool(ToolPath, VpdFileName):
 
     try:
         PopenObject = subprocess.Popen(' '.join([ToolPath,
-                                        '-o', OutputBinFileName,
-                                        '-m', OutputMapFileName,
-                                        '-q',
-                                        '-f',
-                                        VpdFileName]),
-                                        stdout=subprocess.PIPE,
-                                        stderr= subprocess.PIPE,
-                                        shell=True)
+                                                 '-o', OutputBinFileName,
+                                                 '-m', OutputMapFileName,
+                                                 '-q',
+                                                 '-f',
+                                                 VpdFileName]),
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE,
+                                       shell=True)
     except Exception as X:
-        EdkLogger.error("BPDG", BuildToolError.COMMAND_FAILURE, ExtraData=str(X))
+        EdkLogger.error("BPDG", BuildToolError.COMMAND_FAILURE,
+                        ExtraData=str(X))
     (out, error) = PopenObject.communicate()
     print(out.decode())
-    while PopenObject.returncode is None :
+    while PopenObject.returncode is None:
         PopenObject.wait()
 
     if PopenObject.returncode != 0:
-        EdkLogger.debug(EdkLogger.DEBUG_1, "Fail to call BPDG tool", str(error))
-        EdkLogger.error("BPDG", BuildToolError.COMMAND_FAILURE, "Fail to execute BPDG tool with exit code: %d, the error message is: \n %s" % \
-                            (PopenObject.returncode, str(error)))
+        EdkLogger.debug(EdkLogger.DEBUG_1,
+                        "Fail to call BPDG tool", str(error))
+        EdkLogger.error("BPDG", BuildToolError.COMMAND_FAILURE, "Fail to execute BPDG tool with exit code: %d, the error message is: \n %s" %
+                        (PopenObject.returncode, str(error)))
 
     return PopenObject.returncode

@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to save global datas
 #
 # Copyright (c) 2008 - 2014, Intel Corporation. All rights reserved.<BR>
@@ -44,7 +44,8 @@ gOP_UN_DISPATCHED = open(gUN_DISPATCHED_LOG, 'w+')
 
 # Log file for unmatched variables in function calling
 gUN_MATCHED_IN_LIBRARY_CALLING_LOG = 'Log_UnMatchedInLibraryCalling.log'
-gOP_UN_MATCHED_IN_LIBRARY_CALLING = open(gUN_MATCHED_IN_LIBRARY_CALLING_LOG, 'w+')
+gOP_UN_MATCHED_IN_LIBRARY_CALLING = open(
+    gUN_MATCHED_IN_LIBRARY_CALLING_LOG, 'w+')
 
 # Log file for order of dispatched PEIM/DRIVER
 gDISPATCH_ORDER_LOG = 'Log_DispatchOrder.log'

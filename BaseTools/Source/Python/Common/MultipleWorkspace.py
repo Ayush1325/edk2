@@ -1,4 +1,4 @@
-## @file
+# @file
 # manage multiple workspace file.
 #
 # This file is required to make Python interpreter treat the directory
@@ -11,7 +11,7 @@
 import Common.LongFilePathOs as os
 from Common.DataType import TAB_WORKSPACE
 
-## MultipleWorkspace
+# MultipleWorkspace
 #
 # This class manage multiple workspace behavior
 #
@@ -20,11 +20,13 @@ from Common.DataType import TAB_WORKSPACE
 # @var WORKSPACE:      defined the current WORKSPACE
 # @var PACKAGES_PATH:  defined the other WORKSPACE, if current WORKSPACE is invalid, search valid WORKSPACE from PACKAGES_PATH
 #
+
+
 class MultipleWorkspace(object):
     WORKSPACE = ''
     PACKAGES_PATH = None
 
-    ## convertPackagePath()
+    # convertPackagePath()
     #
     #   Convert path to match workspace.
     #
@@ -34,11 +36,11 @@ class MultipleWorkspace(object):
     #
     @classmethod
     def convertPackagePath(cls, Ws, Path):
-        if str(os.path.normcase (Path)).startswith(Ws):
+        if str(os.path.normcase(Path)).startswith(Ws):
             return os.path.join(Ws, os.path.relpath(Path, Ws))
         return Path
 
-    ## setWs()
+    # setWs()
     #
     #   set WORKSPACE and PACKAGES_PATH environment
     #
@@ -50,11 +52,12 @@ class MultipleWorkspace(object):
     def setWs(cls, Ws, PackagesPath=None):
         cls.WORKSPACE = Ws
         if PackagesPath:
-            cls.PACKAGES_PATH = [cls.convertPackagePath (Ws, os.path.normpath(Path.strip())) for Path in PackagesPath.split(os.pathsep)]
+            cls.PACKAGES_PATH = [cls.convertPackagePath(Ws, os.path.normpath(
+                Path.strip())) for Path in PackagesPath.split(os.pathsep)]
         else:
             cls.PACKAGES_PATH = []
 
-    ## join()
+    # join()
     #
     #   rewrite os.path.join function
     #
@@ -74,7 +77,7 @@ class MultipleWorkspace(object):
             Path = os.path.join(Ws, *p)
         return Path
 
-    ## relpath()
+    # relpath()
     #
     #   rewrite os.path.relpath function
     #
@@ -93,7 +96,7 @@ class MultipleWorkspace(object):
             Path = os.path.relpath(Path, Ws)
         return Path
 
-    ## getWs()
+    # getWs()
     #
     #   get valid workspace for the path
     #
@@ -112,7 +115,7 @@ class MultipleWorkspace(object):
                     return Pkg
         return Ws
 
-    ## handleWsMacro()
+    # handleWsMacro()
     #
     #   handle the $(WORKSPACE) tag, if current workspace is invalid path relative the tool, replace it.
     #
@@ -128,17 +131,19 @@ class MultipleWorkspace(object):
                     MacroStartPos = str.find(TAB_WORKSPACE)
                     if MacroStartPos != -1:
                         Substr = str[MacroStartPos:]
-                        Path = Substr.replace(TAB_WORKSPACE, cls.WORKSPACE).strip()
+                        Path = Substr.replace(
+                            TAB_WORKSPACE, cls.WORKSPACE).strip()
                         if not os.path.exists(Path):
                             for Pkg in cls.PACKAGES_PATH:
-                                Path = Substr.replace(TAB_WORKSPACE, Pkg).strip()
+                                Path = Substr.replace(
+                                    TAB_WORKSPACE, Pkg).strip()
                                 if os.path.exists(Path):
                                     break
                         PathList[i] = str[0:MacroStartPos] + Path
             PathStr = ' '.join(PathList)
         return PathStr
 
-    ## getPkgPath()
+    # getPkgPath()
     #
     #   get all package paths.
     #
@@ -147,4 +152,3 @@ class MultipleWorkspace(object):
     @classmethod
     def getPkgPath(cls):
         return cls.PACKAGES_PATH
-

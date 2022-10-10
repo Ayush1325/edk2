@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file is used to define common parsing related functions used in parsing
 # Inf/Dsc/Makefile process
 #
@@ -10,7 +10,8 @@
 # Import Modules
 #
 from __future__ import absolute_import
-import Common.LongFilePathOs as os, re
+import Common.LongFilePathOs as os
+import re
 import Common.EdkLogger as EdkLogger
 from Common.DataType import *
 from CommonDataClass.DataClass import *
@@ -21,10 +22,12 @@ from Common.LongFilePathSupport import OpenLongFilePath as open
 
 import subprocess
 
-## DeCompress
+# DeCompress
 #
 # Call external decompress tool to decompress the fv section
 #
+
+
 def DeCompress(Method, Input):
     # Write the input to a temp file
     open('_Temp.bin', 'wb').write(Input)
@@ -37,7 +40,8 @@ def DeCompress(Method, Input):
         cmd = r'TianoCompress -d -o _New.bin _Temp.bin'
 
     # Call tool to create the decompressed output file
-    Process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    Process = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     Process.communicate()[0]
 
     # Return the beffer of New.bin
@@ -45,7 +49,7 @@ def DeCompress(Method, Input):
         return open('_New.bin', 'rb').read()
 
 
-## PreProcess() method
+# PreProcess() method
 #
 #  Pre process a file
 #
@@ -58,7 +62,7 @@ def DeCompress(Method, Input):
 #
 #  @return Lines: The file contents after removing comments
 #
-def PreProcess(Filename, MergeMultipleLines = True, LineNo = -1):
+def PreProcess(Filename, MergeMultipleLines=True, LineNo=-1):
     Lines = []
     Filename = os.path.normpath(Filename)
     if not os.path.isfile(Filename):
@@ -100,7 +104,8 @@ def PreProcess(Filename, MergeMultipleLines = True, LineNo = -1):
                 IsFindBlockCode = False
                 continue
             if Line[-1] == TAB_SLASH:
-                ReservedLine = ReservedLine +  TAB_SPACE_SPLIT + Line[0:-1].strip()
+                ReservedLine = ReservedLine + \
+                    TAB_SPACE_SPLIT + Line[0:-1].strip()
                 ReservedLineLength = ReservedLineLength + 1
                 IsFindBlockCode = True
                 continue
@@ -109,18 +114,20 @@ def PreProcess(Filename, MergeMultipleLines = True, LineNo = -1):
 
     return Lines
 
-## AddToGlobalMacro() method
+# AddToGlobalMacro() method
 #
 #  Add a macro to EotGlobalData.gMACRO
 #
 #  @param  Name: Name of the macro
 #  @param  Value: Value of the macro
 #
+
+
 def AddToGlobalMacro(Name, Value):
     Value = ReplaceMacro(Value, EotGlobalData.gMACRO, True)
     EotGlobalData.gMACRO[Name] = Value
 
-## AddToSelfMacro() method
+# AddToSelfMacro() method
 #
 #  Parse a line of macro definition and add it to a macro set
 #
@@ -130,6 +137,8 @@ def AddToGlobalMacro(Name, Value):
 #  @return Name: Name of macro
 #  @return Value: Value of macro
 #
+
+
 def AddToSelfMacro(SelfMacro, Line):
     Name, Value = '', ''
     List = GetSplitValueList(Line, TAB_EQUAL_SPLIT, 1)
@@ -142,7 +151,7 @@ def AddToSelfMacro(SelfMacro, Line):
 
     return (Name, Value)
 
-## GetIncludeListOfFile() method
+# GetIncludeListOfFile() method
 #
 #  Get the include path list for a source file
 #
@@ -156,6 +165,8 @@ def AddToSelfMacro(SelfMacro, Line):
 #
 #  @return IncludeList: A list of include directories
 #
+
+
 def GetIncludeListOfFile(WorkSpace, Filepath, Db):
     IncludeList = []
     Filepath = os.path.normpath(Filepath)
@@ -179,7 +190,7 @@ def GetIncludeListOfFile(WorkSpace, Filepath, Db):
 
     return IncludeList
 
-## GetTableList() method
+# GetTableList() method
 #
 #  Search table file and find all small tables
 #
@@ -189,9 +200,12 @@ def GetIncludeListOfFile(WorkSpace, Filepath, Db):
 #
 #  @return TableList: A list of tables
 #
+
+
 def GetTableList(FileModelList, Table, Db):
     TableList = []
-    SqlCommand = """select ID, FullPath from File where Model in %s""" % str(FileModelList)
+    SqlCommand = """select ID, FullPath from File where Model in %s""" % str(
+        FileModelList)
     RecordSet = Db.TblFile.Exec(SqlCommand)
     for Record in RecordSet:
         TableName = Table + str(Record[0])
@@ -199,7 +213,7 @@ def GetTableList(FileModelList, Table, Db):
 
     return TableList
 
-## GetAllIncludeDir() method
+# GetAllIncludeDir() method
 #
 #  Find all Include directories
 #
@@ -207,6 +221,8 @@ def GetTableList(FileModelList, Table, Db):
 #
 #  @return IncludeList: A list of include directories
 #
+
+
 def GetAllIncludeDirs(Db):
     IncludeList = []
     SqlCommand = """select distinct Value1 from Inf where Model = %s order by Value1""" % MODEL_EFI_INCLUDE
@@ -217,7 +233,7 @@ def GetAllIncludeDirs(Db):
 
     return IncludeList
 
-## GetAllIncludeFiles() method
+# GetAllIncludeFiles() method
 #
 #  Find all Include files
 #
@@ -225,6 +241,8 @@ def GetAllIncludeDirs(Db):
 #
 #  @return IncludeFileList: A list of include files
 #
+
+
 def GetAllIncludeFiles(Db):
     IncludeList = GetAllIncludeDirs(Db)
     IncludeFileList = []
@@ -238,7 +256,7 @@ def GetAllIncludeFiles(Db):
 
     return IncludeFileList
 
-## GetAllSourceFiles() method
+# GetAllSourceFiles() method
 #
 #  Find all source files
 #
@@ -246,6 +264,8 @@ def GetAllIncludeFiles(Db):
 #
 #  @return SourceFileList: A list of source files
 #
+
+
 def GetAllSourceFiles(Db):
     SourceFileList = []
     SqlCommand = """select distinct Value1 from Inf where Model = %s order by Value1""" % MODEL_EFI_SOURCE_FILE
@@ -256,7 +276,7 @@ def GetAllSourceFiles(Db):
 
     return SourceFileList
 
-## GetAllFiles() method
+# GetAllFiles() method
 #
 #  Find all files, both source files and include files
 #
@@ -264,6 +284,8 @@ def GetAllSourceFiles(Db):
 #
 #  @return FileList: A list of files
 #
+
+
 def GetAllFiles(Db):
     FileList = []
     IncludeFileList = GetAllIncludeFiles(Db)
@@ -277,7 +299,7 @@ def GetAllFiles(Db):
 
     return FileList
 
-## ParseConditionalStatement() method
+# ParseConditionalStatement() method
 #
 #  Parse conditional statement
 #
@@ -288,10 +310,13 @@ def GetAllFiles(Db):
 #  @retval True: Find keyword of conditional statement
 #  @retval False: Not find keyword of conditional statement
 #
+
+
 def ParseConditionalStatement(Line, Macros, StatusSet):
     NewLine = Line.upper()
     if NewLine.find(TAB_IF_EXIST.upper()) > -1:
-        IfLine = Line[NewLine.find(TAB_IF_EXIST) + len(TAB_IF_EXIST) + 1:].strip()
+        IfLine = Line[NewLine.find(TAB_IF_EXIST) +
+                      len(TAB_IF_EXIST) + 1:].strip()
         IfLine = ReplaceMacro(IfLine, EotGlobalData.gMACRO, True)
         IfLine = ReplaceMacro(IfLine, Macros, True)
         IfLine = IfLine.replace("\"", '')
@@ -308,7 +333,8 @@ def ParseConditionalStatement(Line, Macros, StatusSet):
         StatusSet.append([Status])
         return True
     if NewLine.find(TAB_IF_N_DEF.upper()) > -1:
-        IfLine = Line[NewLine.find(TAB_IF_N_DEF) + len(TAB_IF_N_DEF) + 1:].strip()
+        IfLine = Line[NewLine.find(TAB_IF_N_DEF) +
+                      len(TAB_IF_N_DEF) + 1:].strip()
         Status = False
         if IfLine not in Macros and IfLine not in EotGlobalData.gMACRO:
             Status = True
@@ -320,7 +346,8 @@ def ParseConditionalStatement(Line, Macros, StatusSet):
         StatusSet.append([Status])
         return True
     if NewLine.find(TAB_ELSE_IF.upper()) > -1:
-        IfLine = Line[NewLine.find(TAB_ELSE_IF) + len(TAB_ELSE_IF) + 1:].strip()
+        IfLine = Line[NewLine.find(TAB_ELSE_IF) +
+                      len(TAB_ELSE_IF) + 1:].strip()
         Status = ParseConditionalStatementMacros(IfLine, Macros)
         StatusSet[-1].append(Status)
         return True
@@ -336,7 +363,7 @@ def ParseConditionalStatement(Line, Macros, StatusSet):
 
     return False
 
-## ParseConditionalStatement() method
+# ParseConditionalStatement() method
 #
 #  Parse conditional statement with Macros
 #
@@ -345,6 +372,8 @@ def ParseConditionalStatement(Line, Macros, StatusSet):
 #
 #  @return Line: New line after replacing macros
 #
+
+
 def ParseConditionalStatementMacros(Line, Macros):
     if Line.upper().find('DEFINED(') > -1 or Line.upper().find('EXIST') > -1:
         return False
@@ -354,7 +383,7 @@ def ParseConditionalStatementMacros(Line, Macros):
     Line = Line.replace("||", "or")
     return eval(Line)
 
-## GetConditionalStatementStatus() method
+# GetConditionalStatementStatus() method
 #
 #  1. Assume the latest status as True
 #  2. Pop the top status of status set, previous status
@@ -364,6 +393,8 @@ def ParseConditionalStatementMacros(Line, Macros):
 #
 #  @return Status: The final status
 #
+
+
 def GetConditionalStatementStatus(StatusSet):
     Status = True
     for Item in StatusSet:
@@ -371,7 +402,7 @@ def GetConditionalStatementStatus(StatusSet):
 
     return Status
 
-## SearchBelongsToFunction() method
+# SearchBelongsToFunction() method
 #
 #  Search all functions belong to the file
 #
@@ -381,15 +412,18 @@ def GetConditionalStatementStatus(StatusSet):
 #
 #  @return: The found function
 #
+
+
 def SearchBelongsToFunction(BelongsToFile, StartLine, EndLine):
-    SqlCommand = """select ID, Name from Function where BelongsToFile = %s and StartLine <= %s and EndLine >= %s""" %(BelongsToFile, StartLine, EndLine)
+    SqlCommand = """select ID, Name from Function where BelongsToFile = %s and StartLine <= %s and EndLine >= %s""" % (
+        BelongsToFile, StartLine, EndLine)
     RecordSet = EotGlobalData.gDb.TblFunction.Exec(SqlCommand)
     if RecordSet != []:
         return RecordSet[0][0], RecordSet[0][1]
     else:
         return -1, ''
 
-## SearchPpiCallFunction() method
+# SearchPpiCallFunction() method
 #
 #  Search all used PPI calling function 'PeiServicesReInstallPpi' and 'PeiServicesInstallPpi'
 #  Store the result to database
@@ -399,6 +433,8 @@ def SearchBelongsToFunction(BelongsToFile, StartLine, EndLine):
 #  @param SourceFileFullPath: Source file full path
 #  @param ItemMode: Mode of the item
 #
+
+
 def SearchPpiCallFunction(Identifier, SourceFileID, SourceFileFullPath, ItemMode):
     ItemName, ItemType, GuidName, GuidMacro, GuidValue = '', 'Ppi', '', '', ''
     SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
@@ -410,13 +446,15 @@ def SearchPpiCallFunction(Identifier, SourceFileID, SourceFileFullPath, ItemMode
     for Record in RecordSet:
         Index = 0
         BelongsToFile, StartLine, EndLine = Record[2], Record[3], Record[4]
-        BelongsToFunctionID, BelongsToFunction = SearchBelongsToFunction(BelongsToFile, StartLine, EndLine)
+        BelongsToFunctionID, BelongsToFunction = SearchBelongsToFunction(
+            BelongsToFile, StartLine, EndLine)
         VariableList = Record[0].split(',')
         for Variable in VariableList:
             Variable = Variable.strip()
             # Get index of the variable
             if Variable.find('[') > -1:
-                Index = int(Variable[Variable.find('[') + 1 : Variable.find(']')])
+                Index = int(Variable[Variable.find(
+                    '[') + 1: Variable.find(']')])
                 Variable = Variable[:Variable.find('[')]
             # Get variable name
             if Variable.startswith('&'):
@@ -434,10 +472,12 @@ def SearchPpiCallFunction(Identifier, SourceFileID, SourceFileFullPath, ItemMode
                     if len(NewVariableValueList) > 1:
                         NewVariableValue = NewVariableValueList[1].strip()
                         if NewVariableValue.startswith('&'):
-                            Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, NewVariableValue[1:], GuidMacro, GuidValue, BelongsToFunction, 0)
+                            Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                                      ItemMode, NewVariableValue[1:], GuidMacro, GuidValue, BelongsToFunction, 0)
                             continue
                         else:
-                            EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, NewParameter))
+                            EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (
+                                ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, NewParameter))
 
     ItemName, ItemType, GuidName, GuidMacro, GuidValue = '', 'Ppi', '', '', ''
     SqlCommand = """select Value, Name, BelongsToFile, StartLine, EndLine from %s
@@ -458,12 +498,14 @@ def SearchPpiCallFunction(Identifier, SourceFileID, SourceFileFullPath, ItemMode
             continue
         Index = 0
         BelongsToFile, StartLine, EndLine = Record[2], Record[3], Record[4]
-        BelongsToFunctionID, BelongsToFunction = SearchBelongsToFunction(BelongsToFile, StartLine, EndLine)
-        Variable = Record[0].replace('PeiServicesInstallPpi', '').replace('(', '').replace(')', '').replace('&', '').strip()
+        BelongsToFunctionID, BelongsToFunction = SearchBelongsToFunction(
+            BelongsToFile, StartLine, EndLine)
+        Variable = Record[0].replace('PeiServicesInstallPpi', '').replace(
+            '(', '').replace(')', '').replace('&', '').strip()
         Variable = Variable[Variable.find(',') + 1:].strip()
         # Get index of the variable
         if Variable.find('[') > -1:
-            Index = int(Variable[Variable.find('[') + 1 : Variable.find(']')])
+            Index = int(Variable[Variable.find('[') + 1: Variable.find(']')])
             Variable = Variable[:Variable.find('[')]
         # Get variable name
         if Variable.startswith('&'):
@@ -480,12 +522,14 @@ def SearchPpiCallFunction(Identifier, SourceFileID, SourceFileFullPath, ItemMode
                 if len(NewVariableValueList) > 1:
                     NewVariableValue = NewVariableValueList[1].strip()
                     if NewVariableValue.startswith('&'):
-                        Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, NewVariableValue[1:], GuidMacro, GuidValue, BelongsToFunction, 0)
+                        Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                                  ItemMode, NewVariableValue[1:], GuidMacro, GuidValue, BelongsToFunction, 0)
                         continue
                     else:
-                        EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, NewParameter))
+                        EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (
+                            ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, NewParameter))
 
-## SearchPpis() method
+# SearchPpis() method
 #
 #  Search all used PPI calling function
 #  Store the result to database
@@ -497,7 +541,9 @@ def SearchPpiCallFunction(Identifier, SourceFileID, SourceFileFullPath, ItemMode
 #  @param ItemMode: Mode of the item
 #  @param PpiMode: Mode of PPI
 #
-def SearchPpi(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMode, PpiMode = 1):
+
+
+def SearchPpi(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMode, PpiMode=1):
     ItemName, ItemType, GuidName, GuidMacro, GuidValue = '', 'Ppi', '', '', ''
     BelongsToFunctionID, BelongsToFunction = -1, ''
     Db = EotGlobalData.gDb.TblReport
@@ -506,7 +552,8 @@ def SearchPpi(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMode, Ppi
         Parameter = GetPpiParameter(Record[0], PpiMode)
         BelongsToFile, StartLine, EndLine = Record[2], Record[3], Record[4]
         # Get BelongsToFunction
-        BelongsToFunctionID, BelongsToFunction = SearchBelongsToFunction(BelongsToFile, StartLine, EndLine)
+        BelongsToFunctionID, BelongsToFunction = SearchBelongsToFunction(
+            BelongsToFile, StartLine, EndLine)
 
         # Default is Not Found
         IsFound = False
@@ -514,29 +561,34 @@ def SearchPpi(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMode, Ppi
         # For Consumed Ppi
         if ItemMode == 'Consumed':
             if Parameter.startswith('g'):
-                Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, Parameter, GuidMacro, GuidValue, BelongsToFunction, 0)
+                Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                          ItemMode, Parameter, GuidMacro, GuidValue, BelongsToFunction, 0)
             else:
-                EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter))
+                EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (
+                    ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter))
             continue
 
         # Direct Parameter.Guid
-        SqlCommand = """select Value from %s where (Name like '%%%s.Guid%%' or Name like '%%%s->Guid%%') and Model = %s""" % (Table, Parameter, Parameter, MODEL_IDENTIFIER_ASSIGNMENT_EXPRESSION)
+        SqlCommand = """select Value from %s where (Name like '%%%s.Guid%%' or Name like '%%%s->Guid%%') and Model = %s""" % (
+            Table, Parameter, Parameter, MODEL_IDENTIFIER_ASSIGNMENT_EXPRESSION)
         NewRecordSet = Db.Exec(SqlCommand)
         for NewRecord in NewRecordSet:
             GuidName = GetParameterName(NewRecord[0])
-            Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
+            Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                      ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
             IsFound = True
 
         # Defined Parameter
         if not IsFound:
             Key = Parameter
             if Key.rfind(' ') > -1:
-                Key = Key[Key.rfind(' ') : ].strip().replace('&', '')
+                Key = Key[Key.rfind(' '):].strip().replace('&', '')
             Value = FindKeyValue(EotGlobalData.gDb.TblFile, Table, Key)
             List = GetSplitValueList(Value.replace('\n', ''), TAB_COMMA_SPLIT)
             if len(List) > 1:
                 GuidName = GetParameterName(List[1])
-                Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
+                Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                          ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
                 IsFound = True
 
         # A list Parameter
@@ -545,14 +597,18 @@ def SearchPpi(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMode, Ppi
             End = Parameter.find(']')
             if Start > -1 and End > -1 and Start < End:
                 try:
-                    Index = int(Parameter[Start + 1 : End])
-                    Parameter = Parameter[0 : Start]
-                    SqlCommand = """select Value from %s where Name = '%s' and Model = %s""" % (Table, Parameter, MODEL_IDENTIFIER_VARIABLE)
+                    Index = int(Parameter[Start + 1: End])
+                    Parameter = Parameter[0: Start]
+                    SqlCommand = """select Value from %s where Name = '%s' and Model = %s""" % (
+                        Table, Parameter, MODEL_IDENTIFIER_VARIABLE)
                     NewRecordSet = Db.Exec(SqlCommand)
                     for NewRecord in NewRecordSet:
-                        NewParameter = GetSplitValueList(NewRecord[0], '}')[Index]
-                        GuidName = GetPpiParameter(NewParameter[NewParameter.find('{') : ])
-                        Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
+                        NewParameter = GetSplitValueList(
+                            NewRecord[0], '}')[Index]
+                        GuidName = GetPpiParameter(
+                            NewParameter[NewParameter.find('{'):])
+                        Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                                  ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
                         IsFound = True
                 except Exception:
                     pass
@@ -565,19 +621,22 @@ def SearchPpi(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMode, Ppi
             NewRecordSet = Db.Exec(SqlCommand)
             for NewRecord in NewRecordSet:
                 Table = 'Identifier' + str(NewRecord[0])
-                SqlCommand = """select Value from %s where Name = '%s' and Modifier = 'EFI_PEI_PPI_DESCRIPTOR' and Model = %s""" % (Table, Parameter, MODEL_IDENTIFIER_VARIABLE)
+                SqlCommand = """select Value from %s where Name = '%s' and Modifier = 'EFI_PEI_PPI_DESCRIPTOR' and Model = %s""" % (
+                    Table, Parameter, MODEL_IDENTIFIER_VARIABLE)
                 PpiSet = Db.Exec(SqlCommand)
                 if PpiSet != []:
                     GuidName = GetPpiParameter(PpiSet[0][0])
                     if GuidName != '':
-                        Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
+                        Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                                  ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
                         IsFound = True
                         break
 
         if not IsFound:
-            EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter))
+            EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (
+                ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter))
 
-## SearchProtocols() method
+# SearchProtocols() method
 #
 #  Search all used PROTOCOL calling function
 #  Store the result to database
@@ -589,6 +648,8 @@ def SearchPpi(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMode, Ppi
 #  @param ItemMode: Mode of the item
 #  @param ProtocolMode: Mode of PROTOCOL
 #
+
+
 def SearchProtocols(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMode, ProtocolMode):
     ItemName, ItemType, GuidName, GuidMacro, GuidValue = '', 'Protocol', '', '', ''
     BelongsToFunctionID, BelongsToFunction = -1, ''
@@ -598,7 +659,8 @@ def SearchProtocols(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMod
         Parameter = ''
         BelongsToFile, StartLine, EndLine = Record[2], Record[3], Record[4]
         # Get BelongsToFunction
-        BelongsToFunctionID, BelongsToFunction = SearchBelongsToFunction(BelongsToFile, StartLine, EndLine)
+        BelongsToFunctionID, BelongsToFunction = SearchBelongsToFunction(
+            BelongsToFile, StartLine, EndLine)
 
         # Default is Not Found
         IsFound = False
@@ -607,7 +669,8 @@ def SearchProtocols(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMod
             Parameter = GetProtocolParameter(Record[0], ProtocolMode)
             if Parameter.startswith('g') or Parameter.endswith('Guid') or Parameter == 'ShellEnvProtocol' or Parameter == 'ShellInterfaceProtocol':
                 GuidName = GetParameterName(Parameter)
-                Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
+                Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                          ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
                 IsFound = True
 
         if ProtocolMode == 2:
@@ -615,22 +678,27 @@ def SearchProtocols(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMod
             for Protocol in Protocols:
                 if Protocol.startswith('&') and Protocol.endswith('Guid'):
                     GuidName = GetParameterName(Protocol)
-                    Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
+                    Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                              ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
                     IsFound = True
                 else:
-                    NewValue = FindKeyValue(EotGlobalData.gDb.TblFile, Table, Protocol)
+                    NewValue = FindKeyValue(
+                        EotGlobalData.gDb.TblFile, Table, Protocol)
                     if Protocol != NewValue and NewValue.endswith('Guid'):
                         GuidName = GetParameterName(NewValue)
-                        Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
+                        Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                                  ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
                         IsFound = True
 
         if not IsFound:
             if BelongsToFunction in EotGlobalData.gProducedProtocolLibrary or BelongsToFunction in EotGlobalData.gConsumedProtocolLibrary:
-                EotGlobalData.gOP_UN_MATCHED_IN_LIBRARY_CALLING.write('%s, %s, %s, %s, %s, %s, %s\n' % (ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter, BelongsToFunction))
+                EotGlobalData.gOP_UN_MATCHED_IN_LIBRARY_CALLING.write('%s, %s, %s, %s, %s, %s, %s\n' % (
+                    ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter, BelongsToFunction))
             else:
-                EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter))
+                EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (
+                    ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter))
 
-## SearchFunctionCalling() method
+# SearchFunctionCalling() method
 #
 #  Search all used PPI/PROTOCOL calling function by library
 #  Store the result to database
@@ -642,6 +710,8 @@ def SearchProtocols(SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemMod
 #  @param ItemType: Type of the item, PPI or PROTOCOL
 #  @param ItemMode: Mode of item
 #
+
+
 def SearchFunctionCalling(Table, SourceFileID, SourceFileFullPath, ItemType, ItemMode):
     LibraryList = {}
     Db = EotGlobalData.gDb.TblReport
@@ -675,13 +745,15 @@ def SearchFunctionCalling(Table, SourceFileID, SourceFileFullPath, ItemType, Ite
             for Parameter in Parameters:
                 if Parameter.startswith('g') or Parameter.endswith('Guid') or Parameter == 'ShellEnvProtocol' or Parameter == 'ShellInterfaceProtocol':
                     GuidName = GetParameterName(Parameter)
-                    Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
+                    Db.Insert(-1, '', '', SourceFileID, SourceFileFullPath, ItemName, ItemType,
+                              ItemMode, GuidName, GuidMacro, GuidValue, BelongsToFunction, 0)
                     IsFound = True
 
             if not IsFound:
-                EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter))
+                EotGlobalData.gOP_UN_MATCHED.write('%s, %s, %s, %s, %s, %s\n' % (
+                    ItemType, ItemMode, SourceFileID, SourceFileFullPath, StartLine, Parameter))
 
-## FindProtocols() method
+# FindProtocols() method
 #
 #  Find defined protocols
 #
@@ -693,14 +765,14 @@ def SearchFunctionCalling(Table, SourceFileID, SourceFileFullPath, ItemType, Ite
 #  @param ItemType: Type of the item, PPI or PROTOCOL
 #  @param ItemMode: Mode of item
 #
-#def FindProtocols(Db, SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue):
+# def FindProtocols(Db, SqlCommand, Table, SourceFileID, SourceFileFullPath, ItemName, ItemType, ItemMode, GuidName, GuidMacro, GuidValue):
 #    BelongsToFunction = ''
 #    RecordSet = Db.Exec(SqlCommand)
 #    for Record in RecordSet:
 #        IsFound = True
 #        Parameter = GetProtocolParameter(Record[0])
 
-## GetProtocolParameter() method
+# GetProtocolParameter() method
 #
 # Parse string of protocol and find parameters
 #
@@ -709,10 +781,12 @@ def SearchFunctionCalling(Table, SourceFileID, SourceFileFullPath, ItemType, Ite
 #
 #  @return: call common GetParameter
 #
-def GetProtocolParameter(Parameter, Index = 1):
+
+
+def GetProtocolParameter(Parameter, Index=1):
     return GetParameter(Parameter, Index)
 
-## GetPpiParameter() method
+# GetPpiParameter() method
 #
 # Parse string of ppi and find parameters
 #
@@ -721,10 +795,12 @@ def GetProtocolParameter(Parameter, Index = 1):
 #
 #  @return: call common GetParameter
 #
-def GetPpiParameter(Parameter, Index = 1):
+
+
+def GetPpiParameter(Parameter, Index=1):
     return GetParameter(Parameter, Index)
 
-## GetParameter() method
+# GetParameter() method
 #
 # Get a parameter by index
 #
@@ -733,7 +809,9 @@ def GetPpiParameter(Parameter, Index = 1):
 #
 #  @return Parameter: The found parameter
 #
-def GetParameter(Parameter, Index = 1):
+
+
+def GetParameter(Parameter, Index=1):
     ParameterList = GetSplitValueList(Parameter, TAB_COMMA_SPLIT)
     if len(ParameterList) > Index:
         Parameter = GetParameterName(ParameterList[Index])
@@ -742,7 +820,7 @@ def GetParameter(Parameter, Index = 1):
 
     return ''
 
-## GetParameterName() method
+# GetParameterName() method
 #
 # Get a parameter name
 #
@@ -750,13 +828,15 @@ def GetParameter(Parameter, Index = 1):
 #
 #  @return: The name of parameter
 #
+
+
 def GetParameterName(Parameter):
     if isinstance(Parameter, type('')) and Parameter.startswith('&'):
         return Parameter[1:].replace('{', '').replace('}', '').replace('\r', '').replace('\n', '').strip()
     else:
         return Parameter.strip()
 
-## FindKeyValue() method
+# FindKeyValue() method
 #
 # Find key value of a variable
 #
@@ -766,8 +846,11 @@ def GetParameterName(Parameter):
 #
 #  @return Value: The value of the keyword
 #
+
+
 def FindKeyValue(Db, Table, Key):
-    SqlCommand = """select Value from %s where Name = '%s' and (Model = %s or Model = %s)""" % (Table, Key, MODEL_IDENTIFIER_VARIABLE, MODEL_IDENTIFIER_ASSIGNMENT_EXPRESSION)
+    SqlCommand = """select Value from %s where Name = '%s' and (Model = %s or Model = %s)""" % (
+        Table, Key, MODEL_IDENTIFIER_VARIABLE, MODEL_IDENTIFIER_ASSIGNMENT_EXPRESSION)
     RecordSet = Db.Exec(SqlCommand)
     Value = ''
     for Record in RecordSet:
@@ -779,7 +862,7 @@ def FindKeyValue(Db, Table, Key):
     else:
         return Key
 
-## ParseMapFile() method
+# ParseMapFile() method
 #
 #  Parse map files to get a dict of 'ModuleName' : {FunName : FunAddress}
 #
@@ -787,6 +870,8 @@ def FindKeyValue(Db, Table, Key):
 #
 #  @return AllMaps: An object of all map files
 #
+
+
 def ParseMapFile(Files):
     AllMaps = {}
     CurrentModule = ''
@@ -819,7 +904,7 @@ def ParseMapFile(Files):
 
     return AllMaps
 
-## ConvertGuid
+# ConvertGuid
 #
 #  Convert a GUID to a GUID with all upper letters
 #
@@ -827,6 +912,8 @@ def ParseMapFile(Files):
 #
 #  @param newGuid: The GUID with all upper letters.
 #
+
+
 def ConvertGuid(guid):
     numList = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     newGuid = ''
@@ -844,7 +931,7 @@ def ConvertGuid(guid):
 
     return newGuid
 
-## ConvertGuid2() method
+# ConvertGuid2() method
 #
 #  Convert a GUID to a GUID with new string instead of old string
 #
@@ -854,11 +941,14 @@ def ConvertGuid(guid):
 #
 #  @param newGuid: The GUID after replacement
 #
+
+
 def ConvertGuid2(guid, old, new):
     newGuid = ConvertGuid(guid)
     newGuid = newGuid.replace(old, new)
 
     return newGuid
+
 
 ##
 #

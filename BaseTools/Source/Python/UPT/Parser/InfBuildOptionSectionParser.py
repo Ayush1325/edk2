@@ -1,4 +1,4 @@
-## @file
+# @file
 # This file contained the parser for BuildOption sections in INF file
 #
 # Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -25,22 +25,23 @@ from Library.ParserValidate import IsValidFamily
 from Library.ParserValidate import IsValidBuildOptionName
 from Parser.InfParserMisc import InfParserSectionRoot
 
+
 class InfBuildOptionSectionParser(InfParserSectionRoot):
-    ## InfBuildOptionParser
+    # InfBuildOptionParser
     #
     #
     def InfBuildOptionParser(self, SectionString, InfSectionObject, FileName):
 
         BuildOptionList = []
-        SectionContent  = ''
+        SectionContent = ''
 
         if not GlobalData.gIS_BINARY_INF:
-            ValueList       = []
-            LineNo          = 0
+            ValueList = []
+            LineNo = 0
 
             for Line in SectionString:
                 LineContent = Line[0]
-                LineNo      = Line[1]
+                LineNo = Line[1]
                 TailComments = ''
                 ReplaceFlag = False
 
@@ -58,10 +59,13 @@ class InfBuildOptionSectionParser(InfParserSectionRoot):
                 # Find Tail comment.
                 #
                 if LineContent.find(DT.TAB_COMMENT_SPLIT) > -1:
-                    TailComments = LineContent[LineContent.find(DT.TAB_COMMENT_SPLIT):]
-                    LineContent = LineContent[:LineContent.find(DT.TAB_COMMENT_SPLIT)]
+                    TailComments = LineContent[LineContent.find(
+                        DT.TAB_COMMENT_SPLIT):]
+                    LineContent = LineContent[:LineContent.find(
+                        DT.TAB_COMMENT_SPLIT)]
 
-                TokenList = GetSplitValueList(LineContent, DT.TAB_DEQUAL_SPLIT, 1)
+                TokenList = GetSplitValueList(
+                    LineContent, DT.TAB_DEQUAL_SPLIT, 1)
                 if len(TokenList) == 2:
                     #
                     # "Replace" type build option
@@ -69,7 +73,8 @@ class InfBuildOptionSectionParser(InfParserSectionRoot):
                     TokenList.append('True')
                     ReplaceFlag = True
                 else:
-                    TokenList = GetSplitValueList(LineContent, DT.TAB_EQUAL_SPLIT, 1)
+                    TokenList = GetSplitValueList(
+                        LineContent, DT.TAB_EQUAL_SPLIT, 1)
                     #
                     # "Append" type build option
                     #
@@ -98,7 +103,8 @@ class InfBuildOptionSectionParser(InfParserSectionRoot):
                 else:
                     EqualString = ' == '
 
-                SectionContent += ValueList[0] + EqualString + ValueList[1] + TailComments + DT.END_OF_LINE
+                SectionContent += ValueList[0] + EqualString + \
+                    ValueList[1] + TailComments + DT.END_OF_LINE
 
                 Family = GetSplitValueList(ValueList[0], DT.TAB_COLON_SPLIT, 1)
                 if len(Family) == 2:
@@ -129,7 +135,8 @@ class InfBuildOptionSectionParser(InfParserSectionRoot):
                 ValueList = []
                 continue
         else:
-            BuildOptionList = InfAsBuiltBuildOptionParser(SectionString, FileName)
+            BuildOptionList = InfAsBuiltBuildOptionParser(
+                SectionString, FileName)
 
         #
         # Current section archs
@@ -146,13 +153,16 @@ class InfBuildOptionSectionParser(InfParserSectionRoot):
         if not InfSectionObject.SetBuildOptions(BuildOptionList, ArchList, SectionContent):
             Logger.Error('InfParser',
                          FORMAT_INVALID,
-                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR%("[BuilOptions]"),
+                         ST.ERR_INF_PARSER_MODULE_SECTION_TYPE_ERROR % (
+                             "[BuilOptions]"),
                          File=FileName,
                          Line=LastItem[3])
 
-## InfBuildOptionParser
+# InfBuildOptionParser
 #
 #
+
+
 def InfAsBuiltBuildOptionParser(SectionString, FileName):
     BuildOptionList = []
     #
@@ -164,7 +174,7 @@ def InfAsBuiltBuildOptionParser(SectionString, FileName):
     for Line in SectionString:
         Count += 1
         LineContent = Line[0]
-        LineNo      = Line[1]
+        LineNo = Line[1]
 
         #
         # The last line
@@ -172,7 +182,8 @@ def InfAsBuiltBuildOptionParser(SectionString, FileName):
         if len(SectionString) == Count:
             if LineContent.strip().startswith("##") and AsBuildOptionFlag:
                 BuildOptionList.append(BuildOptionItem)
-                BuildOptionList.append([GetHelpStringByRemoveHashKey(LineContent)])
+                BuildOptionList.append(
+                    [GetHelpStringByRemoveHashKey(LineContent)])
             elif LineContent.strip().startswith("#") and AsBuildOptionFlag:
                 BuildOptionInfo = GetHelpStringByRemoveHashKey(LineContent)
                 BuildOptionItem.append(BuildOptionInfo)
@@ -195,11 +206,11 @@ def InfAsBuiltBuildOptionParser(SectionString, FileName):
 
         if not LineContent.strip().startswith("#"):
             Logger.Error('InfParser',
-                        FORMAT_INVALID,
-                        ST.ERR_BO_CONTATIN_ASBUILD_AND_COMMON,
-                        File=FileName,
-                        Line=LineNo,
-                        ExtraData=LineContent)
+                         FORMAT_INVALID,
+                         ST.ERR_BO_CONTATIN_ASBUILD_AND_COMMON,
+                         File=FileName,
+                         Line=LineNo,
+                         ExtraData=LineContent)
 
         if IsAsBuildOptionInfo(LineContent):
             AsBuildOptionFlag = True
